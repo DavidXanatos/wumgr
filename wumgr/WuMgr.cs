@@ -213,6 +213,7 @@ namespace wumgr
                 case UpdateLists.PendingUpdates: agent.HideUpdates(GetUpdates(), true); break;
                 case UpdateLists.HiddenUpdates: agent.HideUpdates(GetUpdates(), false); break;
             }
+            UpdateCounts();
             LoadList();
         }
 

@@ -283,13 +283,13 @@ namespace wumgr
                     update.IsHidden = Hide;
                     if (Hide)
                     {
-                        mPendingUpdates.Add(update);
-                        RemoveFrom(mHiddenUpdates, update);
+                        mHiddenUpdates.Add(update);
+                        RemoveFrom(mPendingUpdates, update);
                     }
                     else
                     {
-                        mHiddenUpdates.Add(update);
-                        RemoveFrom(mPendingUpdates, update);
+                        mPendingUpdates.Add(update);
+                        RemoveFrom(mHiddenUpdates, update);
                     }
                 }
                 catch (Exception err)
