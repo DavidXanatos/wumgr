@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ObjectListView.Official</id>
+    <title>ObjectListView (Official)</title>
+    <version>2.8.0</version>
+    <authors>Phillip Piper</authors>
+    <owners>Phillip Piper</owners>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <projectUrl>http://objectlistview.sourceforge.net</projectUrl>
+    <iconUrl>http://objectlistview.sourceforge.net/cs/_static/index-icon.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <summary>ObjectListView is a .NET ListView wired on caffeine, guarana and steroids.</summary>
+    <description>ObjectListView is a .NET ListView wired on caffeine, guarana and steroids. More calmly, it is a C# wrapper around a .NET ListView, which makes the ListView much easier to use and teaches it lots of neat new tricks.</description>
+    <releaseNotes>V2.8 added the ability to disable rows, and to have checkboxes in column headers</releaseNotes>
+    <copyright>Copyright 2006-2014 Bright Ideas Software</copyright>
+    <tags>.Net WinForms Net20 Net40 ListView Controls</tags>
+  </metadata>
+</package>
