@@ -14,7 +14,7 @@ namespace wumgr
 {
     class WuAgent
     {
-        string mVersion = "0.1";
+        string mVersion = "0.2";
 
         UpdateSession mUpdateSession = null;
         IUpdateSearcher mUpdateSearcher = null;
