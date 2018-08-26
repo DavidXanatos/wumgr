@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
@@ -47,6 +48,7 @@
             this.btnWinUpd = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkDownload = new System.Windows.Forms.CheckBox();
             this.chkOld = new System.Windows.Forms.CheckBox();
             this.chkOffline = new System.Windows.Forms.CheckBox();
             this.dlSource = new System.Windows.Forms.ComboBox();
@@ -64,6 +66,7 @@
             this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
@@ -90,7 +93,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 458);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 528);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // tableLayoutPanel2
@@ -108,7 +111,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 452);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 522);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -306,33 +309,46 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel6.Controls.Add(this.groupBox1, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.groupBox2, 0, 1);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 260);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 310);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 189);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 209);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.chkDownload);
             this.groupBox1.Controls.Add(this.chkOld);
             this.groupBox1.Controls.Add(this.chkOffline);
             this.groupBox1.Controls.Add(this.dlSource);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(182, 88);
+            this.groupBox1.Size = new System.Drawing.Size(182, 104);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Update Source";
             // 
+            // chkDownload
+            // 
+            this.chkDownload.AutoSize = true;
+            this.chkDownload.Checked = true;
+            this.chkDownload.CheckState = System.Windows.Forms.CheckState.Indeterminate;
+            this.chkDownload.Location = new System.Drawing.Point(6, 63);
+            this.chkDownload.Name = "chkDownload";
+            this.chkDownload.Size = new System.Drawing.Size(145, 17);
+            this.chkDownload.TabIndex = 3;
+            this.chkDownload.Text = "Download wsusscn2.cab";
+            this.chkDownload.ThreeState = true;
+            this.chkDownload.UseVisualStyleBackColor = true;
+            // 
             // chkOld
             // 
             this.chkOld.AutoSize = true;
-            this.chkOld.Location = new System.Drawing.Point(6, 65);
+            this.chkOld.Location = new System.Drawing.Point(6, 80);
             this.chkOld.Name = "chkOld";
             this.chkOld.Size = new System.Drawing.Size(119, 17);
             this.chkOld.TabIndex = 2;
@@ -342,6 +358,8 @@
             // chkOffline
             // 
             this.chkOffline.AutoSize = true;
+            this.chkOffline.Checked = true;
+            this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkOffline.Location = new System.Drawing.Point(6, 46);
             this.chkOffline.Name = "chkOffline";
             this.chkOffline.Size = new System.Drawing.Size(86, 17);
@@ -352,6 +370,7 @@
             // 
             // dlSource
             // 
+            this.dlSource.Enabled = false;
             this.dlSource.FormattingEnabled = true;
             this.dlSource.Location = new System.Drawing.Point(6, 19);
             this.dlSource.Name = "dlSource";
@@ -364,7 +383,7 @@
             this.groupBox2.Controls.Add(this.dlShTime);
             this.groupBox2.Controls.Add(this.dlShDay);
             this.groupBox2.Controls.Add(this.dlPolMode);
-            this.groupBox2.Location = new System.Drawing.Point(3, 97);
+            this.groupBox2.Location = new System.Drawing.Point(3, 117);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(182, 89);
             this.groupBox2.TabIndex = 1;
@@ -381,9 +400,11 @@
             this.chkDrivers.Text = "Include Drivers";
             this.chkDrivers.ThreeState = true;
             this.chkDrivers.UseVisualStyleBackColor = true;
+            this.chkDrivers.CheckStateChanged += new System.EventHandler(this.chkDrivers_CheckStateChanged);
             // 
             // dlShTime
             // 
+            this.dlShTime.Enabled = false;
             this.dlShTime.FormattingEnabled = true;
             this.dlShTime.Items.AddRange(new object[] {
             "00:00",
@@ -414,9 +435,11 @@
             this.dlShTime.Name = "dlShTime";
             this.dlShTime.Size = new System.Drawing.Size(69, 21);
             this.dlShTime.TabIndex = 2;
+            this.dlShTime.SelectedIndexChanged += new System.EventHandler(this.dlShTime_SelectedIndexChanged);
             // 
             // dlShDay
             // 
+            this.dlShDay.Enabled = false;
             this.dlShDay.FormattingEnabled = true;
             this.dlShDay.Items.AddRange(new object[] {
             "Daily",
@@ -431,6 +454,7 @@
             this.dlShDay.Name = "dlShDay";
             this.dlShDay.Size = new System.Drawing.Size(90, 21);
             this.dlShDay.TabIndex = 1;
+            this.dlShDay.SelectedIndexChanged += new System.EventHandler(this.dlShDay_SelectedIndexChanged);
             // 
             // dlPolMode
             // 
@@ -446,6 +470,7 @@
             this.dlPolMode.Name = "dlPolMode";
             this.dlPolMode.Size = new System.Drawing.Size(165, 21);
             this.dlPolMode.TabIndex = 0;
+            this.dlPolMode.SelectedIndexChanged += new System.EventHandler(this.dlPolMode_SelectedIndexChanged);
             // 
             // tableLayoutPanel3
             // 
@@ -462,7 +487,7 @@
             this.tableLayoutPanel3.RowCount = 2;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 69.85646F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.14354F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(677, 452);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(677, 522);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
             // logBox
@@ -470,9 +495,9 @@
             this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(3, 318);
+            this.logBox.Location = new System.Drawing.Point(3, 367);
             this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(671, 131);
+            this.logBox.Size = new System.Drawing.Size(671, 152);
             this.logBox.TabIndex = 0;
             this.logBox.Text = "";
             // 
@@ -497,7 +522,7 @@
             this.olvColumn6});
             this.updateView.Location = new System.Drawing.Point(3, 3);
             this.updateView.Name = "updateView";
-            this.updateView.Size = new System.Drawing.Size(671, 309);
+            this.updateView.Size = new System.Drawing.Size(671, 358);
             this.updateView.TabIndex = 1;
             this.updateView.UseCompatibleStateImageBehavior = false;
             this.updateView.View = System.Windows.Forms.View.Details;
@@ -547,7 +572,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(884, 461);
+            this.ClientSize = new System.Drawing.Size(884, 531);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "WuMgr";
             this.Text = "Windows Update Manager";
@@ -606,6 +631,8 @@
         private System.Windows.Forms.CheckBox btnHidden;
         private System.Windows.Forms.CheckBox btnInstalled;
         private System.Windows.Forms.CheckBox btnWinUpd;
+        private System.Windows.Forms.CheckBox chkDownload;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
 

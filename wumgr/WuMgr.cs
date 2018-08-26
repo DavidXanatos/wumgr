@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using WUApiLib;//this is required to use the Interfaces given by microsoft. 
 using BrightIdeasSoftware;
 using System.Collections;
+using Microsoft.Win32;
+using System.Security.AccessControl;
 
 namespace wumgr
 {
@@ -23,11 +25,21 @@ namespace wumgr
             logBox.ScrollToCaret();
         }
 
+        private string mWuGPO = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate";
+
         public WuMgr()
         {
             InitializeComponent();
 
             this.Text = Program.fmt("Windows Update Manager by David Xanatos");
+
+            toolTip.SetToolTip(btnSearch, "Search");
+            toolTip.SetToolTip(btnInstall, "Install");
+            toolTip.SetToolTip(btnDownload, "Download");
+            toolTip.SetToolTip(btnHide, "Hide");
+            toolTip.SetToolTip(btnGetLink, "Get Links");
+            toolTip.SetToolTip(btnUnInstall, "Uninstall");
+            toolTip.SetToolTip(btnCancel, "Cancel");
 
             AppLog.Logger += LineLogger;
             agent = WuAgent.GetInstance();
@@ -47,15 +59,93 @@ namespace wumgr
                     dlSource.SelectedIndex = i;
             }
 
+            mSuspendGPO = true;
+
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, false);
+                object value_drv = subKey.GetValue("ExcludeWUDriversInQualityUpdate");
+
+                if (value_drv == null)
+                    chkDrivers.CheckState = CheckState.Indeterminate;
+                else if ((int)value_drv == 1)
+                    chkDrivers.CheckState = CheckState.Unchecked;
+                else if ((int)value_drv == 0)
+                    chkDrivers.CheckState = CheckState.Checked;
+            }
+
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                object value_no = subKey.GetValue("NoAutoUpdate");
+                if (value_no == null || (int)value_no == 0)
+                {
+                    object value_au = subKey.GetValue("AUOptions");
+                    switch (value_au == null ? 0 : (int)value_au)
+                    {
+                        case 2:
+                            dlPolMode.SelectedIndex = 2;
+                            break;
+                        case 3:
+                            dlPolMode.SelectedIndex = 3;
+                            break;
+                        case 4:
+                            dlPolMode.SelectedIndex = 4;
+                            dlShDay.Enabled = dlShTime.Enabled = true;
+                            break;
+                        case 5:
+                            dlPolMode.SelectedIndex = 5;
+                            break;
+                    }
+                }
+                else
+                {
+                    dlPolMode.SelectedIndex = 1;
+                }
+
+                object value_day = subKey.GetValue("ScheduledInstallDay");
+                if (value_day != null)
+                    dlShDay.SelectedIndex = (int)value_day;
+                object value_time = subKey.GetValue("ScheduledInstallTime");
+                if (value_time != null)
+                    dlShTime.SelectedIndex = (int)value_time;
+            }
+            mSuspendGPO = false;
+
             UpdateCounts();
             SwitchList(UpdateLists.UpdateHistory);
+
+            bool doUpdate = false;
+            for (int i = 0; i < Program.args.Length; i++)
+            {
+                if (Program.args[i].Equals("-update", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    doUpdate = true;
+                }
+            }
+
+            if (doUpdate)
+            {
+                aTimer = new Timer();
+                aTimer.Interval = 1000;
+                // Hook up the Elapsed event for the timer. 
+                aTimer.Tick += OnTimedEvent;
+                aTimer.Enabled = true;
+            }
+        }
+
+        private static Timer aTimer = null;
+
+        private void OnTimedEvent(Object source, EventArgs e)
+        {
+            aTimer.Stop();
+            aTimer = null;
+            if (chkOffline.Checked)
+                agent.SearchForUpdates((int)chkDownload.CheckState, chkOld.Checked);
+            else
+                agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
         }
 
         void FoundUpdates(object sender, WuAgent.FoundUpdatesArgs args)
         {
-            progTotal.Style = ProgressBarStyle.Continuous;
-            progTotal.MarqueeAnimationSpeed = 0;
-
             UpdateCounts();
             SwitchList(UpdateLists.PendingUpdates);
         }
@@ -177,15 +267,10 @@ namespace wumgr
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            progTotal.Style = ProgressBarStyle.Marquee;
-            progTotal.MarqueeAnimationSpeed = 30;
-
             if (chkOffline.Checked)
-                agent.SetOffline();
+                agent.SearchForUpdates((int)chkDownload.CheckState, chkOld.Checked);
             else
-                agent.SetOnline(dlSource.Text);
-
-            agent.SearchForUpdates(chkOld.Checked);
+                agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
@@ -243,12 +328,128 @@ namespace wumgr
 
         void OnProgress(object sender, WuAgent.ProgressArgs args)
         {
-            progTotal.Value = args.TotalPercent;
+            if (args.TotalUpdates == -1)
+            {
+                progTotal.Style = ProgressBarStyle.Marquee;
+                progTotal.MarqueeAnimationSpeed = 30;
+            }
+            else
+            {
+                progTotal.Style = ProgressBarStyle.Continuous;
+                progTotal.MarqueeAnimationSpeed = 0;
+
+                progTotal.Value = args.TotalPercent;
+            }
         }
 
         private void chkOffline_CheckedChanged(object sender, EventArgs e)
         {
             dlSource.Enabled = !chkOffline.Checked;
+            chkDownload.Enabled = chkOffline.Checked;
+        }
+
+        private bool mSuspendGPO = false;
+
+        private void chkDrivers_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (mSuspendGPO)
+                return;
+            try
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
+                switch (chkDrivers.CheckState)
+                {
+                    case CheckState.Unchecked:
+                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 1);
+                        break;
+                    case CheckState.Indeterminate:
+                        if (subKey.GetValue("ExcludeWUDriversInQualityUpdate") != null)
+                            subKey.DeleteValue("ExcludeWUDriversInQualityUpdate");
+                        break;
+                    case CheckState.Checked:
+                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 0);
+                        break;
+                }
+            }
+            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}",err.ToString())); }
+        }
+
+        private void dlPolMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mSuspendGPO)
+                return;
+            try
+            {
+                dlShDay.Enabled = dlShTime.Enabled = dlPolMode.SelectedIndex == 4;
+
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                switch (dlPolMode.SelectedIndex)
+                {
+                case 0: //Automatic(default)
+                    if (subKey.GetValue("NoAutoUpdate") != null)
+                        subKey.DeleteValue("NoAutoUpdate");
+                    if (subKey.GetValue("AUOptions") != null)
+                        subKey.DeleteValue("AUOptions");
+                    break;
+                case 1: //Disabled
+                    subKey.SetValue("NoAutoUpdate", 1);
+                    if(subKey.GetValue("AUOptions") != null)
+                        subKey.DeleteValue("AUOptions");
+                    break;
+                case 2: //Notification only
+                    subKey.SetValue("NoAutoUpdate", 0);
+                    subKey.SetValue("AUOptions", 2);
+                    break;
+                case 3: //Download only
+                    subKey.SetValue("NoAutoUpdate", 0);
+                    subKey.SetValue("AUOptions", 3);
+                    break;
+                case 4: //Schleduled Instalation
+                    subKey.SetValue("NoAutoUpdate", 0);
+                    subKey.SetValue("AUOptions", 4);
+
+                    subKey.SetValue("ScheduledInstallDay", dlShDay.SelectedIndex);
+                    subKey.SetValue("ScheduledInstallTime", dlShTime.SelectedIndex);
+                    break;
+                case 5: //Managed by Admin
+                    subKey.SetValue("NoAutoUpdate", 0);
+                    subKey.SetValue("AUOptions", 5);
+                    break;
+                }
+
+                if (dlPolMode.SelectedIndex != 4)
+                {
+                    if (subKey.GetValue("ScheduledInstallDay") != null)
+                        subKey.DeleteValue("ScheduledInstallDay");
+                    if (subKey.GetValue("ScheduledInstallTime") != null)
+                        subKey.DeleteValue("ScheduledInstallTime");
+                }
+            }
+            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+        }
+
+        private void dlShDay_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mSuspendGPO)
+                return;
+            try
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                subKey.SetValue("ScheduledInstallDay", dlShDay.SelectedIndex);
+            }
+            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+        }
+
+        private void dlShTime_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mSuspendGPO)
+                return;
+            try
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                subKey.SetValue("ScheduledInstallTime", dlShTime.SelectedIndex);
+            }
+            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
         }
     }
 

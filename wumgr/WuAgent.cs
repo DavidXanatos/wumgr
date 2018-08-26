@@ -7,6 +7,8 @@ using WUApiLib;//this is required to use the Interfaces given by microsoft.
 using System.Threading;
 using System.Windows.Threading;
 using System.IO;
+using System.Net;
+using System.ComponentModel;
 
 namespace wumgr
 {
@@ -72,10 +74,13 @@ namespace wumgr
         UpdateServiceManager mUpdateServiceManager = null;
         IUpdateService mOfflineService = null;
 
-        public bool SetOffline()
+        private bool SetOffline()
         {
             try
             {
+                AppLog.Line(Program.fmt("Setting up 'Offline Sync Service'"));
+
+                // http://go.microsoft.com/fwlink/p/?LinkID=74689
                 mOfflineService = mUpdateServiceManager.AddScanPackageService("Offline Sync Service", Directory.GetCurrentDirectory() + @"\wsusscn2.cab");
 
                 mUpdateSearcher.ServerSelection = ServerSelection.ssOthers;
@@ -90,7 +95,7 @@ namespace wumgr
             }
         }
 
-        public void SetOnline(string ServiceName)
+        private void SetOnline(string ServiceName)
         {
             mUpdateSearcher.ServerSelection = ServerSelection.ssDefault;
             mUpdateSearcher.ServiceID = "00000000-0000-0000-0000-000000000000";
@@ -107,27 +112,117 @@ namespace wumgr
         }
 
         UpdateCallback mCallback = null;
+        WebClient mWebClient = null;
 
-        public bool SearchForUpdates(bool IncludePotentiallySupersededUpdates = false)
+        void wc_dlProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            Progress(this, new ProgressArgs(1, e.ProgressPercentage, 0, "Downloading", 0));
+        }
+
+        void wd_Finish(object sender, AsyncCompletedEventArgs args)
+        {
+            if (args.Error != null || args.Cancelled)
+            {
+                mWebClient = null;
+                if (args.Error != null)
+                {
+                    AppLog.Line(Program.fmt("wsusscn2.cab downloaded, failed: {0}", args.Error.ToString()));
+                }
+                return;
+            }
+
+            AppLog.Line(Program.fmt("wsusscn2.cab downloaded, now checking for updates"));
+
+            SetOffline();
+
+            SearchForUpdates();
+        }
+
+        public bool SearchForUpdates(String Source = "", bool IncludePotentiallySupersededUpdates = false)
         {
             if (mCallback != null)
                 return false;
 
-            //SetOffline();
-            //SetOnline("Windows Update");
-            //SetOnline("Windows Store (DCat Prod)");
             mUpdateSearcher.IncludePotentiallySupersededUpdates = IncludePotentiallySupersededUpdates;
+
+            SetOnline(Source);
+
+            SearchForUpdates();
+            return true;
+        }
+
+        public bool SearchForUpdates(int Download, bool IncludePotentiallySupersededUpdates = false)
+        {
+            if (mCallback != null)
+                return false;
+
+            mUpdateSearcher.IncludePotentiallySupersededUpdates = IncludePotentiallySupersededUpdates;
+
+            if (Download != 0)
+            {
+                if (mCallback != null || mWebClient != null)
+                    return false;
+
+                bool isDownloaded = false;
+
+                var fi = new FileInfo(Directory.GetCurrentDirectory() + @"\wsusscn2.cab");
+                if (fi.Exists) {
+                    if ((Download == 1 || fi.LastWriteTime < DateTime.Today.Subtract(new TimeSpan(1, 0, 0, 0))))
+                    {
+                        try
+                        {
+                            fi.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            AppLog.Line(Program.fmt("failed to delete {0}", fi.FullName));
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        isDownloaded = true;
+                        AppLog.Line(Program.fmt("up to date wsusscn2.cab is already downloaded"));
+                    }
+                }
+
+                if (!isDownloaded)
+                {
+                    AppLog.Line(Program.fmt("downloading wsusscn2.cab"));
+
+                    mWebClient = new WebClient();
+                    mWebClient.DownloadFileAsync(new System.Uri("http://go.microsoft.com/fwlink/p/?LinkID=74689"), fi.FullName);
+                    mWebClient.DownloadProgressChanged += wc_dlProgress;
+                    mWebClient.DownloadFileCompleted += wd_Finish;
+                    return true;
+                }
+            }
+            
+            SetOffline();
+            
+            SearchForUpdates();
+            return true;
+        }
+
+        private void SearchForUpdates()
+        {
+            Progress(this, new ProgressArgs(-1, 0, 0, "Checking", 0));
 
             mCallback = new UpdateCallback(this);
             AppLog.Line(Program.fmt("Searching for updates"));
             //for the above search criteria refer to 
             // http://msdn.microsoft.com/en-us/library/windows/desktop/aa386526(v=VS.85).aspx
             mSearchJob = mUpdateSearcher.BeginSearch("(IsInstalled = 0 and IsHidden = 0) or (IsInstalled = 1 and IsHidden = 0) or (IsHidden = 1)", mCallback, null);
-            return true;
         }
 
         public void CancelOperations()
         {
+            if (mWebClient != null)
+            {
+                mWebClient.CancelAsync();
+                mWebClient = null;
+            }
+
             if (mCallback == null)
                 return;
 
@@ -347,6 +442,8 @@ namespace wumgr
             }
 
             AppLog.Line(Program.fmt("Found {0} pending updates.", mPendingUpdates.Count));
+
+            Progress(this, new ProgressArgs(0, 0, 0, "", 0));
 
             Found(this, new FoundUpdatesArgs());
         }
