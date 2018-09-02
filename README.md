@@ -1,2 +1,2 @@
 # wumgr
-Windows update managemetn tool for windows 10
+Windows update management tool for windows 10
