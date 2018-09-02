@@ -26,12 +26,33 @@ namespace wumgr
         }
 
         private string mWuGPO = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate";
+        private string mWuKey = @"SOFTWARE\Xanatos\Windows Update Manager";
+
+        private bool allowshowdisplay = true;
+
+        private TrayIcon mTray = null;
+
+        protected override void SetVisibleCore(bool value)
+        {
+            base.SetVisibleCore(allowshowdisplay ? value : allowshowdisplay);
+        }
 
         public WuMgr()
         {
+            Console.WriteLine("Alloc WuMgr...");
+
+            if (Program.TestArg("-tray"))
+            {
+                allowshowdisplay = false;
+
+                mTray = new TrayIcon();
+                mTray.CreateNotifyicon();
+                mTray.Action += TrayAction;
+            }
+
             InitializeComponent();
 
-            this.Text = Program.fmt("Windows Update Manager by David Xanatos");
+            this.Text = Program.fmt("{0} by David Xanatos", Program.mName);
 
             toolTip.SetToolTip(btnSearch, "Search");
             toolTip.SetToolTip(btnInstall, "Install");
@@ -45,21 +66,22 @@ namespace wumgr
             agent = WuAgent.GetInstance();
             agent.Found += FoundUpdates;
             agent.Progress += OnProgress;
+
+            Console.WriteLine("AppLog Init...");
+
             agent.Init();
+
+            Console.WriteLine("WuAgent Init...");
 
             updateView.ShowGroups = true;
             updateView.ShowItemCountOnGroups = true;
             updateView.AlwaysGroupByColumn = updateView.ColumnsInDisplayOrder[1];
             updateView.Sort();
 
-            for(int i=0; i < agent.mServiceList.Count; i++){
-                string service = agent.mServiceList[i];
-                dlSource.Items.Add(service);
-                if (service.Equals("Windows Update", StringComparison.CurrentCultureIgnoreCase))
-                    dlSource.SelectedIndex = i;
-            }
+            Console.WriteLine("Listing update sources");
 
-            mSuspendGPO = true;
+            mSuspendUpdate = true;
+            Console.WriteLine("Loading GPO");
 
             {
                 var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, false);
@@ -74,7 +96,7 @@ namespace wumgr
             }
 
             {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", false);
                 object value_no = subKey.GetValue("NoAutoUpdate");
                 if (value_no == null || (int)value_no == 0)
                 {
@@ -108,27 +130,82 @@ namespace wumgr
                 if (value_time != null)
                     dlShTime.SelectedIndex = (int)value_time;
             }
-            mSuspendGPO = false;
 
-            UpdateCounts();
-            SwitchList(UpdateLists.UpdateHistory);
-
-            bool doUpdate = false;
-            for (int i = 0; i < Program.args.Length; i++)
             {
-                if (Program.args[i].Equals("-update", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    doUpdate = true;
-                }
+                var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false);
+                chkAutoRun.Checked = (subKey != null && subKey.GetValue("wumgr") != null);
+
+                chkNoUAC.Checked = Program.IsSkipUacRun();
             }
 
-            if (doUpdate)
+            {
+                var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
+                string source = subKey.GetValue("Source", "Windows Update").ToString();
+
+                for (int i = 0; i < agent.mServiceList.Count; i++)
+                {
+                    string service = agent.mServiceList[i];
+                    dlSource.Items.Add(service);
+                    if (service.Equals(source, StringComparison.CurrentCultureIgnoreCase))
+                        dlSource.SelectedIndex = i;
+                }
+
+                chkOffline.Checked = (int)subKey.GetValue("Offline", 1) != 0;
+                chkDownload.CheckState = (CheckState)subKey.GetValue("Download", 2);
+                chkOld.Checked = (int)subKey.GetValue("IncludeOld", 0) != 0;
+            }
+            mSuspendUpdate = false;
+
+            Console.WriteLine("Updating Lists");
+            UpdateCounts();
+            Console.WriteLine("Loding List");
+            SwitchList(UpdateLists.UpdateHistory);
+
+            if (Program.TestArg("-update"))
             {
                 aTimer = new Timer();
                 aTimer.Interval = 1000;
                 // Hook up the Elapsed event for the timer. 
                 aTimer.Tick += OnTimedEvent;
                 aTimer.Enabled = true;
+            }
+
+            Console.WriteLine("Ready");
+        }
+
+        private void WuMgr_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (mTray != null)
+            {
+                mTray.DestroyNotifyicon();
+            }
+
+            agent.UnInit();
+        }
+
+        void TrayAction(object sender, TrayIcon.TrayEventArgs args)
+        {
+            switch (args.Action)
+            {
+                case TrayIcon.Actions.ToggleWindow:
+                    {
+                        if (allowshowdisplay)
+                        {
+                            allowshowdisplay = false;
+                            this.Hide();
+                        }
+                        else
+                        {
+                            allowshowdisplay = true;
+                            this.Show();
+                        }
+                        break;
+                    }
+                case TrayIcon.Actions.CloseApplication:
+                    {
+                        Application.Exit();
+                        break;
+                    }
             }
         }
 
@@ -185,14 +262,16 @@ namespace wumgr
             }
         }
 
-        void LoadList(IUpdateHistoryEntryCollection List)
+        void LoadList(List<IUpdateHistoryEntry> List)
         {
             if (List != null)
             {
+                List<Update> list = new List<Update>();
                 foreach (IUpdateHistoryEntry update in List)
                 {
-                    updateView.AddObject(new Update(update));
+                    list.Add(new Update(update));
                 }
+                updateView.AddObjects(list);
             }
         }
 
@@ -200,10 +279,12 @@ namespace wumgr
         {
             if (List != null)
             {
+                List<Update> list = new List<Update>();
                 foreach (IUpdate update in List)
                 {
-                    updateView.AddObject(new Update(update));
+                    list.Add(new Update(update));
                 }
+                updateView.AddObjects(list);
             }
         }
 
@@ -261,6 +342,7 @@ namespace wumgr
 
         private void btnHistory_CheckedChanged(object sender, EventArgs e)
         {
+            agent.UpdateHistory();
             SwitchList(UpdateLists.UpdateHistory);
         }
         
@@ -276,13 +358,23 @@ namespace wumgr
         private void btnDownload_Click(object sender, EventArgs e)
         {
             if (CurrentList == UpdateLists.PendingUpdates)
-                agent.DownloadUpdates(GetUpdates());
+            {
+                if (chkOffline.Checked)
+                    agent.DownloadUpdatesOffline(GetUpdates());
+                else
+                    agent.DownloadUpdates(GetUpdates());
+            }
         }
 
         private void btnInstall_Click(object sender, EventArgs e)
         {
             if (CurrentList == UpdateLists.PendingUpdates)
-                agent.DownloadUpdates(GetUpdates(), true);
+            {
+                if (chkOffline.Checked)
+                    agent.DownloadUpdatesOffline(GetUpdates(), true);
+                else
+                    agent.DownloadUpdates(GetUpdates(), true);
+            }
         }
 
         private void btnUnInstall_Click(object sender, EventArgs e)
@@ -342,17 +434,46 @@ namespace wumgr
             }
         }
 
+        private void dlSource_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
+            subKey.SetValue("Source", dlSource.Text);
+        }
+
         private void chkOffline_CheckedChanged(object sender, EventArgs e)
         {
             dlSource.Enabled = !chkOffline.Checked;
             chkDownload.Enabled = chkOffline.Checked;
+
+            if (mSuspendUpdate)
+                return;
+            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
+            subKey.SetValue("Offline", chkOffline.Checked, RegistryValueKind.DWord);
         }
 
-        private bool mSuspendGPO = false;
+        private void chkDownload_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
+            subKey.SetValue("Download", chkDownload.CheckState, RegistryValueKind.DWord);
+        }
+
+        private void chkOld_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
+            subKey.SetValue("IncludeOld", chkOld.Checked, RegistryValueKind.DWord);
+        }
+
+        private bool mSuspendUpdate = false;
 
         private void chkDrivers_CheckStateChanged(object sender, EventArgs e)
         {
-            if (mSuspendGPO)
+            if (mSuspendUpdate)
                 return;
             try
             {
@@ -376,7 +497,7 @@ namespace wumgr
 
         private void dlPolMode_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (mSuspendGPO)
+            if (mSuspendUpdate)
                 return;
             try
             {
@@ -404,7 +525,7 @@ namespace wumgr
                     subKey.SetValue("NoAutoUpdate", 0);
                     subKey.SetValue("AUOptions", 3);
                     break;
-                case 4: //Schleduled Instalation
+                case 4: //Scheduled Installation
                     subKey.SetValue("NoAutoUpdate", 0);
                     subKey.SetValue("AUOptions", 4);
 
@@ -430,7 +551,7 @@ namespace wumgr
 
         private void dlShDay_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (mSuspendGPO)
+            if (mSuspendUpdate)
                 return;
             try
             {
@@ -442,7 +563,7 @@ namespace wumgr
 
         private void dlShTime_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (mSuspendGPO)
+            if (mSuspendUpdate)
                 return;
             try
             {
@@ -450,6 +571,28 @@ namespace wumgr
                 subKey.SetValue("ScheduledInstallTime", dlShTime.SelectedIndex);
             }
             catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+        }
+
+        private void chkAutoRun_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+
+            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            if (chkAutoRun.Checked)
+            {
+                string value = "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " -tray";
+                subKey.SetValue("wumgr", value);
+            }
+            else if (subKey.GetValue("wumgr") != null)
+                subKey.DeleteValue("wumgr");
+        }
+
+        private void chkNoUAC_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            Program.SkipUacEnable(chkNoUAC.Checked);
         }
     }
 
@@ -520,7 +663,7 @@ namespace wumgr
                     category += cat.Name;
                 }
                 return category;*/
-                return update.Categories.Count > 0 ? update.Categories[0].Name : "";
+                return update.Categories.Count > 0 ? update.Categories[0].Name : "Unknown";
             }
             catch (Exception err) {
                 return "";
@@ -531,7 +674,7 @@ namespace wumgr
         {
             try
             {
-                return update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "";
+                return update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "KBUnknown";
             }
             catch (Exception err)
             {

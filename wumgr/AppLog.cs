@@ -33,7 +33,7 @@ namespace wumgr
 
         static void LineLogger(object sender, LogEventArgs args)
         {
-            Console.WriteLine(args.line);
+            Console.WriteLine("LOG: " + args.line);
         }
 
         static private AppLog mInstance = null;

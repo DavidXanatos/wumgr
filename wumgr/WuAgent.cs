@@ -9,13 +9,12 @@ using System.Windows.Threading;
 using System.IO;
 using System.Net;
 using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace wumgr
 {
     class WuAgent
     {
-        string mVersion = "0.2";
-
         UpdateSession mUpdateSession = null;
         IUpdateSearcher mUpdateSearcher = null;
         ISearchJob mSearchJob = null;
@@ -24,7 +23,7 @@ namespace wumgr
         UpdateInstaller mInstaller = null;
         IInstallationJob mInstalationJob = null;
 
-        public IUpdateHistoryEntryCollection mUpdateHistory = null;
+        public List<IUpdateHistoryEntry> mUpdateHistory = null;
         public UpdateCollection mPendingUpdates = null;
         public UpdateCollection mInstalledUpdates = null;
         public UpdateCollection mHiddenUpdates = null;
@@ -34,58 +33,95 @@ namespace wumgr
         private static WuAgent mInstance = null;
         public static WuAgent GetInstance() { return mInstance; }
 
+        WebDownloader mWebDownloader = new WebDownloader();
+
         public WuAgent()
         {
             mInstance = this;
             mDispatcher = Dispatcher.CurrentDispatcher;
+
+            mWebDownloader.Finished += DownloadsFinished;
         }
 
         protected Dispatcher mDispatcher = null;
 
+        private string dlPath = null;
+
         public void Init()
         {
-            AppLog.Line(Program.fmt("Windows Update Manager, Version v{0} by David Xanatos", mVersion));
+            AppLog.Line(Program.fmt("{0}, Version v{1} by David Xanatos", Program.mName, Program.mVersion));
             AppLog.Line(Program.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
+
+            dlPath = Directory.GetCurrentDirectory() + @"\Downloads";
 
             mUpdateSession = new UpdateSession();
             mUpdateSession.ClientApplicationID = "Windows Update Manager";
 
             mUpdateServiceManager = new UpdateServiceManager();
-            foreach (IUpdateService service in mUpdateServiceManager.Services)
+            try
             {
-                if (service.Name == "Offline Sync Service")
-                    mUpdateServiceManager.RemoveService(service.ServiceID);
-                else
-                    mServiceList.Add(service.Name);
+                foreach (IUpdateService service in mUpdateServiceManager.Services)
+                {
+                    if (service.Name == "Offline Sync Service")
+                        mUpdateServiceManager.RemoveService(service.ServiceID);
+                    else
+                        mServiceList.Add(service.Name);
+                }
+
+                mUpdateSearcher = mUpdateSession.CreateUpdateSearcher();
+                    
+
+                WindowsUpdateAgentInfo info = new WindowsUpdateAgentInfo();
+                var currentVersion = info.GetInfo("ApiMajorVersion").ToString().Trim() + "." + info.GetInfo("ApiMinorVersion").ToString().Trim()
+                                        + " (" + info.GetInfo("ProductVersionString").ToString().Trim() + ")";
+
+                AppLog.Line(Program.fmt("Windows Update Agent Version: {0}", currentVersion));
+
+                UpdateHistory();
             }
+            catch (Exception err)
+            {
+                MessageBox.Show("Please enable the Windows Update Service and restart the tool.");
+            }
+        }
 
-            mUpdateSearcher = mUpdateSession.CreateUpdateSearcher();
+        public void UnInit()
+        {
+            ClearOffline();
+        }
 
+        public void UpdateHistory()
+        {
             int count = mUpdateSearcher.GetTotalHistoryCount();
-            mUpdateHistory = mUpdateSearcher.QueryHistory(0, count);
-
-            WindowsUpdateAgentInfo info = new WindowsUpdateAgentInfo();
-            var currentVersion = info.GetInfo("ApiMajorVersion").ToString().Trim() + "." + info.GetInfo("ApiMinorVersion").ToString().Trim()
-                                    + " (" + info.GetInfo("ProductVersionString").ToString().Trim() + ")";
-
-            AppLog.Line(Program.fmt("Windows Update Agent Version: {0}", currentVersion));
+            mUpdateHistory = new List<IUpdateHistoryEntry>();
+            if (count == 0)
+                return;
+            foreach (IUpdateHistoryEntry update in mUpdateSearcher.QueryHistory(0, count))
+            {
+                if (update.Title == null)
+                    continue;
+                mUpdateHistory.Add(update);
+            }
         }
 
         UpdateServiceManager mUpdateServiceManager = null;
         IUpdateService mOfflineService = null;
 
-        private bool SetOffline()
+        private bool SetupOffline()
         {
             try
             {
-                AppLog.Line(Program.fmt("Setting up 'Offline Sync Service'"));
+                if (mOfflineService == null)
+                {
+                    AppLog.Line(Program.fmt("Setting up 'Offline Sync Service'"));
 
-                // http://go.microsoft.com/fwlink/p/?LinkID=74689
-                mOfflineService = mUpdateServiceManager.AddScanPackageService("Offline Sync Service", Directory.GetCurrentDirectory() + @"\wsusscn2.cab");
+                    // http://go.microsoft.com/fwlink/p/?LinkID=74689
+                    mOfflineService = mUpdateServiceManager.AddScanPackageService("Offline Sync Service", dlPath + @"\wsusscn2.cab");
+                }
 
                 mUpdateSearcher.ServerSelection = ServerSelection.ssOthers;
                 mUpdateSearcher.ServiceID = mOfflineService.ServiceID;
-                mUpdateSearcher.Online = true;
+                //mUpdateSearcher.Online = false;
                 return true;
             }
             catch (Exception err)
@@ -95,20 +131,26 @@ namespace wumgr
             }
         }
 
+        private void ClearOffline()
+        {
+            if (mOfflineService != null)
+            {
+                mUpdateServiceManager.RemoveService(mOfflineService.ServiceID);
+                mOfflineService = null;
+            }
+        }
+
         private void SetOnline(string ServiceName)
         {
-            mUpdateSearcher.ServerSelection = ServerSelection.ssDefault;
-            mUpdateSearcher.ServiceID = "00000000-0000-0000-0000-000000000000";
             foreach (IUpdateService service in mUpdateServiceManager.Services)
             {
                 if (service.Name.Equals(ServiceName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    mUpdateSearcher.ServerSelection = ServerSelection.ssOthers;
+                    mUpdateSearcher.ServerSelection = ServerSelection.ssDefault;
                     mUpdateSearcher.ServiceID = service.ServiceID;
+                    //mUpdateSearcher.Online = true;
                 }
-
             }
-            mUpdateSearcher.Online = true;
         }
 
         UpdateCallback mCallback = null;
@@ -131,9 +173,36 @@ namespace wumgr
                 return;
             }
 
+            
+            var fi = new FileInfo(dlPath + @"\wsusscn2.cab");
+            if (fi.Exists)
+            {
+                try
+                {
+                    fi.Delete();
+                }
+                catch (Exception ex)
+                {
+                    AppLog.Line(Program.fmt("failed to delete {0}", fi.FullName));
+                    return;
+                }
+            }
+
+            var tfi = new FileInfo(dlPath + @"\wsusscn2.tmp");
+            try
+            {
+                tfi.MoveTo(dlPath + @"\wsusscn2.cab");
+            }
+            catch (Exception ex)
+            {
+                AppLog.Line(Program.fmt("failed to move {0} to {1}", tfi.FullName, fi.FullName));
+                return;
+            }
+
             AppLog.Line(Program.fmt("wsusscn2.cab downloaded, now checking for updates"));
 
-            SetOffline();
+            ClearOffline();
+            SetupOffline();
 
             SearchForUpdates();
         }
@@ -165,21 +234,12 @@ namespace wumgr
 
                 bool isDownloaded = false;
 
-                var fi = new FileInfo(Directory.GetCurrentDirectory() + @"\wsusscn2.cab");
+                if (!Directory.Exists(dlPath))
+                    Directory.CreateDirectory(dlPath);
+
+                var fi = new FileInfo(dlPath + @"\wsusscn2.cab");
                 if (fi.Exists) {
-                    if ((Download == 1 || fi.LastWriteTime < DateTime.Today.Subtract(new TimeSpan(1, 0, 0, 0))))
-                    {
-                        try
-                        {
-                            fi.Delete();
-                        }
-                        catch (Exception ex)
-                        {
-                            AppLog.Line(Program.fmt("failed to delete {0}", fi.FullName));
-                        }
-                        return false;
-                    }
-                    else
+                    if (!(Download == 1 || fi.LastWriteTime < DateTime.Today.Subtract(new TimeSpan(1, 0, 0, 0))))
                     {
                         isDownloaded = true;
                         AppLog.Line(Program.fmt("up to date wsusscn2.cab is already downloaded"));
@@ -190,15 +250,26 @@ namespace wumgr
                 {
                     AppLog.Line(Program.fmt("downloading wsusscn2.cab"));
 
+                    var tfi = new FileInfo(dlPath + @"\wsusscn2.tmp");
+                    try
+                    {
+                        tfi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        AppLog.Line(Program.fmt("failed to delete {0}", tfi.FullName));
+                        return false;
+                    }
+
                     mWebClient = new WebClient();
-                    mWebClient.DownloadFileAsync(new System.Uri("http://go.microsoft.com/fwlink/p/?LinkID=74689"), fi.FullName);
+                    mWebClient.DownloadFileAsync(new System.Uri("http://go.microsoft.com/fwlink/p/?LinkID=74689"), tfi.FullName);
                     mWebClient.DownloadProgressChanged += wc_dlProgress;
                     mWebClient.DownloadFileCompleted += wd_Finish;
                     return true;
                 }
             }
-            
-            SetOffline();
+
+            SetupOffline();
             
             SearchForUpdates();
             return true;
@@ -236,16 +307,6 @@ namespace wumgr
                 mSearchJob = null;
             }
 
-            if (mOfflineService != null)
-            {
-                try
-                {
-                    mUpdateServiceManager.RemoveService(mOfflineService.ServiceID);
-                }
-                catch (Exception err) { }
-                mOfflineService = null;
-            }
-
             if (mDownloadJob != null)
             {
                 try
@@ -270,6 +331,38 @@ namespace wumgr
             }
 
             mCallback = null;
+        }
+
+        public bool DownloadUpdatesOffline(UpdateCollection Updates, bool Install = false)
+        {
+            List<WebDownloader.Task> downloads = new List<WebDownloader.Task>();
+            foreach (IUpdate update in Updates)
+            {
+                string KB = update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "KBUnknown";
+                foreach (IUpdate bundle in update.BundledUpdates)
+                {
+                    foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
+                    {
+                        if (String.IsNullOrEmpty(udc.DownloadUrl))
+                            continue;
+                        WebDownloader.Task download = new WebDownloader.Task();
+                        download.Url = udc.DownloadUrl;
+                        download.Path = dlPath + @"\" + KB;
+                        downloads.Add(download);
+                    }
+                }
+            }
+            /*WebDownloader.Task download = new WebDownloader.Task();
+            //download.Url = "http://download.windowsupdate.com/d/msdownload/update/software/secu/2018/08/windows10.0-kb4343902-x64_346f95cde08164057941d1182e28cf35ff6dfca7.cab";
+            download.Url = "http://go.microsoft.com/fwlink/p/?LinkID=74689";
+            download.Path = dlPath + @"\" + "KB1234567890";
+            downloads.Add(download);*/
+            return mWebDownloader.Download(downloads);
+        }
+
+        void DownloadsFinished(object sender, WebDownloader.FinishedEventArgs args)
+        {
+            AppLog.Line(Program.fmt("Updates downloaded to {0}", dlPath));
         }
 
         public bool DownloadUpdates(UpdateCollection Updates, bool Install = false)
@@ -412,12 +505,6 @@ namespace wumgr
             try
             {
                 SearchResults = mUpdateSearcher.EndSearch(searchJob);
-
-                if (mOfflineService != null)
-                {
-                    mUpdateServiceManager.RemoveService(mOfflineService.ServiceID);
-                    mOfflineService = null;
-                }
             }
             catch (Exception err)
             {
@@ -436,9 +523,29 @@ namespace wumgr
                 else if (update.IsInstalled)
                     mInstalledUpdates.Add(update);
                 else
-                    mPendingUpdates.Add(update);         
+                    mPendingUpdates.Add(update);
 
-                Console.WriteLine("\r\n");
+                Console.WriteLine(update.Title);
+                try
+                {
+                    foreach (IUpdate bundle in update.BundledUpdates)
+                    {
+                        foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
+                        {
+                            if (String.IsNullOrEmpty(udc.DownloadUrl))
+                                continue;
+
+                            Console.WriteLine(udc.DownloadUrl);
+                        }
+                    }
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine("");
+                }
+                Console.WriteLine("");
+
+                //Console.WriteLine("\r\n");
             }
 
             AppLog.Line(Program.fmt("Found {0} pending updates.", mPendingUpdates.Count));

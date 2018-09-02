@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WuMgr));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
@@ -52,13 +53,17 @@
             this.chkOld = new System.Windows.Forms.CheckBox();
             this.chkOffline = new System.Windows.Forms.CheckBox();
             this.dlSource = new System.Windows.Forms.ComboBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.chkDrivers = new System.Windows.Forms.CheckBox();
             this.dlShTime = new System.Windows.Forms.ComboBox();
             this.dlShDay = new System.Windows.Forms.ComboBox();
             this.dlPolMode = new System.Windows.Forms.ComboBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.chkNoUAC = new System.Windows.Forms.CheckBox();
+            this.chkAutoRun = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.logBox = new System.Windows.Forms.RichTextBox();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.updateView = new BrightIdeasSoftware.ObjectListView();
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
@@ -66,7 +71,9 @@
             this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.logBox = new System.Windows.Forms.RichTextBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
@@ -74,8 +81,14 @@
             this.tableLayoutPanel5.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.updateView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -90,10 +103,11 @@
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 2);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 528);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 454);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // tableLayoutPanel2
@@ -111,7 +125,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 522);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 448);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -310,13 +324,13 @@
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Controls.Add(this.groupBox1, 0, 0);
-            this.tableLayoutPanel6.Controls.Add(this.groupBox2, 0, 1);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 310);
+            this.tableLayoutPanel6.Controls.Add(this.tabControl1, 0, 1);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 231);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 55F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 209);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 214);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
             // groupBox1
@@ -327,7 +341,7 @@
             this.groupBox1.Controls.Add(this.dlSource);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(182, 104);
+            this.groupBox1.Size = new System.Drawing.Size(182, 101);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Update Source";
@@ -344,6 +358,7 @@
             this.chkDownload.Text = "Download wsusscn2.cab";
             this.chkDownload.ThreeState = true;
             this.chkDownload.UseVisualStyleBackColor = true;
+            this.chkDownload.CheckStateChanged += new System.EventHandler(this.chkDownload_CheckStateChanged);
             // 
             // chkOld
             // 
@@ -354,6 +369,7 @@
             this.chkOld.TabIndex = 2;
             this.chkOld.Text = "Include superseded";
             this.chkOld.UseVisualStyleBackColor = true;
+            this.chkOld.CheckedChanged += new System.EventHandler(this.chkOld_CheckedChanged);
             // 
             // chkOffline
             // 
@@ -370,33 +386,46 @@
             // 
             // dlSource
             // 
+            this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dlSource.Enabled = false;
             this.dlSource.FormattingEnabled = true;
             this.dlSource.Location = new System.Drawing.Point(6, 19);
             this.dlSource.Name = "dlSource";
             this.dlSource.Size = new System.Drawing.Size(170, 21);
             this.dlSource.TabIndex = 0;
+            this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
             // 
-            // groupBox2
+            // tabControl1
             // 
-            this.groupBox2.Controls.Add(this.chkDrivers);
-            this.groupBox2.Controls.Add(this.dlShTime);
-            this.groupBox2.Controls.Add(this.dlShDay);
-            this.groupBox2.Controls.Add(this.dlPolMode);
-            this.groupBox2.Location = new System.Drawing.Point(3, 117);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(182, 89);
-            this.groupBox2.TabIndex = 1;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Groupe Policy";
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(3, 110);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(182, 101);
+            this.tabControl1.TabIndex = 1;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.chkDrivers);
+            this.tabPage1.Controls.Add(this.dlShTime);
+            this.tabPage1.Controls.Add(this.dlShDay);
+            this.tabPage1.Controls.Add(this.dlPolMode);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(174, 75);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "GPO";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // chkDrivers
             // 
             this.chkDrivers.AutoSize = true;
-            this.chkDrivers.Location = new System.Drawing.Point(6, 70);
+            this.chkDrivers.Location = new System.Drawing.Point(5, 59);
             this.chkDrivers.Name = "chkDrivers";
             this.chkDrivers.Size = new System.Drawing.Size(97, 17);
-            this.chkDrivers.TabIndex = 3;
+            this.chkDrivers.TabIndex = 7;
             this.chkDrivers.Text = "Include Drivers";
             this.chkDrivers.ThreeState = true;
             this.chkDrivers.UseVisualStyleBackColor = true;
@@ -404,6 +433,7 @@
             // 
             // dlShTime
             // 
+            this.dlShTime.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dlShTime.Enabled = false;
             this.dlShTime.FormattingEnabled = true;
             this.dlShTime.Items.AddRange(new object[] {
@@ -431,14 +461,15 @@
             "21:00",
             "22:00",
             "23:00"});
-            this.dlShTime.Location = new System.Drawing.Point(102, 46);
+            this.dlShTime.Location = new System.Drawing.Point(101, 35);
             this.dlShTime.Name = "dlShTime";
             this.dlShTime.Size = new System.Drawing.Size(69, 21);
-            this.dlShTime.TabIndex = 2;
+            this.dlShTime.TabIndex = 6;
             this.dlShTime.SelectedIndexChanged += new System.EventHandler(this.dlShTime_SelectedIndexChanged);
             // 
             // dlShDay
             // 
+            this.dlShDay.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dlShDay.Enabled = false;
             this.dlShDay.FormattingEnabled = true;
             this.dlShDay.Items.AddRange(new object[] {
@@ -450,27 +481,62 @@
             "Thursday",
             "Friday",
             "Saturday"});
-            this.dlShDay.Location = new System.Drawing.Point(6, 46);
+            this.dlShDay.Location = new System.Drawing.Point(5, 35);
             this.dlShDay.Name = "dlShDay";
             this.dlShDay.Size = new System.Drawing.Size(90, 21);
-            this.dlShDay.TabIndex = 1;
+            this.dlShDay.TabIndex = 5;
             this.dlShDay.SelectedIndexChanged += new System.EventHandler(this.dlShDay_SelectedIndexChanged);
             // 
             // dlPolMode
             // 
+            this.dlPolMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dlPolMode.FormattingEnabled = true;
             this.dlPolMode.Items.AddRange(new object[] {
             "Automatic (default)",
             "Disabled",
             "Notification only",
             "Download only",
-            "Schleduled Instalation",
+            "Scheduled Installation",
             "Managed by Admin"});
-            this.dlPolMode.Location = new System.Drawing.Point(6, 19);
+            this.dlPolMode.Location = new System.Drawing.Point(5, 8);
             this.dlPolMode.Name = "dlPolMode";
             this.dlPolMode.Size = new System.Drawing.Size(165, 21);
-            this.dlPolMode.TabIndex = 0;
+            this.dlPolMode.TabIndex = 4;
             this.dlPolMode.SelectedIndexChanged += new System.EventHandler(this.dlPolMode_SelectedIndexChanged);
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.chkNoUAC);
+            this.tabPage2.Controls.Add(this.chkAutoRun);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(174, 75);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Start";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // chkNoUAC
+            // 
+            this.chkNoUAC.AutoSize = true;
+            this.chkNoUAC.Location = new System.Drawing.Point(7, 25);
+            this.chkNoUAC.Name = "chkNoUAC";
+            this.chkNoUAC.Size = new System.Drawing.Size(164, 17);
+            this.chkNoUAC.TabIndex = 1;
+            this.chkNoUAC.Text = "Bypass User Account Control";
+            this.chkNoUAC.UseVisualStyleBackColor = true;
+            this.chkNoUAC.CheckedChanged += new System.EventHandler(this.chkNoUAC_CheckedChanged);
+            // 
+            // chkAutoRun
+            // 
+            this.chkAutoRun.AutoSize = true;
+            this.chkAutoRun.Location = new System.Drawing.Point(7, 7);
+            this.chkAutoRun.Name = "chkAutoRun";
+            this.chkAutoRun.Size = new System.Drawing.Size(142, 17);
+            this.chkAutoRun.TabIndex = 0;
+            this.chkAutoRun.Text = "Auto Start with Windows";
+            this.chkAutoRun.UseVisualStyleBackColor = true;
+            this.chkAutoRun.CheckedChanged += new System.EventHandler(this.chkAutoRun_CheckedChanged);
             // 
             // tableLayoutPanel3
             // 
@@ -478,28 +544,35 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel3.ColumnCount = 1;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel3.Controls.Add(this.logBox, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.updateView, 0, 0);
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.splitContainer1, 0, 1);
             this.tableLayoutPanel3.Location = new System.Drawing.Point(203, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 2;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 69.85646F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.14354F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(677, 522);
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(677, 448);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
-            // logBox
+            // splitContainer1
             // 
-            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(3, 367);
-            this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(671, 152);
-            this.logBox.TabIndex = 0;
-            this.logBox.Text = "";
+            this.splitContainer1.Location = new System.Drawing.Point(3, 23);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.updateView);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.logBox);
+            this.splitContainer1.Size = new System.Drawing.Size(671, 422);
+            this.splitContainer1.SplitterDistance = 291;
+            this.splitContainer1.TabIndex = 2;
             // 
             // updateView
             // 
@@ -520,10 +593,10 @@
             this.olvColumn4,
             this.olvColumn5,
             this.olvColumn6});
-            this.updateView.Location = new System.Drawing.Point(3, 3);
+            this.updateView.Location = new System.Drawing.Point(0, 0);
             this.updateView.Name = "updateView";
-            this.updateView.Size = new System.Drawing.Size(671, 358);
-            this.updateView.TabIndex = 1;
+            this.updateView.Size = new System.Drawing.Size(671, 291);
+            this.updateView.TabIndex = 3;
             this.updateView.UseCompatibleStateImageBehavior = false;
             this.updateView.View = System.Windows.Forms.View.Details;
             // 
@@ -568,14 +641,33 @@
             this.olvColumn6.Text = "State";
             this.olvColumn6.Width = 122;
             // 
+            // logBox
+            // 
+            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.logBox.Location = new System.Drawing.Point(0, 2);
+            this.logBox.Name = "logBox";
+            this.logBox.ReadOnly = true;
+            this.logBox.Size = new System.Drawing.Size(671, 128);
+            this.logBox.TabIndex = 3;
+            this.logBox.Text = "";
+            // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
+            // 
             // WuMgr
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(884, 531);
+            this.ClientSize = new System.Drawing.Size(884, 457);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "WuMgr";
             this.Text = "Windows Update Manager";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WuMgr_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
@@ -585,9 +677,16 @@
             this.tableLayoutPanel6.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.updateView)).EndInit();
             this.ResumeLayout(false);
 
@@ -597,8 +696,6 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
-        private System.Windows.Forms.RichTextBox logBox;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnSearch;
@@ -607,32 +704,40 @@
         private System.Windows.Forms.Button btnUnInstall;
         private System.Windows.Forms.Button btnHide;
         private System.Windows.Forms.Button btnGetLink;
-        private BrightIdeasSoftware.ObjectListView updateView;
-        private BrightIdeasSoftware.OLVColumn olvColumn1;
-        private BrightIdeasSoftware.OLVColumn olvColumn2;
-        private BrightIdeasSoftware.OLVColumn olvColumn3;
-        private BrightIdeasSoftware.OLVColumn olvColumn4;
-        private BrightIdeasSoftware.OLVColumn olvColumn5;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ProgressBar progTotal;
-        private BrightIdeasSoftware.OLVColumn olvColumn6;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox chkOld;
         private System.Windows.Forms.CheckBox chkOffline;
         private System.Windows.Forms.ComboBox dlSource;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckBox chkDrivers;
-        private System.Windows.Forms.ComboBox dlShTime;
-        private System.Windows.Forms.ComboBox dlShDay;
-        private System.Windows.Forms.ComboBox dlPolMode;
         private System.Windows.Forms.CheckBox btnHistory;
         private System.Windows.Forms.CheckBox btnHidden;
         private System.Windows.Forms.CheckBox btnInstalled;
         private System.Windows.Forms.CheckBox btnWinUpd;
         private System.Windows.Forms.CheckBox chkDownload;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.CheckBox chkDrivers;
+        private System.Windows.Forms.ComboBox dlShTime;
+        private System.Windows.Forms.ComboBox dlShDay;
+        private System.Windows.Forms.ComboBox dlPolMode;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.CheckBox chkNoUAC;
+        private System.Windows.Forms.CheckBox chkAutoRun;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private BrightIdeasSoftware.ObjectListView updateView;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.OLVColumn olvColumn2;
+        private BrightIdeasSoftware.OLVColumn olvColumn3;
+        private BrightIdeasSoftware.OLVColumn olvColumn4;
+        private BrightIdeasSoftware.OLVColumn olvColumn5;
+        private BrightIdeasSoftware.OLVColumn olvColumn6;
+        private System.Windows.Forms.RichTextBox logBox;
     }
 }
 
