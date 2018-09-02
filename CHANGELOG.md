@@ -7,14 +7,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - System tray Icon
 - Auto Start
 - UAC bypass for administrator users
-- fixed issue with slow history loading
 - added warning if running without window supdate service enabled
 - added -console command line option to show a debug console 
 - added /? command line option to show all available command line options
-- fixed multiple errors with offlien update search
 - added direct update download, i.e. not using the update service
 - added propepr slitter for the log
 - added settings saving to registry
+
+### Fixed
+- multiple errors with offlien update search
+- issue with slow history loading
 
 ## [0.2] - 2018-08-26
 ### Added
