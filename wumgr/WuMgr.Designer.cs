@@ -30,7 +30,19 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WuMgr));
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.checkStateRenderer1 = new BrightIdeasSoftware.CheckStateRenderer();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.updateView = new BrightIdeasSoftware.ObjectListView();
+            this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.logBox = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -47,14 +59,11 @@
             this.btnHidden = new System.Windows.Forms.CheckBox();
             this.btnInstalled = new System.Windows.Forms.CheckBox();
             this.btnWinUpd = new System.Windows.Forms.CheckBox();
+            this.lblStatus = new System.Windows.Forms.Label();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.chkDownload = new System.Windows.Forms.CheckBox();
-            this.chkOld = new System.Windows.Forms.CheckBox();
-            this.chkOffline = new System.Windows.Forms.CheckBox();
-            this.dlSource = new System.Windows.Forms.ComboBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.chkBlockMS = new System.Windows.Forms.CheckBox();
             this.chkDrivers = new System.Windows.Forms.CheckBox();
             this.dlShTime = new System.Windows.Forms.ComboBox();
             this.dlShDay = new System.Windows.Forms.ComboBox();
@@ -62,53 +71,160 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.chkNoUAC = new System.Windows.Forms.CheckBox();
             this.chkAutoRun = new System.Windows.Forms.CheckBox();
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.updateView = new BrightIdeasSoftware.ObjectListView();
-            this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvColumn3 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.logBox = new System.Windows.Forms.RichTextBox();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.tableLayoutPanel4.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel5.SuspendLayout();
-            this.tableLayoutPanel6.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.chkMsUpd = new System.Windows.Forms.CheckBox();
+            this.tabControl2 = new System.Windows.Forms.TabControl();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.chkOld = new System.Windows.Forms.CheckBox();
+            this.dlSource = new System.Windows.Forms.ComboBox();
+            this.chkOffline = new System.Windows.Forms.CheckBox();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.chkDownload = new System.Windows.Forms.CheckBox();
+            this.chkManual = new System.Windows.Forms.CheckBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.updateView)).BeginInit();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.tableLayoutPanel6.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.tabControl2.SuspendLayout();
+            this.tabPage4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tableLayoutPanel1
+            // notifyIcon1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 2);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 454);
-            this.tableLayoutPanel1.TabIndex = 1;
+            this.tableLayoutPanel3.ColumnCount = 1;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.splitContainer1, 0, 1);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(188, 0);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 2;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(695, 482);
+            this.tableLayoutPanel3.TabIndex = 1;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(3, 23);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.updateView);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.logBox);
+            this.splitContainer1.Size = new System.Drawing.Size(689, 456);
+            this.splitContainer1.SplitterDistance = 295;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // updateView
+            // 
+            this.updateView.AllColumns.Add(this.olvColumn1);
+            this.updateView.AllColumns.Add(this.olvColumn2);
+            this.updateView.AllColumns.Add(this.olvColumn3);
+            this.updateView.AllColumns.Add(this.olvColumn4);
+            this.updateView.AllColumns.Add(this.olvColumn5);
+            this.updateView.AllColumns.Add(this.olvColumn6);
+            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.updateView.CheckBoxes = true;
+            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.olvColumn1,
+            this.olvColumn2,
+            this.olvColumn3,
+            this.olvColumn4,
+            this.olvColumn5,
+            this.olvColumn6});
+            this.updateView.Location = new System.Drawing.Point(0, 0);
+            this.updateView.Name = "updateView";
+            this.updateView.Size = new System.Drawing.Size(689, 295);
+            this.updateView.TabIndex = 3;
+            this.updateView.UseCompatibleStateImageBehavior = false;
+            this.updateView.View = System.Windows.Forms.View.Details;
+            // 
+            // olvColumn1
+            // 
+            this.olvColumn1.AspectName = "Title";
+            this.olvColumn1.Groupable = false;
+            this.olvColumn1.Text = "Title";
+            this.olvColumn1.Width = 244;
+            // 
+            // olvColumn2
+            // 
+            this.olvColumn2.AspectName = "Category";
+            this.olvColumn2.Text = "Category";
+            this.olvColumn2.Width = 93;
+            // 
+            // olvColumn3
+            // 
+            this.olvColumn3.AspectName = "KB";
+            this.olvColumn3.Groupable = false;
+            this.olvColumn3.Text = "KB article";
+            this.olvColumn3.Width = 77;
+            // 
+            // olvColumn4
+            // 
+            this.olvColumn4.AspectName = "Date";
+            this.olvColumn4.Groupable = false;
+            this.olvColumn4.Text = "Date";
+            this.olvColumn4.Width = 79;
+            // 
+            // olvColumn5
+            // 
+            this.olvColumn5.AspectName = "Size";
+            this.olvColumn5.Groupable = false;
+            this.olvColumn5.Text = "Size";
+            this.olvColumn5.Width = 45;
+            // 
+            // olvColumn6
+            // 
+            this.olvColumn6.AspectName = "State";
+            this.olvColumn6.Groupable = false;
+            this.olvColumn6.Text = "State";
+            this.olvColumn6.Width = 122;
+            // 
+            // logBox
+            // 
+            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.logBox.Location = new System.Drawing.Point(0, 2);
+            this.logBox.Name = "logBox";
+            this.logBox.ReadOnly = true;
+            this.logBox.Size = new System.Drawing.Size(689, 155);
+            this.logBox.TabIndex = 3;
+            this.logBox.Text = "";
             // 
             // tableLayoutPanel2
             // 
@@ -120,12 +236,14 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel6, 0, 1);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(194, 448);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(188, 482);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -138,16 +256,19 @@
             this.tableLayoutPanel4.Controls.Add(this.btnHidden, 0, 2);
             this.tableLayoutPanel4.Controls.Add(this.btnInstalled, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.btnWinUpd, 0, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel4.Controls.Add(this.lblStatus, 0, 6);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 6;
+            this.tableLayoutPanel4.RowCount = 7;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 15F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(188, 217);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(186, 210);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // flowLayoutPanel1
@@ -160,66 +281,66 @@
             this.flowLayoutPanel1.Controls.Add(this.btnGetLink);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 123);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(182, 29);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 29);
             this.flowLayoutPanel1.TabIndex = 4;
             // 
             // btnSearch
             // 
-            this.btnSearch.Location = new System.Drawing.Point(3, 3);
+            this.btnSearch.Location = new System.Drawing.Point(0, 0);
+            this.btnSearch.Margin = new System.Windows.Forms.Padding(0);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(23, 23);
+            this.btnSearch.Size = new System.Drawing.Size(30, 30);
             this.btnSearch.TabIndex = 0;
-            this.btnSearch.Text = "C";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // btnDownload
             // 
-            this.btnDownload.Location = new System.Drawing.Point(32, 3);
+            this.btnDownload.Location = new System.Drawing.Point(30, 0);
+            this.btnDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btnDownload.Name = "btnDownload";
-            this.btnDownload.Size = new System.Drawing.Size(23, 23);
+            this.btnDownload.Size = new System.Drawing.Size(30, 30);
             this.btnDownload.TabIndex = 1;
-            this.btnDownload.Text = "D";
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
             // btnInstall
             // 
-            this.btnInstall.Location = new System.Drawing.Point(61, 3);
+            this.btnInstall.Location = new System.Drawing.Point(60, 0);
+            this.btnInstall.Margin = new System.Windows.Forms.Padding(0);
             this.btnInstall.Name = "btnInstall";
-            this.btnInstall.Size = new System.Drawing.Size(23, 23);
+            this.btnInstall.Size = new System.Drawing.Size(30, 30);
             this.btnInstall.TabIndex = 2;
-            this.btnInstall.Text = "I";
             this.btnInstall.UseVisualStyleBackColor = true;
             this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
             // 
             // btnUnInstall
             // 
-            this.btnUnInstall.Location = new System.Drawing.Point(90, 3);
+            this.btnUnInstall.Location = new System.Drawing.Point(90, 0);
+            this.btnUnInstall.Margin = new System.Windows.Forms.Padding(0);
             this.btnUnInstall.Name = "btnUnInstall";
-            this.btnUnInstall.Size = new System.Drawing.Size(23, 23);
+            this.btnUnInstall.Size = new System.Drawing.Size(30, 30);
             this.btnUnInstall.TabIndex = 3;
-            this.btnUnInstall.Text = "U";
             this.btnUnInstall.UseVisualStyleBackColor = true;
             this.btnUnInstall.Click += new System.EventHandler(this.btnUnInstall_Click);
             // 
             // btnHide
             // 
-            this.btnHide.Location = new System.Drawing.Point(119, 3);
+            this.btnHide.Location = new System.Drawing.Point(120, 0);
+            this.btnHide.Margin = new System.Windows.Forms.Padding(0);
             this.btnHide.Name = "btnHide";
-            this.btnHide.Size = new System.Drawing.Size(23, 23);
+            this.btnHide.Size = new System.Drawing.Size(30, 30);
             this.btnHide.TabIndex = 4;
-            this.btnHide.Text = "H";
             this.btnHide.UseVisualStyleBackColor = true;
             this.btnHide.Click += new System.EventHandler(this.btnHide_Click);
             // 
             // btnGetLink
             // 
-            this.btnGetLink.Location = new System.Drawing.Point(148, 3);
+            this.btnGetLink.Location = new System.Drawing.Point(150, 0);
+            this.btnGetLink.Margin = new System.Windows.Forms.Padding(0);
             this.btnGetLink.Name = "btnGetLink";
-            this.btnGetLink.Size = new System.Drawing.Size(23, 23);
+            this.btnGetLink.Size = new System.Drawing.Size(30, 30);
             this.btnGetLink.TabIndex = 5;
-            this.btnGetLink.Text = "L";
             this.btnGetLink.UseVisualStyleBackColor = true;
             this.btnGetLink.Click += new System.EventHandler(this.btnGetLink_Click);
             // 
@@ -236,7 +357,7 @@
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(182, 29);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(180, 29);
             this.tableLayoutPanel5.TabIndex = 5;
             // 
             // btnCancel
@@ -244,11 +365,11 @@
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(156, 3);
+            this.btnCancel.Location = new System.Drawing.Point(151, 0);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(0);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(23, 23);
+            this.btnCancel.Size = new System.Drawing.Size(29, 29);
             this.btnCancel.TabIndex = 0;
-            this.btnCancel.Text = "X";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
@@ -258,7 +379,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progTotal.Location = new System.Drawing.Point(3, 3);
             this.progTotal.Name = "progTotal";
-            this.progTotal.Size = new System.Drawing.Size(147, 23);
+            this.progTotal.Size = new System.Drawing.Size(145, 23);
             this.progTotal.TabIndex = 1;
             // 
             // btnHistory
@@ -269,7 +390,7 @@
             this.btnHistory.AutoSize = true;
             this.btnHistory.Location = new System.Drawing.Point(3, 93);
             this.btnHistory.Name = "btnHistory";
-            this.btnHistory.Size = new System.Drawing.Size(182, 23);
+            this.btnHistory.Size = new System.Drawing.Size(180, 23);
             this.btnHistory.TabIndex = 6;
             this.btnHistory.Text = "Update History";
             this.btnHistory.UseVisualStyleBackColor = true;
@@ -283,7 +404,7 @@
             this.btnHidden.AutoSize = true;
             this.btnHidden.Location = new System.Drawing.Point(3, 63);
             this.btnHidden.Name = "btnHidden";
-            this.btnHidden.Size = new System.Drawing.Size(182, 23);
+            this.btnHidden.Size = new System.Drawing.Size(180, 23);
             this.btnHidden.TabIndex = 7;
             this.btnHidden.Text = "Hidden Updates";
             this.btnHidden.UseVisualStyleBackColor = true;
@@ -297,7 +418,7 @@
             this.btnInstalled.AutoSize = true;
             this.btnInstalled.Location = new System.Drawing.Point(3, 33);
             this.btnInstalled.Name = "btnInstalled";
-            this.btnInstalled.Size = new System.Drawing.Size(182, 23);
+            this.btnInstalled.Size = new System.Drawing.Size(180, 23);
             this.btnInstalled.TabIndex = 0;
             this.btnInstalled.Text = "Installed Updates";
             this.btnInstalled.UseVisualStyleBackColor = true;
@@ -311,11 +432,20 @@
             this.btnWinUpd.AutoSize = true;
             this.btnWinUpd.Location = new System.Drawing.Point(3, 3);
             this.btnWinUpd.Name = "btnWinUpd";
-            this.btnWinUpd.Size = new System.Drawing.Size(182, 23);
+            this.btnWinUpd.Size = new System.Drawing.Size(180, 23);
             this.btnWinUpd.TabIndex = 8;
             this.btnWinUpd.Text = "Windows Updates";
             this.btnWinUpd.UseVisualStyleBackColor = true;
             this.btnWinUpd.CheckedChanged += new System.EventHandler(this.btnWinUpd_CheckedChanged);
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(3, 193);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(180, 13);
+            this.lblStatus.TabIndex = 9;
             // 
             // tableLayoutPanel6
             // 
@@ -323,90 +453,31 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Controls.Add(this.groupBox1, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.tabControl1, 0, 1);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 231);
+            this.tableLayoutPanel6.Controls.Add(this.tabControl2, 0, 0);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 250);
+            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 214);
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45.25862F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 54.74138F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 232);
             this.tableLayoutPanel6.TabIndex = 1;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.chkDownload);
-            this.groupBox1.Controls.Add(this.chkOld);
-            this.groupBox1.Controls.Add(this.chkOffline);
-            this.groupBox1.Controls.Add(this.dlSource);
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(182, 101);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Update Source";
-            // 
-            // chkDownload
-            // 
-            this.chkDownload.AutoSize = true;
-            this.chkDownload.Checked = true;
-            this.chkDownload.CheckState = System.Windows.Forms.CheckState.Indeterminate;
-            this.chkDownload.Location = new System.Drawing.Point(6, 63);
-            this.chkDownload.Name = "chkDownload";
-            this.chkDownload.Size = new System.Drawing.Size(145, 17);
-            this.chkDownload.TabIndex = 3;
-            this.chkDownload.Text = "Download wsusscn2.cab";
-            this.chkDownload.ThreeState = true;
-            this.chkDownload.UseVisualStyleBackColor = true;
-            this.chkDownload.CheckStateChanged += new System.EventHandler(this.chkDownload_CheckStateChanged);
-            // 
-            // chkOld
-            // 
-            this.chkOld.AutoSize = true;
-            this.chkOld.Location = new System.Drawing.Point(6, 80);
-            this.chkOld.Name = "chkOld";
-            this.chkOld.Size = new System.Drawing.Size(119, 17);
-            this.chkOld.TabIndex = 2;
-            this.chkOld.Text = "Include superseded";
-            this.chkOld.UseVisualStyleBackColor = true;
-            this.chkOld.CheckedChanged += new System.EventHandler(this.chkOld_CheckedChanged);
-            // 
-            // chkOffline
-            // 
-            this.chkOffline.AutoSize = true;
-            this.chkOffline.Checked = true;
-            this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOffline.Location = new System.Drawing.Point(6, 46);
-            this.chkOffline.Name = "chkOffline";
-            this.chkOffline.Size = new System.Drawing.Size(86, 17);
-            this.chkOffline.TabIndex = 1;
-            this.chkOffline.Text = "Offline Mode";
-            this.chkOffline.UseVisualStyleBackColor = true;
-            this.chkOffline.CheckedChanged += new System.EventHandler(this.chkOffline_CheckedChanged);
-            // 
-            // dlSource
-            // 
-            this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dlSource.Enabled = false;
-            this.dlSource.FormattingEnabled = true;
-            this.dlSource.Location = new System.Drawing.Point(6, 19);
-            this.dlSource.Name = "dlSource";
-            this.dlSource.Size = new System.Drawing.Size(170, 21);
-            this.dlSource.TabIndex = 0;
-            this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(3, 110);
+            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Location = new System.Drawing.Point(3, 108);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(182, 101);
+            this.tabControl1.Size = new System.Drawing.Size(182, 119);
             this.tabControl1.TabIndex = 1;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.chkBlockMS);
             this.tabPage1.Controls.Add(this.chkDrivers);
             this.tabPage1.Controls.Add(this.dlShTime);
             this.tabPage1.Controls.Add(this.dlShDay);
@@ -414,10 +485,21 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(174, 75);
+            this.tabPage1.Size = new System.Drawing.Size(174, 93);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "GPO";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // chkBlockMS
+            // 
+            this.chkBlockMS.AutoSize = true;
+            this.chkBlockMS.Location = new System.Drawing.Point(5, 77);
+            this.chkBlockMS.Name = "chkBlockMS";
+            this.chkBlockMS.Size = new System.Drawing.Size(173, 17);
+            this.chkBlockMS.TabIndex = 4;
+            this.chkBlockMS.Text = "Restrict Access to WU Servers";
+            this.chkBlockMS.UseVisualStyleBackColor = true;
+            this.chkBlockMS.CheckedChanged += new System.EventHandler(this.chkBlockMS_CheckedChanged);
             // 
             // chkDrivers
             // 
@@ -511,7 +593,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(174, 75);
+            this.tabPage2.Size = new System.Drawing.Size(174, 93);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Start";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -538,163 +620,194 @@
             this.chkAutoRun.UseVisualStyleBackColor = true;
             this.chkAutoRun.CheckedChanged += new System.EventHandler(this.chkAutoRun_CheckedChanged);
             // 
-            // tableLayoutPanel3
+            // tabPage3
             // 
-            this.tableLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tabPage3.Controls.Add(this.chkMsUpd);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(174, 93);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Misc";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // chkMsUpd
+            // 
+            this.chkMsUpd.AutoSize = true;
+            this.chkMsUpd.Location = new System.Drawing.Point(7, 7);
+            this.chkMsUpd.Name = "chkMsUpd";
+            this.chkMsUpd.Size = new System.Drawing.Size(149, 17);
+            this.chkMsUpd.TabIndex = 0;
+            this.chkMsUpd.Text = "Register Microsoft Update";
+            this.chkMsUpd.UseVisualStyleBackColor = true;
+            this.chkMsUpd.CheckedChanged += new System.EventHandler(this.chkMsUpd_CheckedChanged);
+            // 
+            // tabControl2
+            // 
+            this.tabControl2.Controls.Add(this.tabPage4);
+            this.tabControl2.Controls.Add(this.tabPage5);
+            this.tabControl2.Location = new System.Drawing.Point(3, 3);
+            this.tabControl2.Name = "tabControl2";
+            this.tabControl2.SelectedIndex = 0;
+            this.tabControl2.Size = new System.Drawing.Size(182, 99);
+            this.tabControl2.TabIndex = 2;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.chkOld);
+            this.tabPage4.Controls.Add(this.dlSource);
+            this.tabPage4.Controls.Add(this.chkOffline);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(174, 73);
+            this.tabPage4.TabIndex = 0;
+            this.tabPage4.Text = "Update Source";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // chkOld
+            // 
+            this.chkOld.AutoSize = true;
+            this.chkOld.Location = new System.Drawing.Point(5, 50);
+            this.chkOld.Name = "chkOld";
+            this.chkOld.Size = new System.Drawing.Size(119, 17);
+            this.chkOld.TabIndex = 2;
+            this.chkOld.Text = "Include superseded";
+            this.chkOld.UseVisualStyleBackColor = true;
+            this.chkOld.CheckedChanged += new System.EventHandler(this.chkOld_CheckedChanged);
+            // 
+            // dlSource
+            // 
+            this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dlSource.Enabled = false;
+            this.dlSource.FormattingEnabled = true;
+            this.dlSource.Location = new System.Drawing.Point(5, 6);
+            this.dlSource.Name = "dlSource";
+            this.dlSource.Size = new System.Drawing.Size(163, 21);
+            this.dlSource.TabIndex = 0;
+            this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
+            // 
+            // chkOffline
+            // 
+            this.chkOffline.AutoSize = true;
+            this.chkOffline.Checked = true;
+            this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkOffline.Location = new System.Drawing.Point(5, 32);
+            this.chkOffline.Name = "chkOffline";
+            this.chkOffline.Size = new System.Drawing.Size(86, 17);
+            this.chkOffline.TabIndex = 1;
+            this.chkOffline.Text = "Offline Mode";
+            this.chkOffline.UseVisualStyleBackColor = true;
+            this.chkOffline.CheckedChanged += new System.EventHandler(this.chkOffline_CheckedChanged);
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.chkDownload);
+            this.tabPage5.Controls.Add(this.chkManual);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage5.Size = new System.Drawing.Size(174, 73);
+            this.tabPage5.TabIndex = 1;
+            this.tabPage5.Text = "Offline Options";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // chkDownload
+            // 
+            this.chkDownload.AutoSize = true;
+            this.chkDownload.Checked = true;
+            this.chkDownload.CheckState = System.Windows.Forms.CheckState.Indeterminate;
+            this.chkDownload.Location = new System.Drawing.Point(5, 6);
+            this.chkDownload.Name = "chkDownload";
+            this.chkDownload.Size = new System.Drawing.Size(145, 17);
+            this.chkDownload.TabIndex = 3;
+            this.chkDownload.Text = "Download wsusscn2.cab";
+            this.chkDownload.ThreeState = true;
+            this.chkDownload.UseVisualStyleBackColor = true;
+            this.chkDownload.CheckStateChanged += new System.EventHandler(this.chkDownload_CheckStateChanged);
+            // 
+            // chkManual
+            // 
+            this.chkManual.AutoSize = true;
+            this.chkManual.Location = new System.Drawing.Point(5, 24);
+            this.chkManual.Name = "chkManual";
+            this.chkManual.Size = new System.Drawing.Size(154, 17);
+            this.chkManual.TabIndex = 0;
+            this.chkManual.Text = "\"Manual\" Download/Install";
+            this.chkManual.UseVisualStyleBackColor = true;
+            this.chkManual.CheckedChanged += new System.EventHandler(this.chkManual_CheckedChanged);
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel3.ColumnCount = 1;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Controls.Add(this.splitContainer1, 0, 1);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(203, 3);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 2;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(677, 448);
-            this.tableLayoutPanel3.TabIndex = 1;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer1.Location = new System.Drawing.Point(3, 23);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.updateView);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.logBox);
-            this.splitContainer1.Size = new System.Drawing.Size(671, 422);
-            this.splitContainer1.SplitterDistance = 291;
-            this.splitContainer1.TabIndex = 2;
-            // 
-            // updateView
-            // 
-            this.updateView.AllColumns.Add(this.olvColumn1);
-            this.updateView.AllColumns.Add(this.olvColumn2);
-            this.updateView.AllColumns.Add(this.olvColumn3);
-            this.updateView.AllColumns.Add(this.olvColumn4);
-            this.updateView.AllColumns.Add(this.olvColumn5);
-            this.updateView.AllColumns.Add(this.olvColumn6);
-            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.updateView.CheckBoxes = true;
-            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.olvColumn1,
-            this.olvColumn2,
-            this.olvColumn3,
-            this.olvColumn4,
-            this.olvColumn5,
-            this.olvColumn6});
-            this.updateView.Location = new System.Drawing.Point(0, 0);
-            this.updateView.Name = "updateView";
-            this.updateView.Size = new System.Drawing.Size(671, 291);
-            this.updateView.TabIndex = 3;
-            this.updateView.UseCompatibleStateImageBehavior = false;
-            this.updateView.View = System.Windows.Forms.View.Details;
-            // 
-            // olvColumn1
-            // 
-            this.olvColumn1.AspectName = "Title";
-            this.olvColumn1.Groupable = false;
-            this.olvColumn1.Text = "Title";
-            this.olvColumn1.Width = 244;
-            // 
-            // olvColumn2
-            // 
-            this.olvColumn2.AspectName = "Category";
-            this.olvColumn2.Text = "Category";
-            this.olvColumn2.Width = 93;
-            // 
-            // olvColumn3
-            // 
-            this.olvColumn3.AspectName = "KB";
-            this.olvColumn3.Groupable = false;
-            this.olvColumn3.Text = "KB article";
-            this.olvColumn3.Width = 77;
-            // 
-            // olvColumn4
-            // 
-            this.olvColumn4.AspectName = "Date";
-            this.olvColumn4.Groupable = false;
-            this.olvColumn4.Text = "Date";
-            this.olvColumn4.Width = 79;
-            // 
-            // olvColumn5
-            // 
-            this.olvColumn5.AspectName = "Size";
-            this.olvColumn5.Groupable = false;
-            this.olvColumn5.Text = "Size";
-            this.olvColumn5.Width = 45;
-            // 
-            // olvColumn6
-            // 
-            this.olvColumn6.AspectName = "State";
-            this.olvColumn6.Groupable = false;
-            this.olvColumn6.Text = "State";
-            this.olvColumn6.Width = 122;
-            // 
-            // logBox
-            // 
-            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(0, 2);
-            this.logBox.Name = "logBox";
-            this.logBox.ReadOnly = true;
-            this.logBox.Size = new System.Drawing.Size(671, 128);
-            this.logBox.TabIndex = 3;
-            this.logBox.Text = "";
-            // 
-            // notifyIcon1
-            // 
-            this.notifyIcon1.Text = "notifyIcon1";
-            this.notifyIcon1.Visible = true;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 2);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(883, 482);
+            this.tableLayoutPanel1.TabIndex = 1;
             // 
             // WuMgr
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(884, 457);
+            this.ClientSize = new System.Drawing.Size(884, 485);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "WuMgr";
             this.Text = "Windows Update Manager";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WuMgr_FormClosing);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel4.PerformLayout();
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel5.ResumeLayout(false);
-            this.tableLayoutPanel6.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
+            this.Load += new System.EventHandler(this.WuMgr_Load);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.updateView)).EndInit();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel6.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            this.tabControl2.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolTip toolTip;
+        private BrightIdeasSoftware.CheckStateRenderer checkStateRenderer1;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private BrightIdeasSoftware.ObjectListView updateView;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.OLVColumn olvColumn2;
+        private BrightIdeasSoftware.OLVColumn olvColumn3;
+        private BrightIdeasSoftware.OLVColumn olvColumn4;
+        private BrightIdeasSoftware.OLVColumn olvColumn5;
+        private BrightIdeasSoftware.OLVColumn olvColumn6;
+        private System.Windows.Forms.RichTextBox logBox;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
@@ -707,20 +820,15 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ProgressBar progTotal;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.CheckBox chkOld;
-        private System.Windows.Forms.CheckBox chkOffline;
-        private System.Windows.Forms.ComboBox dlSource;
         private System.Windows.Forms.CheckBox btnHistory;
         private System.Windows.Forms.CheckBox btnHidden;
         private System.Windows.Forms.CheckBox btnInstalled;
         private System.Windows.Forms.CheckBox btnWinUpd;
-        private System.Windows.Forms.CheckBox chkDownload;
-        private System.Windows.Forms.ToolTip toolTip;
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.Label lblStatus;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.CheckBox chkBlockMS;
         private System.Windows.Forms.CheckBox chkDrivers;
         private System.Windows.Forms.ComboBox dlShTime;
         private System.Windows.Forms.ComboBox dlShDay;
@@ -728,16 +836,17 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.CheckBox chkNoUAC;
         private System.Windows.Forms.CheckBox chkAutoRun;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private BrightIdeasSoftware.ObjectListView updateView;
-        private BrightIdeasSoftware.OLVColumn olvColumn1;
-        private BrightIdeasSoftware.OLVColumn olvColumn2;
-        private BrightIdeasSoftware.OLVColumn olvColumn3;
-        private BrightIdeasSoftware.OLVColumn olvColumn4;
-        private BrightIdeasSoftware.OLVColumn olvColumn5;
-        private BrightIdeasSoftware.OLVColumn olvColumn6;
-        private System.Windows.Forms.RichTextBox logBox;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.CheckBox chkMsUpd;
+        private System.Windows.Forms.TabControl tabControl2;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.CheckBox chkOld;
+        private System.Windows.Forms.ComboBox dlSource;
+        private System.Windows.Forms.CheckBox chkOffline;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.CheckBox chkDownload;
+        private System.Windows.Forms.CheckBox chkManual;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
 

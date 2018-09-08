@@ -8,6 +8,8 @@ namespace wumgr
 {
     class AppLog
     {
+        private List<string> mLogList = new List<string>();
+
         static public void Line(String line)
         {
             if (mInstance != null)
@@ -18,11 +20,17 @@ namespace wumgr
         {
             if (Logger != null)
             {
+                mLogList.Add(line);
+                while (mLogList.Count > 100)
+                    mLogList.RemoveAt(0);
+
                 LogEventArgs args = new LogEventArgs();
                 args.line = line;
                 Logger(this, args);
             }
         }
+
+        static public List<string> GetLog() { return mInstance.mLogList; }
 
         public class LogEventArgs : EventArgs
         {

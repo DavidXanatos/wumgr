@@ -10,12 +10,15 @@ using System.IO;
 using System.Net;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.ServiceProcess;
 
 namespace wumgr
 {
     class WuAgent
     {
         UpdateSession mUpdateSession = null;
+        UpdateServiceManager mUpdateServiceManager = null;
+        IUpdateService mOfflineService = null;
         IUpdateSearcher mUpdateSearcher = null;
         ISearchJob mSearchJob = null;
         UpdateDownloader mDownloader = null;
@@ -23,7 +26,7 @@ namespace wumgr
         UpdateInstaller mInstaller = null;
         IInstallationJob mInstalationJob = null;
 
-        public List<IUpdateHistoryEntry> mUpdateHistory = null;
+        public List<IUpdateHistoryEntry2> mUpdateHistory = null;
         public UpdateCollection mPendingUpdates = null;
         public UpdateCollection mInstalledUpdates = null;
         public UpdateCollection mHiddenUpdates = null;
@@ -33,56 +36,43 @@ namespace wumgr
         private static WuAgent mInstance = null;
         public static WuAgent GetInstance() { return mInstance; }
 
-        WebDownloader mWebDownloader = new WebDownloader();
+        WebDownloader mWebDownloader = null;
 
         public WuAgent()
         {
             mInstance = this;
             mDispatcher = Dispatcher.CurrentDispatcher;
 
+            mWebDownloader = new WebDownloader();
             mWebDownloader.Finished += DownloadsFinished;
+            mWebDownloader.Progress += DownloadProgress;
+
+            dlPath = Program.appPath + @"\Downloads";
+
+            WindowsUpdateAgentInfo info = new WindowsUpdateAgentInfo();
+            var currentVersion = info.GetInfo("ApiMajorVersion").ToString().Trim() + "." + info.GetInfo("ApiMinorVersion").ToString().Trim() + " (" + info.GetInfo("ProductVersionString").ToString().Trim() + ")";
+            AppLog.Line(Program.fmt("Windows Update Agent Version: {0}", currentVersion));
+
+            mUpdateSession = new UpdateSession();
+            mUpdateSession.ClientApplicationID = Program.mName;
+            mUpdateSession.UserLocale = 1033; // alwys show strings in englisch, we need that to know what each catergory means
+
+            mUpdateServiceManager = new UpdateServiceManager();
         }
 
         protected Dispatcher mDispatcher = null;
 
         private string dlPath = null;
 
-        public void Init()
+        public bool Init()
         {
-            AppLog.Line(Program.fmt("{0}, Version v{1} by David Xanatos", Program.mName, Program.mVersion));
-            AppLog.Line(Program.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
+            if (!LoadServices(true))
+                return false;
+            
+            mUpdateSearcher = mUpdateSession.CreateUpdateSearcher();
 
-            dlPath = Directory.GetCurrentDirectory() + @"\Downloads";
-
-            mUpdateSession = new UpdateSession();
-            mUpdateSession.ClientApplicationID = "Windows Update Manager";
-
-            mUpdateServiceManager = new UpdateServiceManager();
-            try
-            {
-                foreach (IUpdateService service in mUpdateServiceManager.Services)
-                {
-                    if (service.Name == "Offline Sync Service")
-                        mUpdateServiceManager.RemoveService(service.ServiceID);
-                    else
-                        mServiceList.Add(service.Name);
-                }
-
-                mUpdateSearcher = mUpdateSession.CreateUpdateSearcher();
-                    
-
-                WindowsUpdateAgentInfo info = new WindowsUpdateAgentInfo();
-                var currentVersion = info.GetInfo("ApiMajorVersion").ToString().Trim() + "." + info.GetInfo("ApiMinorVersion").ToString().Trim()
-                                        + " (" + info.GetInfo("ProductVersionString").ToString().Trim() + ")";
-
-                AppLog.Line(Program.fmt("Windows Update Agent Version: {0}", currentVersion));
-
-                UpdateHistory();
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("Please enable the Windows Update Service and restart the tool.");
-            }
+            UpdateHistory();
+            return true;
         }
 
         public void UnInit()
@@ -90,13 +80,112 @@ namespace wumgr
             ClearOffline();
         }
 
+        public bool IsActive()
+        {
+            return mUpdateSearcher != null;
+        }
+
+        public bool IsBusy()
+        {
+            if (mWebDownloader.IsBusy())
+                return true;
+            return mCurOperation != AgentOperation.None;
+        }
+
+        public bool LoadServices(bool cleanUp = false)
+        {
+            try
+            {
+                Console.WriteLine("Update Services:");
+                mServiceList.Clear();
+                foreach (IUpdateService service in mUpdateServiceManager.Services)
+                {
+                    if (service.Name == mMyOfflineSvc)
+                    {
+                        if(cleanUp)
+                            mUpdateServiceManager.RemoveService(service.ServiceID);
+                        continue;
+                    }
+
+                    Console.WriteLine(service.Name + ": " + service.ServiceID);
+                    //AppLog.Line(service.Name + ": " + service.ServiceID);
+                    mServiceList.Add(service.Name);
+                }
+
+                return true;
+            }
+            catch (Exception err)
+            {
+                if((uint)err.HResult != 0x80070422)
+                    LogError(err);
+                return false;
+            }
+        }
+
+        private void LogError(Exception error)
+        {
+            uint errCode = (uint)error.HResult;
+            AppLog.Line("Error: " + WinErrors.GetErrorStr(errCode));
+        }
+
+        public static string MsUpdGUID = "7971f918-a847-4430-9279-4a52d1efe18d"; // Microsoft Update
+        public static string WinUpdUID = "9482f4b4-e343-43b6-b170-9a65bc822c77"; // Windows Update
+        public static string WsUsUID = "3da21691-e39d-4da6-8a4b-b43877bcb1b7"; // Windows Server Update Service
+
+        public static string DCatGUID = "8b24b027-1dee-babb-9a95-3517dfb9c552"; // DCat Flighting Prod - Windows Insider Program
+        public static string WinStorGUID = "117cab2d-82b1-4b5a-a08c-4d62dbee7782 "; // Windows Store
+        public static string WinStorDCat2GUID = "855e8a7c-ecb4-4ca3-b045-1dfa50104289"; // Windows Store (DCat Prod) - Insider Updates for Store Apps
+
+        public void EnableService(string GUID, bool enable = true)
+        {
+            if (enable)
+                AddService(GUID);
+            else
+                RemoveService(GUID);
+            LoadServices();
+        }
+
+        private void AddService(string ID)
+        {
+            mUpdateServiceManager.AddService2(ID, (int)(tagAddServiceFlag.asfAllowOnlineRegistration | tagAddServiceFlag.asfAllowPendingRegistration | tagAddServiceFlag.asfRegisterServiceWithAU), "");
+        }
+
+        private void RemoveService(string ID)
+        {
+            mUpdateServiceManager.RemoveService(ID);
+        }
+
+        public bool TestService(string ID)
+        {
+            foreach (IUpdateService service in mUpdateServiceManager.Services)
+            {
+                if (service.ServiceID.Equals(ID))
+                    return true;
+            }
+            return false;
+        }
+
+        public string GetServiceName(string ID, bool bAdd = false)
+        {
+            foreach (IUpdateService service in mUpdateServiceManager.Services)
+            {
+                if (service.ServiceID.Equals(ID))
+                    return service.Name;
+            }
+            if (bAdd == false)
+                return null;
+            AddService(ID);
+            LoadServices();
+            return GetServiceName(ID, false);
+        }
+
         public void UpdateHistory()
         {
             int count = mUpdateSearcher.GetTotalHistoryCount();
-            mUpdateHistory = new List<IUpdateHistoryEntry>();
+            mUpdateHistory = new List<IUpdateHistoryEntry2>();
             if (count == 0)
                 return;
-            foreach (IUpdateHistoryEntry update in mUpdateSearcher.QueryHistory(0, count))
+            foreach (IUpdateHistoryEntry2 update in mUpdateSearcher.QueryHistory(0, count))
             {
                 if (update.Title == null)
                     continue;
@@ -104,8 +193,7 @@ namespace wumgr
             }
         }
 
-        UpdateServiceManager mUpdateServiceManager = null;
-        IUpdateService mOfflineService = null;
+        public string mMyOfflineSvc = "Offline Sync Service";
 
         private bool SetupOffline()
         {
@@ -116,7 +204,7 @@ namespace wumgr
                     AppLog.Line(Program.fmt("Setting up 'Offline Sync Service'"));
 
                     // http://go.microsoft.com/fwlink/p/?LinkID=74689
-                    mOfflineService = mUpdateServiceManager.AddScanPackageService("Offline Sync Service", dlPath + @"\wsusscn2.cab");
+                    mOfflineService = mUpdateServiceManager.AddScanPackageService(mMyOfflineSvc, dlPath + @"\wsusscn2.cab");
                 }
 
                 mUpdateSearcher.ServerSelection = ServerSelection.ssOthers;
@@ -154,62 +242,25 @@ namespace wumgr
         }
 
         UpdateCallback mCallback = null;
-        WebClient mWebClient = null;
 
-        void wc_dlProgress(object sender, DownloadProgressChangedEventArgs e)
+        public enum AgentOperation
         {
-            Progress(this, new ProgressArgs(1, e.ProgressPercentage, 0, "Downloading", 0));
-        }
+            None = 0,
+            CheckingUpdates,
+            PreparingCheck,
+            DownloadingUpdates,
+            InstallingUpdates,
+            PreparingUpdates,
+            RemoveingUpdtes
+        };
 
-        void wd_Finish(object sender, AsyncCompletedEventArgs args)
-        {
-            if (args.Error != null || args.Cancelled)
-            {
-                mWebClient = null;
-                if (args.Error != null)
-                {
-                    AppLog.Line(Program.fmt("wsusscn2.cab downloaded, failed: {0}", args.Error.ToString()));
-                }
-                return;
-            }
+        private AgentOperation mCurOperation = AgentOperation.None;
 
-            
-            var fi = new FileInfo(dlPath + @"\wsusscn2.cab");
-            if (fi.Exists)
-            {
-                try
-                {
-                    fi.Delete();
-                }
-                catch (Exception ex)
-                {
-                    AppLog.Line(Program.fmt("failed to delete {0}", fi.FullName));
-                    return;
-                }
-            }
-
-            var tfi = new FileInfo(dlPath + @"\wsusscn2.tmp");
-            try
-            {
-                tfi.MoveTo(dlPath + @"\wsusscn2.cab");
-            }
-            catch (Exception ex)
-            {
-                AppLog.Line(Program.fmt("failed to move {0} to {1}", tfi.FullName, fi.FullName));
-                return;
-            }
-
-            AppLog.Line(Program.fmt("wsusscn2.cab downloaded, now checking for updates"));
-
-            ClearOffline();
-            SetupOffline();
-
-            SearchForUpdates();
-        }
+        public AgentOperation CurOperation() { return mCurOperation; }
 
         public bool SearchForUpdates(String Source = "", bool IncludePotentiallySupersededUpdates = false)
         {
-            if (mCallback != null)
+            if (IsBusy())
                 return false;
 
             mUpdateSearcher.IncludePotentiallySupersededUpdates = IncludePotentiallySupersededUpdates;
@@ -222,16 +273,15 @@ namespace wumgr
 
         public bool SearchForUpdates(int Download, bool IncludePotentiallySupersededUpdates = false)
         {
-            if (mCallback != null)
+            if (IsBusy())
                 return false;
 
             mUpdateSearcher.IncludePotentiallySupersededUpdates = IncludePotentiallySupersededUpdates;
 
+            mCurOperation = AgentOperation.PreparingCheck;
+
             if (Download != 0)
             {
-                if (mCallback != null || mWebClient != null)
-                    return false;
-
                 bool isDownloaded = false;
 
                 if (!Directory.Exists(dlPath))
@@ -248,23 +298,21 @@ namespace wumgr
 
                 if (!isDownloaded)
                 {
+                    OnProgress(-1, 0, 0, 0);
+
                     AppLog.Line(Program.fmt("downloading wsusscn2.cab"));
 
-                    var tfi = new FileInfo(dlPath + @"\wsusscn2.tmp");
-                    try
+                    List<WebDownloader.Task> downloads = new List<WebDownloader.Task>();
+                    WebDownloader.Task download = new WebDownloader.Task();
+                    download.Url = "http://go.microsoft.com/fwlink/p/?LinkID=74689";
+                    download.Path = dlPath;
+                    download.FileName = "wsusscn2.cab";
+                    downloads.Add(download); 
+                    if(!mWebDownloader.Download(downloads))
                     {
-                        tfi.Delete();
-                    }
-                    catch (Exception ex)
-                    {
-                        AppLog.Line(Program.fmt("failed to delete {0}", tfi.FullName));
+                        mCurOperation = AgentOperation.None;
                         return false;
                     }
-
-                    mWebClient = new WebClient();
-                    mWebClient.DownloadFileAsync(new System.Uri("http://go.microsoft.com/fwlink/p/?LinkID=74689"), tfi.FullName);
-                    mWebClient.DownloadProgressChanged += wc_dlProgress;
-                    mWebClient.DownloadFileCompleted += wd_Finish;
                     return true;
                 }
             }
@@ -277,9 +325,12 @@ namespace wumgr
 
         private void SearchForUpdates()
         {
-            Progress(this, new ProgressArgs(-1, 0, 0, "Checking", 0));
+            mCurOperation = AgentOperation.CheckingUpdates;
+
+            OnProgress(-1, 0, 0, 0);
 
             mCallback = new UpdateCallback(this);
+
             AppLog.Line(Program.fmt("Searching for updates"));
             //for the above search criteria refer to 
             // http://msdn.microsoft.com/en-us/library/windows/desktop/aa386526(v=VS.85).aspx
@@ -288,14 +339,7 @@ namespace wumgr
 
         public void CancelOperations()
         {
-            if (mWebClient != null)
-            {
-                mWebClient.CancelAsync();
-                mWebClient = null;
-            }
-
-            if (mCallback == null)
-                return;
+            mWebDownloader.CancelOperations();
 
             if (mSearchJob != null)
             {
@@ -303,7 +347,7 @@ namespace wumgr
                 {
                     mUpdateSearcher.EndSearch(mSearchJob);
                 }
-                catch (Exception err) { }
+                catch { }
                 mSearchJob = null;
             }
 
@@ -313,7 +357,7 @@ namespace wumgr
                 {
                     mDownloader.EndDownload(mDownloadJob);
                 }
-                catch (Exception err) { }
+                catch { }
                 mDownloadJob = null;
             }
 
@@ -321,36 +365,49 @@ namespace wumgr
             {
                 try
                 {
-                    if (mCallback.Install)
+                    if (mCurOperation == AgentOperation.InstallingUpdates)
                         mInstaller.EndInstall(mInstalationJob);
-                    else
+                    else if (mCurOperation == AgentOperation.RemoveingUpdtes)
                         mInstaller.EndUninstall(mInstalationJob);
                 }
-                catch (Exception err) { }
+                catch { }
                 mInstalationJob = null;
             }
+
+            mCurOperation = AgentOperation.None;
 
             mCallback = null;
         }
 
         public bool DownloadUpdatesOffline(UpdateCollection Updates, bool Install = false)
         {
+            if (IsBusy())
+                return false;
+
+            mCurOperation = Install ? AgentOperation.PreparingUpdates : AgentOperation.DownloadingUpdates;
+
+            OnProgress(-1, 0, 0, 0);
+
             List<WebDownloader.Task> downloads = new List<WebDownloader.Task>();
             foreach (IUpdate update in Updates)
             {
                 string KB = update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "KBUnknown";
+                int Counter = 0;
                 foreach (IUpdate bundle in update.BundledUpdates)
                 {
                     foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
                     {
                         if (String.IsNullOrEmpty(udc.DownloadUrl))
                             continue;
+                        Counter++;
                         WebDownloader.Task download = new WebDownloader.Task();
                         download.Url = udc.DownloadUrl;
                         download.Path = dlPath + @"\" + KB;
                         downloads.Add(download);
                     }
                 }
+                if (Counter == 0)
+                    AppLog.Line(Program.fmt("Error: No Download Url's found for update {0}", update.Title));
             }
             /*WebDownloader.Task download = new WebDownloader.Task();
             //download.Url = "http://download.windowsupdate.com/d/msdownload/update/software/secu/2018/08/windows10.0-kb4343902-x64_346f95cde08164057941d1182e28cf35ff6dfca7.cab";
@@ -362,12 +419,37 @@ namespace wumgr
 
         void DownloadsFinished(object sender, WebDownloader.FinishedEventArgs args)
         {
-            AppLog.Line(Program.fmt("Updates downloaded to {0}", dlPath));
+            if (mCurOperation == AgentOperation.CheckingUpdates)
+            {
+                AppLog.Line(Program.fmt("wsusscn2.cab downloaded"));
+
+                ClearOffline();
+                SetupOffline();
+
+                SearchForUpdates();
+            }
+            else if (mCurOperation == AgentOperation.InstallingUpdates)
+            {
+                // TODO:
+                MessageBox.Show("\"Manual\" update instalation is not yet implemented.\r\nYou have to install the downloaded updates manually");
+                AppLog.Line(Program.fmt("Updates downloaded to {0}", dlPath));
+                OnFinished(args.Success);
+            }
+            else
+            {
+                AppLog.Line(Program.fmt("Updates downloaded to {0}", dlPath));
+                OnFinished(args.Success);
+            }
+        }
+
+        void DownloadProgress(object sender, WebDownloader.ProgressEventArgs args)
+        {
+            OnProgress(args.TotalFiles, args.TotalPercent, args.CurrentIndex, args.CurrentPercent);
         }
 
         public bool DownloadUpdates(UpdateCollection Updates, bool Install = false)
         {
-            if (mCallback != null)
+            if (IsBusy())
                 return false;
 
             if (mDownloader == null)
@@ -389,8 +471,12 @@ namespace wumgr
                 return false;
             }
 
+            mCurOperation = Install ? AgentOperation.PreparingUpdates : AgentOperation.DownloadingUpdates;
+
+            OnProgress(-1, 0, 0, 0);
+
             mCallback = new UpdateCallback(this);
-            mCallback.Install = Install;
+
             AppLog.Line(Program.fmt("Downloading Updates... This may take several minutes."));
             mDownloadJob = mDownloader.BeginDownload(mCallback, mCallback, null);
             return true;
@@ -398,7 +484,7 @@ namespace wumgr
 
         private bool InstallUpdates(UpdateCollection Updates)
         {
-            if (mCallback != null)
+            if (IsBusy())
                 return false;
 
             if (mInstaller == null)
@@ -412,16 +498,20 @@ namespace wumgr
                 return false;
             }
 
+            mCurOperation = AgentOperation.InstallingUpdates;
+
+            OnProgress(-1, 0, 0, 0);
+
             mCallback = new UpdateCallback(this);
+
             AppLog.Line(Program.fmt("Installing Updates... This may take several minutes."));
-            mCallback.Install = true;
             mInstalationJob = mInstaller.BeginInstall(mCallback, mCallback, null);
             return true;
         }
 
         public bool UnInstallUpdates(UpdateCollection Updates)
         {
-            if (mInstalationJob != null)
+            if (IsBusy())
                 return false;
 
             if (mInstaller == null)
@@ -443,9 +533,13 @@ namespace wumgr
                 return false;
             }
 
+            mCurOperation = AgentOperation.RemoveingUpdtes;
+
+            OnProgress(-1, 0, 0, 0);
+
             mCallback = new UpdateCallback(this);
+
             AppLog.Line(Program.fmt("Removing Updates... This may take several minutes."));
-            mCallback.Install = false;
             mInstalationJob = mInstaller.BeginUninstall(mCallback, mCallback, null);
             return true;
         }
@@ -480,19 +574,9 @@ namespace wumgr
                         RemoveFrom(mHiddenUpdates, update);
                     }
                 }
-                catch (Exception err)
-                {
-                    // Hide update may throw an exception, if the user has hidden the update manually while the search was in progress.
-                }
+                catch { } // Hide update may throw an exception, if the user has hidden the update manually while the search was in progress.
             }
         }
-
-        public class FoundUpdatesArgs : EventArgs
-        {
-            //public ISearchResult result { get; set; }
-        }
-
-        public event EventHandler<FoundUpdatesArgs> Found;
 
         protected void OnUpdatesFound(ISearchJob searchJob)
         {
@@ -508,7 +592,8 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(Program.fmt("Search for updats failed, Error: {0}", err.Message));
+                AppLog.Line(Program.fmt("Search for updats failed, Error: {0}", WinErrors.GetErrorStr((uint)err.HResult)));
+                OnFinished(false);
                 return;
             }
 
@@ -518,7 +603,7 @@ namespace wumgr
 
             foreach (IUpdate update in SearchResults.Updates)
             {
-                if (safe_IsHidden(update))
+                if (update.IsHidden)
                     mHiddenUpdates.Add(update);
                 else if (update.IsInstalled)
                     mInstalledUpdates.Add(update);
@@ -526,36 +611,25 @@ namespace wumgr
                     mPendingUpdates.Add(update);
 
                 Console.WriteLine(update.Title);
-                try
+                foreach (IUpdate bundle in update.BundledUpdates)
                 {
-                    foreach (IUpdate bundle in update.BundledUpdates)
+                    foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
                     {
-                        foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
-                        {
-                            if (String.IsNullOrEmpty(udc.DownloadUrl))
-                                continue;
+                        if (String.IsNullOrEmpty(udc.DownloadUrl))
+                            continue;
 
-                            Console.WriteLine(udc.DownloadUrl);
-                        }
+                        Console.WriteLine(udc.DownloadUrl);
                     }
                 }
-                catch (Exception err)
-                {
-                    Console.WriteLine("");
-                }
                 Console.WriteLine("");
-
-                //Console.WriteLine("\r\n");
             }
 
             AppLog.Line(Program.fmt("Found {0} pending updates.", mPendingUpdates.Count));
 
-            Progress(this, new ProgressArgs(0, 0, 0, "", 0));
-
-            Found(this, new FoundUpdatesArgs());
+            OnFinished(SearchResults.ResultCode == OperationResultCode.orcSucceeded, false, true);
         }
 
-        protected void OnUpdatesDownloaded(IDownloadJob downloadJob, bool Install)
+        protected void OnUpdatesDownloaded(IDownloadJob downloadJob)
         {
             if (downloadJob != mDownloadJob)
                 return;
@@ -569,20 +643,21 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(Program.fmt("Downloading updates failed, Error: {0}", err.Message));
+                AppLog.Line(Program.fmt("Downloading updates failed, Error: {0}", WinErrors.GetErrorStr((uint)err.HResult)));
                 OnFinished(false);
                 return;
             }
 
-            AppLog.Line(Program.fmt("Updates downloaded to %windir%\\SoftwareDistribution\\Download"));
-
-            if (Install)
+            if (mCurOperation == AgentOperation.PreparingUpdates)
                 InstallUpdates(downloadJob.Updates);
             else
-                OnFinished(true);
+            {
+                AppLog.Line(Program.fmt("Updates downloaded to %windir%\\SoftwareDistribution\\Download"));
+                OnFinished(DownloadResults.ResultCode == OperationResultCode.orcSucceeded);
+            }
         }
 
-        protected void OnInstalationCompleted(IInstallationJob installationJob, bool Install)
+        protected void OnInstalationCompleted(IInstallationJob installationJob)
         {
             if (installationJob != mInstalationJob)
                 return;
@@ -592,15 +667,15 @@ namespace wumgr
             IInstallationResult InstallationResults = null;
             try
             {
-                if (Install)
+                if (mCurOperation == AgentOperation.InstallingUpdates)
                     InstallationResults = mInstaller.EndInstall(installationJob);
-                else
+                else if (mCurOperation == AgentOperation.RemoveingUpdtes)
                     InstallationResults = mInstaller.EndUninstall(installationJob);
                 
             }
             catch (Exception err)
             {
-                AppLog.Line(Program.fmt("(Un)Installing updates failed, Error: {0}", err.Message));
+                AppLog.Line(Program.fmt("(Un)Installing updates failed, Error: {0}", WinErrors.GetErrorStr((uint)err.HResult)));
                 OnFinished(false);
                 return;
             }
@@ -610,64 +685,92 @@ namespace wumgr
                 AppLog.Line(Program.fmt("Updates (Un)Installed succesfully"));
 
                 if (InstallationResults.RebootRequired == true)
-                {
-                    AppLog.Line(Program.fmt("Reboot is required for one of more updates."));
-                }
+                    AppLog.Line(Program.fmt("Reboot is required for one of more updates"));
             }
             else
-            {
-                AppLog.Line(Program.fmt("Updates failed to (Un)Install do it manually"));
-            }
+                AppLog.Line(Program.fmt("Updates failed to (Un)Install"));
 
             OnFinished(InstallationResults.ResultCode == OperationResultCode.orcSucceeded, InstallationResults.RebootRequired);
         }
 
+
+        public void EnableWuAuServ(bool enable = true)
+        {
+            ServiceController svc = new ServiceController("wuauserv");
+            try
+            {
+                if (enable)
+                {
+                    if (svc.Status != ServiceControllerStatus.Running)
+                    {
+                        ServiceHelper.ChangeStartMode(svc, ServiceStartMode.Manual);
+                        svc.Start();
+                    }
+                }
+                else
+                {
+                    if (svc.Status == ServiceControllerStatus.Running)
+                        svc.Stop();
+                    ServiceHelper.ChangeStartMode(svc, ServiceStartMode.Disabled);
+                }
+            }
+            catch (Exception err)
+            {
+                AppLog.Line("Error: " + err.Message);
+            }
+            svc.Close();
+        }
+
         public class ProgressArgs : EventArgs
         {
-            public ProgressArgs(int TotalUpdates, int TotalPercent, int CurrentIndex, String Title, int UpdatePercent)
+            public ProgressArgs(int TotalUpdates, int TotalPercent, int CurrentIndex, int UpdatePercent, String Info)
             {
                 this.TotalUpdates = TotalUpdates;
                 this.TotalPercent = TotalPercent;
                 this.CurrentIndex = CurrentIndex;
-                this.Title = Title;
                 this.UpdatePercent = UpdatePercent;
-            }
-
-            public ProgressArgs(bool success, bool needReboot)
-            {
-                if (success)
-                    Finished = true;
-                else
-                    Failed = true;
-                RebootNeeded = needReboot;
+                this.Info = Info;
             }
 
             public int TotalUpdates = 0;
             public int TotalPercent = 0;
             public int CurrentIndex = 0;
-            public String Title = "";
             public int UpdatePercent = 0;
-            public bool Finished = false;
-            public bool Failed = false;
-            public bool RebootNeeded = false;
+            public String Info = "";
         }
 
         public event EventHandler<ProgressArgs> Progress;
 
-        protected void OnProgress(int TotalUpdates, int TotalPercent, int CurrentIndex, String Title, int UpdatePercent)
+        protected void OnProgress(int TotalUpdates, int TotalPercent, int CurrentIndex, int UpdatePercent, String Info = "")
         {
-            Progress(this, new ProgressArgs(TotalUpdates, TotalPercent, CurrentIndex, Title, UpdatePercent));
+            Progress?.Invoke(this, new ProgressArgs(TotalUpdates, TotalPercent, CurrentIndex, UpdatePercent, Info));
         }
 
-        protected void OnFinished(bool success, bool needReboot = false)
+        public class FinishedArgs : EventArgs
         {
-            Progress(this, new ProgressArgs(success, needReboot));
+            public FinishedArgs(bool success, bool needReboot = false, bool foundUpdates = false)
+            {
+                Success = success;
+                RebootNeeded = needReboot;
+                FoundUpdates = foundUpdates;
+            }
+
+            public bool Success = false;
+            public bool FoundUpdates = false;
+            public bool RebootNeeded = false;
+        }
+        public event EventHandler<FinishedArgs> Finished;
+
+        protected void OnFinished(bool success, bool needReboot = false, bool foundUpdates = false)
+        {
+            mCurOperation = AgentOperation.None;
+
+            Finished?.Invoke(this, new FinishedArgs(success, needReboot, foundUpdates));
         }
 
         class UpdateCallback : ISearchCompletedCallback, IDownloadProgressChangedCallback, IDownloadCompletedCallback, IInstallationProgressChangedCallback, IInstallationCompletedCallback
         {
             private WuAgent agent;
-            public bool Install = false;
 
             public UpdateCallback(WuAgent agent)
             {
@@ -689,7 +792,7 @@ namespace wumgr
                 // !!! warning this function is invoced from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnProgress(downloadJob.Updates.Count, callbackArgs.Progress.PercentComplete, callbackArgs.Progress.CurrentUpdateIndex + 1,
-                        downloadJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title, callbackArgs.Progress.CurrentUpdatePercentComplete);
+                        callbackArgs.Progress.CurrentUpdatePercentComplete, downloadJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title);
                 }));
             }
 
@@ -698,7 +801,7 @@ namespace wumgr
             {
                 // !!! warning this function is invoced from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
-                    agent.OnUpdatesDownloaded(downloadJob, Install);
+                    agent.OnUpdatesDownloaded(downloadJob);
                 }));
             }
 
@@ -708,7 +811,7 @@ namespace wumgr
                 // !!! warning this function is invoced from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnProgress(installationJob.Updates.Count, callbackArgs.Progress.PercentComplete, callbackArgs.Progress.CurrentUpdateIndex + 1,
-                        installationJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title, callbackArgs.Progress.CurrentUpdatePercentComplete);
+                        callbackArgs.Progress.CurrentUpdatePercentComplete, installationJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title);
                 }));
             }
 
@@ -717,32 +820,8 @@ namespace wumgr
             {
                 // !!! warning this function is invoced from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
-                    agent.OnInstalationCompleted(installationJob, Install);
+                    agent.OnInstalationCompleted(installationJob);
                 }));
-            }
-        }
-
-        static public bool safe_IsHidden(IUpdate update)
-        {
-            try
-            {
-                return update.IsHidden;
-            }
-            catch (Exception err)
-            {
-                return false;
-            }
-        }
-
-        static public bool safe_IsDownloaded(IUpdate update)
-        {
-            try
-            {
-                return update.IsDownloaded;
-            }
-            catch (Exception err)
-            {
-                return false;
             }
         }
     }

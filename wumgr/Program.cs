@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -25,6 +26,8 @@ namespace wumgr
         public static string mVersion = "0.0";
         public static string mName = "Windows Update Manager";
         private static string nTaskName = "WuMgrNoUAC";
+        public static string appPath = "";
+        private static string mINIPath = "";
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
@@ -44,15 +47,21 @@ namespace wumgr
 
             Console.WriteLine("Starting...");
 
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
+
             AppLog Log = new AppLog();
+            AppLog.Line(Program.fmt("{0}, Version v{1} by David Xanatos", mName, mVersion));
+            AppLog.Line(Program.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
+
+            appPath = Path.GetDirectoryName(Application.ExecutablePath);
+
+            mINIPath = appPath + @"\wumgr.ini";
 
 #if DEBUG
             Test();
 #endif
-
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
 
             if (IsAdministrator() == false)
             {
@@ -70,15 +79,29 @@ namespace wumgr
                 return;
             }
 
-            Console.WriteLine("Alloc AppLog...");
-
             WuAgent Agent = new WuAgent();
 
-            Console.WriteLine("Alloc WuAgent...");
+            if (int.Parse(IniReadValue("OnStart", "EnableWuAuServ", "0")) != 0)
+                Agent.EnableWuAuServ(true);
+
+            string OnStart = IniReadValue("OnStart", "Exec", "");
+            if(OnStart.Length > 0)
+                Process.Start(OnStart);
+
+            Agent.Init();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new WuMgr());
+
+            Agent.UnInit();
+
+            string OnClose = IniReadValue("OnClose", "Exec", "");
+            if (OnClose.Length > 0)
+                Process.Start(OnClose);
+
+            if (int.Parse(IniReadValue("OnClose", "DisableWuAuServ", "0")) != 0)
+                Agent.EnableWuAuServ(false);
 
             for (int i = 0; i < Program.args.Length; i++)
             {
@@ -89,7 +112,23 @@ namespace wumgr
 
         static private void Test()
         {
-            return;
+            
+        }
+
+        [DllImport("kernel32")]
+        private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
+        public static void IniWriteValue(string Section, string Key, string Value)
+        {
+            WritePrivateProfileString(Section, Key, Value, mINIPath);
+        }
+
+        [DllImport("kernel32")]
+        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
+        public static string IniReadValue(string Section, string Key, string Default = "")
+        {
+            StringBuilder temp = new StringBuilder(1025);
+            int i = GetPrivateProfileString(Section, Key, Default, temp, 1025, mINIPath);
+            return temp.ToString();
         }
 
         private static bool IsAdministrator()
@@ -109,6 +148,39 @@ namespace wumgr
             return false;
         }
 
+        public static string GetArg(string name)
+        {
+            for (int i = 0; i < Program.args.Length; i++)
+            {
+                if (Program.args[i].Equals(name, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    string temp = Program.args[i + 1];
+                    if (temp.Length > 0 && temp[0] != '-')
+                        return temp;
+                    return "";
+                }
+            }
+            return null;
+        }
+
+        public static void AutoStart(bool enable)
+        {
+            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+            if (enable)
+            {
+                string value = "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " -tray";
+                subKey.SetValue("wumgr", value);
+            }
+            else
+                subKey.DeleteValue("wumgr", false);
+        }
+
+        public static bool IsAutoStart()
+        { 
+            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false);
+            return (subKey != null && subKey.GetValue("wumgr") != null);
+        }
+
         static public bool IsSkipUacRun()
         {
             try
@@ -119,7 +191,7 @@ namespace wumgr
                 IRegisteredTask task = folder.GetTask(nTaskName);
                 return task != null;
             }
-            catch (Exception err){}
+            catch {}
             return false;
         }
 
@@ -145,7 +217,7 @@ namespace wumgr
 
                     IExecAction action = (IExecAction)task.Actions.Create(_TASK_ACTION_TYPE.TASK_ACTION_EXEC);
                     action.Path = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    action.WorkingDirectory = Directory.GetCurrentDirectory();
+                    action.WorkingDirectory = appPath;
                     action.Arguments = "$(Arg0)";
 
                     IRegisteredTask registered_task = folder.RegisterTaskDefinition(nTaskName, task, (int)_TASK_CREATION.TASK_CREATE_OR_UPDATE, null, null, _TASK_LOGON_TYPE.TASK_LOGON_INTERACTIVE_TOKEN);

@@ -12,11 +12,41 @@ using BrightIdeasSoftware;
 using System.Collections;
 using Microsoft.Win32;
 using System.Security.AccessControl;
+using System.Runtime.InteropServices;
 
 namespace wumgr
 {
     public partial class WuMgr : Form
     {
+        public const Int32 WM_SYSCOMMAND = 0x112;
+        public const Int32 MF_BYPOSITION = 0x400;
+        public const Int32 MF_SEPARATOR = 0x800;
+        public const Int32 MYMENU_ABOUT = 1000;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+        [DllImport("user32.dll")]
+        private static extern bool InsertMenu(IntPtr hMenu, Int32 wPosition, Int32 wFlags, Int32 wIDNewItem, string lpNewItem);
+
+        protected override void WndProc(ref Message msg)
+        {
+            if (msg.Msg == WM_SYSCOMMAND)
+            {
+                switch (msg.WParam.ToInt32())
+                {
+                    case MYMENU_ABOUT: menuAbout_Click(); return;
+                }
+            }
+            base.WndProc(ref msg);
+        }
+
+        private void WuMgr_Load(object sender, EventArgs e)
+        {
+            IntPtr MenuHandle = GetSystemMenu(this.Handle, false);
+            InsertMenu(MenuHandle, 5, MF_BYPOSITION | MF_SEPARATOR, 0, string.Empty); // <-- Add a menu seperator
+            InsertMenu(MenuHandle, 6, MF_BYPOSITION, MYMENU_ABOUT, "&About");
+        }
+
         WuAgent agent;
 
         void LineLogger(object sender, AppLog.LogEventArgs args)
@@ -25,32 +55,36 @@ namespace wumgr
             logBox.ScrollToCaret();
         }
 
-        private string mWuGPO = @"SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate";
-        private string mWuKey = @"SOFTWARE\Xanatos\Windows Update Manager";
-
         private bool allowshowdisplay = true;
-
-        private TrayIcon mTray = null;
 
         protected override void SetVisibleCore(bool value)
         {
             base.SetVisibleCore(allowshowdisplay ? value : allowshowdisplay);
         }
 
+        private bool mSuspendUpdate = false;
+
         public WuMgr()
         {
-            Console.WriteLine("Alloc WuMgr...");
+            InitializeComponent();
+
+            notifyIcon1.ContextMenu = new System.Windows.Forms.ContextMenu();
+            MenuItem menuExit = new System.Windows.Forms.MenuItem();
+
+            menuExit.Index = 0;
+            menuExit.Text = "E&xit";
+            menuExit.Click += new System.EventHandler(menuExit_Click);
+
+            notifyIcon1.ContextMenu.MenuItems.AddRange(new MenuItem[] { menuExit });
+
+            //notifyIcon1.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            notifyIcon1.Text = Program.mName;
 
             if (Program.TestArg("-tray"))
             {
                 allowshowdisplay = false;
-
-                mTray = new TrayIcon();
-                mTray.CreateNotifyicon();
-                mTray.Action += TrayAction;
+                notifyIcon1.Visible = true;
             }
-
-            InitializeComponent();
 
             this.Text = Program.fmt("{0} by David Xanatos", Program.mName);
 
@@ -62,103 +96,94 @@ namespace wumgr
             toolTip.SetToolTip(btnUnInstall, "Uninstall");
             toolTip.SetToolTip(btnCancel, "Cancel");
 
+            btnSearch.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_available_updates_32, new Size(25, 25)));
+            btnInstall.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_software_installer_32, new Size(25, 25)));
+            btnDownload.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_downloading_updates_32, new Size(25, 25)));
+            btnUnInstall.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_trash_32, new Size(25, 25)));
+            btnHide.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_hide_32, new Size(25, 25)));
+            btnGetLink.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_link_32, new Size(25, 25)));
+            btnCancel.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_cancel_32, new Size(25, 25)));
+
             AppLog.Logger += LineLogger;
+
+            foreach (string line in AppLog.GetLog())
+                logBox.AppendText(line + Environment.NewLine);
+            logBox.ScrollToCaret();
+            
+
             agent = WuAgent.GetInstance();
-            agent.Found += FoundUpdates;
             agent.Progress += OnProgress;
+            agent.Finished += OnFinished;
 
-            Console.WriteLine("AppLog Init...");
-
-            agent.Init();
-
-            Console.WriteLine("WuAgent Init...");
+            if (!agent.IsActive())
+            {
+                if (MessageBox.Show("Windows Update Service is not available, try to start it?", Program.mName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    agent.EnableWuAuServ();
+                    agent.Init();
+                }
+            }
 
             updateView.ShowGroups = true;
             updateView.ShowItemCountOnGroups = true;
             updateView.AlwaysGroupByColumn = updateView.ColumnsInDisplayOrder[1];
             updateView.Sort();
-
-            Console.WriteLine("Listing update sources");
+            
 
             mSuspendUpdate = true;
-            Console.WriteLine("Loading GPO");
+            chkDrivers.CheckState = (CheckState)GPO.GetDriverAU();
+            int day, time;
+            dlPolMode.SelectedIndex = GPO.GetAU(out day, out time);
+            dlShDay.SelectedIndex = day; dlShTime.SelectedIndex = time;
+            chkBlockMS.CheckState = (CheckState)GPO.GetBlockMS();
+            chkAutoRun.Checked = Program.IsAutoStart();
+            chkNoUAC.Checked = Program.IsSkipUacRun();
 
+
+
+            chkOffline.Checked = int.Parse(GetConfig("Offline", "1")) != 0;
+            chkDownload.CheckState = (CheckState)int.Parse(GetConfig("Download", "2"));
+            chkManual.Checked = int.Parse(GetConfig("Manual", "0")) != 0;
+            chkOld.Checked = int.Parse(GetConfig("IncludeOld", "0")) != 0;
+            string source = GetConfig("Source", "Windows Update");
+
+            string Online = Program.GetArg("-online");
+            if (Online != null)
             {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, false);
-                object value_drv = subKey.GetValue("ExcludeWUDriversInQualityUpdate");
-
-                if (value_drv == null)
-                    chkDrivers.CheckState = CheckState.Indeterminate;
-                else if ((int)value_drv == 1)
-                    chkDrivers.CheckState = CheckState.Unchecked;
-                else if ((int)value_drv == 0)
-                    chkDrivers.CheckState = CheckState.Checked;
+                chkOffline.Checked = false;
+                if (Online.Length > 0)
+                    source = agent.GetServiceName(Online, true);
             }
 
+            string Offline = Program.GetArg("-offline");
+            if (Offline != null)
             {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", false);
-                object value_no = subKey.GetValue("NoAutoUpdate");
-                if (value_no == null || (int)value_no == 0)
-                {
-                    object value_au = subKey.GetValue("AUOptions");
-                    switch (value_au == null ? 0 : (int)value_au)
-                    {
-                        case 2:
-                            dlPolMode.SelectedIndex = 2;
-                            break;
-                        case 3:
-                            dlPolMode.SelectedIndex = 3;
-                            break;
-                        case 4:
-                            dlPolMode.SelectedIndex = 4;
-                            dlShDay.Enabled = dlShTime.Enabled = true;
-                            break;
-                        case 5:
-                            dlPolMode.SelectedIndex = 5;
-                            break;
-                    }
-                }
-                else
-                {
-                    dlPolMode.SelectedIndex = 1;
-                }
+                chkOffline.Checked = true;
 
-                object value_day = subKey.GetValue("ScheduledInstallDay");
-                if (value_day != null)
-                    dlShDay.SelectedIndex = (int)value_day;
-                object value_time = subKey.GetValue("ScheduledInstallTime");
-                if (value_time != null)
-                    dlShTime.SelectedIndex = (int)value_time;
+                if (Offline.Equals("download", StringComparison.CurrentCultureIgnoreCase))
+                    chkDownload.CheckState = CheckState.Checked;
+                else if (Offline.Equals("no_download", StringComparison.CurrentCultureIgnoreCase))
+                    chkDownload.CheckState = CheckState.Unchecked;
+                else if (Offline.Equals("download_new", StringComparison.CurrentCultureIgnoreCase))
+                    chkDownload.CheckState = CheckState.Indeterminate;
             }
 
-            {
-                var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false);
-                chkAutoRun.Checked = (subKey != null && subKey.GetValue("wumgr") != null);
+            if (Program.TestArg("-manual"))
+                chkManual.Checked = false;
 
-                chkNoUAC.Checked = Program.IsSkipUacRun();
+            LoadProviders(source);
+
+            chkMsUpd.Checked = agent.IsActive() && agent.TestService(WuAgent.MsUpdGUID);
+
+            if (GPO.IsRespected() == 0)
+            {
+                dlPolMode.Enabled = false;
+                //toolTip.SetToolTip(dlPolMode, "Windows 10 Pro and Home do not respect this GPO setting");
             }
 
-            {
-                var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
-                string source = subKey.GetValue("Source", "Windows Update").ToString();
-
-                for (int i = 0; i < agent.mServiceList.Count; i++)
-                {
-                    string service = agent.mServiceList[i];
-                    dlSource.Items.Add(service);
-                    if (service.Equals(source, StringComparison.CurrentCultureIgnoreCase))
-                        dlSource.SelectedIndex = i;
-                }
-
-                chkOffline.Checked = (int)subKey.GetValue("Offline", 1) != 0;
-                chkDownload.CheckState = (CheckState)subKey.GetValue("Download", 2);
-                chkOld.Checked = (int)subKey.GetValue("IncludeOld", 0) != 0;
-            }
             mSuspendUpdate = false;
-
-            Console.WriteLine("Updating Lists");
+            
             UpdateCounts();
-            Console.WriteLine("Loding List");
             SwitchList(UpdateLists.UpdateHistory);
 
             if (Program.TestArg("-update"))
@@ -169,44 +194,42 @@ namespace wumgr
                 aTimer.Tick += OnTimedEvent;
                 aTimer.Enabled = true;
             }
-
-            Console.WriteLine("Ready");
         }
 
         private void WuMgr_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (mTray != null)
-            {
-                mTray.DestroyNotifyicon();
-            }
 
-            agent.UnInit();
         }
 
-        void TrayAction(object sender, TrayIcon.TrayEventArgs args)
+        private void menuExit_Click(object Sender, EventArgs e)
         {
-            switch (args.Action)
+            Application.Exit();
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (allowshowdisplay)
             {
-                case TrayIcon.Actions.ToggleWindow:
-                    {
-                        if (allowshowdisplay)
-                        {
-                            allowshowdisplay = false;
-                            this.Hide();
-                        }
-                        else
-                        {
-                            allowshowdisplay = true;
-                            this.Show();
-                        }
-                        break;
-                    }
-                case TrayIcon.Actions.CloseApplication:
-                    {
-                        Application.Exit();
-                        break;
-                    }
+                allowshowdisplay = false;
+                this.Hide();
             }
+            else
+            {
+                allowshowdisplay = true;
+                this.Show();
+            }
+        }
+
+        private static void menuAbout_Click()
+        {
+            string About = "";
+            About += Program.fmt("Author: \tDavid Xanatos\r\n");
+            About += Program.fmt("Licence: \tGNU General Public License v3\r\n");
+            About += Program.fmt("Version: \t{0}\r\n", Program.mVersion);
+            About += "\r\n";
+            About += "Icons from: https://icons8.com/";
+
+            MessageBox.Show(About, Program.mName);
         }
 
         private static Timer aTimer = null;
@@ -215,36 +238,37 @@ namespace wumgr
         {
             aTimer.Stop();
             aTimer = null;
+            if (!agent.IsActive())
+                return;
             if (chkOffline.Checked)
                 agent.SearchForUpdates((int)chkDownload.CheckState, chkOld.Checked);
             else
                 agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
         }
 
-        void FoundUpdates(object sender, WuAgent.FoundUpdatesArgs args)
+        private void LoadProviders(string source = null)
         {
-            UpdateCounts();
-            SwitchList(UpdateLists.PendingUpdates);
+            dlSource.Items.Clear();
+            for (int i = 0; i < agent.mServiceList.Count; i++)
+            {
+                string service = agent.mServiceList[i];
+                dlSource.Items.Add(service);
+
+                if (source != null && service.Equals(source, StringComparison.CurrentCultureIgnoreCase))
+                    dlSource.SelectedIndex = i;
+            }
         }
 
         void UpdateCounts()
         {
             if (agent.mPendingUpdates != null)
-            {
                 btnWinUpd.Text = Program.fmt("Windows Update ({0})", agent.mPendingUpdates.Count);
-            }
             if (agent.mInstalledUpdates != null)
-            {
                 btnInstalled.Text = Program.fmt("Installed Updates ({0})", agent.mInstalledUpdates.Count);
-            }
             if (agent.mHiddenUpdates != null)
-            {
                 btnHidden.Text = Program.fmt("Hidden Updates ({0})", agent.mHiddenUpdates.Count);
-            }
             if (agent.mUpdateHistory != null)
-            {
                 btnHistory.Text = Program.fmt("Update History ({0})", agent.mUpdateHistory.Count);
-            }
         }
 
         void LoadList()
@@ -262,12 +286,12 @@ namespace wumgr
             }
         }
 
-        void LoadList(List<IUpdateHistoryEntry> List)
+        void LoadList(List<IUpdateHistoryEntry2> List)
         {
             if (List != null)
             {
                 List<Update> list = new List<Update>();
-                foreach (IUpdateHistoryEntry update in List)
+                foreach (IUpdateHistoryEntry2 update in List)
                 {
                     list.Add(new Update(update));
                 }
@@ -323,6 +347,24 @@ namespace wumgr
 
             CurrentList = List;
             LoadList();
+
+            UpdateState();
+        }
+
+        private void UpdateState()
+        {
+            bool busy = agent.IsBusy();
+            btnCancel.Visible = busy;
+            progTotal.Visible = busy;
+            lblStatus.Visible = busy;
+
+            bool enable = agent.IsActive() && !busy;
+            btnSearch.Enabled = enable;
+            btnDownload.Enabled = enable && (CurrentList == UpdateLists.PendingUpdates);
+            btnInstall.Enabled = enable && (CurrentList == UpdateLists.PendingUpdates);
+            btnUnInstall.Enabled = enable && (CurrentList == UpdateLists.InstaledUpdates);
+            btnHide.Enabled = enable && (CurrentList == UpdateLists.PendingUpdates || CurrentList == UpdateLists.HiddenUpdates);
+            btnGetLink.Enabled = CurrentList != UpdateLists.UpdateHistory;
         }
 
         private void btnWinUpd_CheckedChanged(object sender, EventArgs e)
@@ -342,6 +384,8 @@ namespace wumgr
 
         private void btnHistory_CheckedChanged(object sender, EventArgs e)
         {
+            if (!agent.IsActive())
+                return;
             agent.UpdateHistory();
             SwitchList(UpdateLists.UpdateHistory);
         }
@@ -349,6 +393,8 @@ namespace wumgr
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            if (!agent.IsActive() || agent.IsBusy())
+                return;
             if (chkOffline.Checked)
                 agent.SearchForUpdates((int)chkDownload.CheckState, chkOld.Checked);
             else
@@ -357,9 +403,11 @@ namespace wumgr
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
+            if (!agent.IsActive() || agent.IsBusy())
+                return;
             if (CurrentList == UpdateLists.PendingUpdates)
             {
-                if (chkOffline.Checked)
+                if (chkOffline.Checked && chkManual.Checked)
                     agent.DownloadUpdatesOffline(GetUpdates());
                 else
                     agent.DownloadUpdates(GetUpdates());
@@ -368,9 +416,11 @@ namespace wumgr
 
         private void btnInstall_Click(object sender, EventArgs e)
         {
+            if (!agent.IsActive() || agent.IsBusy())
+                return;
             if (CurrentList == UpdateLists.PendingUpdates)
             {
-                if (chkOffline.Checked)
+                if (chkOffline.Checked && chkManual.Checked)
                     agent.DownloadUpdatesOffline(GetUpdates(), true);
                 else
                     agent.DownloadUpdates(GetUpdates(), true);
@@ -379,12 +429,16 @@ namespace wumgr
 
         private void btnUnInstall_Click(object sender, EventArgs e)
         {
-            if(CurrentList == UpdateLists.InstaledUpdates)
+            if (!agent.IsActive() || agent.IsBusy())
+                return;
+            if (CurrentList == UpdateLists.InstaledUpdates)
                 agent.UnInstallUpdates(GetUpdates());
         }
 
         private void btnHide_Click(object sender, EventArgs e)
         {
+            if (!agent.IsActive() || agent.IsBusy())
+                return;
             switch (CurrentList)
             {
                 case UpdateLists.PendingUpdates: agent.HideUpdates(GetUpdates(), true); break;
@@ -420,10 +474,23 @@ namespace wumgr
 
         void OnProgress(object sender, WuAgent.ProgressArgs args)
         {
+            string Status = "";
+
+            switch(agent.CurOperation())
+            {
+                case WuAgent.AgentOperation.CheckingUpdates:    Status = "Checking for Updates"; break;
+                case WuAgent.AgentOperation.PreparingCheck:     Status = "Preparing Check"; break;
+                case WuAgent.AgentOperation.PreparingUpdates:
+                case WuAgent.AgentOperation.DownloadingUpdates: Status = "Downloading Updates"; break;
+                case WuAgent.AgentOperation.InstallingUpdates:  Status = "Installing Updates"; break;
+                case WuAgent.AgentOperation.RemoveingUpdtes:    Status = "Removing Updates"; break;
+            }
+
             if (args.TotalUpdates == -1)
             {
                 progTotal.Style = ProgressBarStyle.Marquee;
                 progTotal.MarqueeAnimationSpeed = 30;
+                Status += "...";
             }
             else
             {
@@ -431,161 +498,97 @@ namespace wumgr
                 progTotal.MarqueeAnimationSpeed = 0;
 
                 progTotal.Value = args.TotalPercent;
+
+                if(args.TotalUpdates > 1)
+                    Status += " " + args.CurrentIndex + "/" + args.TotalUpdates + " ";
+
+                //if (args.UpdatePercent != 0)
+                //    Status += " " + args.UpdatePercent + "%";
             }
+            lblStatus.Text = Status;
+            toolTip.SetToolTip(lblStatus, args.Info);
+
+            UpdateState();
+        }
+
+        void OnFinished(object sender, WuAgent.FinishedArgs args)
+        {
+            UpdateCounts();
+            UpdateState();
+            if (args.FoundUpdates)
+                SwitchList(UpdateLists.PendingUpdates);
+            lblStatus.Text = "";
+            toolTip.SetToolTip(lblStatus, "");
         }
 
         private void dlSource_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (mSuspendUpdate)
-                return;
-            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
-            subKey.SetValue("Source", dlSource.Text);
+            SetConfig("Source", dlSource.Text);
         }
 
         private void chkOffline_CheckedChanged(object sender, EventArgs e)
         {
             dlSource.Enabled = !chkOffline.Checked;
             chkDownload.Enabled = chkOffline.Checked;
+            chkManual.Enabled = chkOffline.Checked;
 
-            if (mSuspendUpdate)
-                return;
-            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
-            subKey.SetValue("Offline", chkOffline.Checked, RegistryValueKind.DWord);
+            SetConfig("Offline", chkOffline.Checked ? "1" : "0");
         }
 
         private void chkDownload_CheckStateChanged(object sender, EventArgs e)
         {
-            if (mSuspendUpdate)
-                return;
-            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
-            subKey.SetValue("Download", chkDownload.CheckState, RegistryValueKind.DWord);
+            SetConfig("Download", chkDownload.Checked ? "1" : "0");
         }
 
         private void chkOld_CheckedChanged(object sender, EventArgs e)
         {
-            if (mSuspendUpdate)
-                return;
-            var subKey = Registry.CurrentUser.CreateSubKey(mWuKey, true);
-            subKey.SetValue("IncludeOld", chkOld.Checked, RegistryValueKind.DWord);
+            SetConfig("IncludeOld", chkOld.Checked ? "1" : "0");
         }
-
-        private bool mSuspendUpdate = false;
 
         private void chkDrivers_CheckStateChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-            try
-            {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
-                switch (chkDrivers.CheckState)
-                {
-                    case CheckState.Unchecked:
-                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 1);
-                        break;
-                    case CheckState.Indeterminate:
-                        if (subKey.GetValue("ExcludeWUDriversInQualityUpdate") != null)
-                            subKey.DeleteValue("ExcludeWUDriversInQualityUpdate");
-                        break;
-                    case CheckState.Checked:
-                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 0);
-                        break;
-                }
-            }
-            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}",err.ToString())); }
+            GPO.ConfigDriverAU((int)chkDrivers.CheckState);
         }
 
         private void dlPolMode_SelectedIndexChanged(object sender, EventArgs e)
         {
+            dlShDay.Enabled = dlShTime.Enabled = dlPolMode.SelectedIndex == 4;
+
             if (mSuspendUpdate)
                 return;
-            try
-            {
-                dlShDay.Enabled = dlShTime.Enabled = dlPolMode.SelectedIndex == 4;
-
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-                switch (dlPolMode.SelectedIndex)
-                {
-                case 0: //Automatic(default)
-                    if (subKey.GetValue("NoAutoUpdate") != null)
-                        subKey.DeleteValue("NoAutoUpdate");
-                    if (subKey.GetValue("AUOptions") != null)
-                        subKey.DeleteValue("AUOptions");
-                    break;
-                case 1: //Disabled
-                    subKey.SetValue("NoAutoUpdate", 1);
-                    if(subKey.GetValue("AUOptions") != null)
-                        subKey.DeleteValue("AUOptions");
-                    break;
-                case 2: //Notification only
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 2);
-                    break;
-                case 3: //Download only
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 3);
-                    break;
-                case 4: //Scheduled Installation
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 4);
-
-                    subKey.SetValue("ScheduledInstallDay", dlShDay.SelectedIndex);
-                    subKey.SetValue("ScheduledInstallTime", dlShTime.SelectedIndex);
-                    break;
-                case 5: //Managed by Admin
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 5);
-                    break;
-                }
-
-                if (dlPolMode.SelectedIndex != 4)
-                {
-                    if (subKey.GetValue("ScheduledInstallDay") != null)
-                        subKey.DeleteValue("ScheduledInstallDay");
-                    if (subKey.GetValue("ScheduledInstallTime") != null)
-                        subKey.DeleteValue("ScheduledInstallTime");
-                }
-            }
-            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+            GPO.ConfigAU(dlPolMode.SelectedIndex, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+            CheckAndHideUpdatePage();
         }
 
         private void dlShDay_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-            try
-            {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-                subKey.SetValue("ScheduledInstallDay", dlShDay.SelectedIndex);
-            }
-            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+            GPO.ConfigAU(4, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
         }
 
         private void dlShTime_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-            try
-            {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-                subKey.SetValue("ScheduledInstallTime", dlShTime.SelectedIndex);
-            }
-            catch (Exception err) { AppLog.Line(Program.fmt("Error: {0}", err.ToString())); }
+            GPO.ConfigAU(4, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+        }
+
+        private void chkBlockMS_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            GPO.BlockMS(chkBlockMS.Checked);
+            CheckAndHideUpdatePage();
         }
 
         private void chkAutoRun_CheckedChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-
-            var subKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-            if (chkAutoRun.Checked)
-            {
-                string value = "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"" + " -tray";
-                subKey.SetValue("wumgr", value);
-            }
-            else if (subKey.GetValue("wumgr") != null)
-                subKey.DeleteValue("wumgr");
+            Program.AutoStart(chkAutoRun.Checked);
         }
 
         private void chkNoUAC_CheckedChanged(object sender, EventArgs e)
@@ -593,6 +596,41 @@ namespace wumgr
             if (mSuspendUpdate)
                 return;
             Program.SkipUacEnable(chkNoUAC.Checked);
+        }
+
+        private void chkMsUpd_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            string source = dlSource.Text;
+            agent.EnableService(WuAgent.MsUpdGUID, chkMsUpd.Checked);
+            LoadProviders(source);
+        }
+
+        private void chkManual_CheckedChanged(object sender, EventArgs e)
+        {
+            SetConfig("Manual", chkManual.Checked ? "1" : "0");
+        }
+
+        private void CheckAndHideUpdatePage()
+        {
+            GPO.HideUpdatePage(chkBlockMS.Checked || dlPolMode.SelectedIndex == 1);
+        }
+
+        public string GetConfig(string name, string def = "")
+        {
+            return Program.IniReadValue("Options", name, def);
+            //var subKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Xanatos\Windows Update Manager", true);
+            //return subKey.GetValue(name, def).ToString();
+        }
+
+        public void SetConfig(string name, string value)
+        {
+            if (mSuspendUpdate)
+                return;
+            Program.IniWriteValue("Options", name, value.ToString());
+            //var subKey = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Xanatos\Windows Update Manager", true);
+            //subKey.SetValue(name, value);
         }
     }
 
@@ -606,80 +644,74 @@ namespace wumgr
             Entry = update;
 
             Title = update.Title;
-            Category = GetCategory(update);
+            Category = GetCategory(update.Categories);
             Description = update.Description;
             Size = GetSizeStr(update);
             Date = update.LastDeploymentChangeTime.ToString("dd.MM.yyyy");
             KB = GetKB(update);
 
-            try
-            {
-                if (update.IsBeta)
-                    State = "Beta ";
+            if (update.IsBeta)
+                State = "Beta ";
 
-                if (update.IsInstalled)
-                {
-                    State += "Installed";
-                    if (update.IsUninstallable)
-                        State += " Removable";
-                }
-                else if (WuAgent.safe_IsHidden(update))
-                {
-                    State += "Hidden";
-                    if (WuAgent.safe_IsDownloaded(update))
-                        State += " Downloaded";
-                }
-                else
-                {
-                    if (WuAgent.safe_IsDownloaded(update))
-                        State += "Downloaded";
-                    else
-                        State += "Pending";
-                    if (update.AutoSelectOnWebSites) //update.DeploymentAction
-                        State += " (!)";
-                    if (update.IsMandatory)
-                        State += " Manatory";
-                }
+            if (update.IsInstalled)
+            {
+                State += "Installed";
+                if (update.IsUninstallable)
+                    State += " Removable";
             }
-            catch (Exception err) {}
+            else if (update.IsHidden)
+            {
+                State += "Hidden";
+                if (update.IsDownloaded)
+                    State += " Downloaded";
+            }
+            else
+            {
+                if (update.IsDownloaded)
+                    State += "Downloaded";
+                else
+                    State += "Pending";
+                if (update.AutoSelectOnWebSites) //update.DeploymentAction
+                    State += " (!)";
+                if (update.IsMandatory)
+                    State += " Manatory";
+            }
         }
 
-        public Update(IUpdateHistoryEntry update)
+        public Update(IUpdateHistoryEntry2 update)
         {
             Title = update.Title;
+            Category = GetCategory(update.Categories);
             Description = update.Description;
-            Date = update.Date.ToString();
+            Date = update.Date.ToString("dd.MM.yyyy");
+            switch (update.ResultCode)
+            {
+                case OperationResultCode.orcNotStarted: State = "Not Started"; break;
+                case OperationResultCode.orcInProgress: State = "In Progress"; break;
+                case OperationResultCode.orcSucceeded: State = "Succeeded"; break;
+                case OperationResultCode.orcSucceededWithErrors: State = "Succeeded with Errors"; break;
+                case OperationResultCode.orcFailed: State = "Failed"; break;
+                case OperationResultCode.orcAborted: State = "Aborted"; break;
+            }
+            State += " (0x" + String.Format("{0:X8}", update.HResult) + ")";
         }
 
-        string GetCategory(IUpdate update)
+        string GetCategory(ICategoryCollection cats)
         {
-            try
+            string category = "";
+            foreach (ICategory cat in cats)
             {
-                /*string category = "";
-                foreach (ICategory cat in cats)
-                {
-                    if (category.Length > 0)
-                        category += "; ";
-                    category += cat.Name;
-                }
-                return category;*/
-                return update.Categories.Count > 0 ? update.Categories[0].Name : "Unknown";
+                if (category.Length > 0)
+                    category += "; ";
+                category += cat.Name;
             }
-            catch (Exception err) {
-                return "";
-            }
+            return category;
+            //return update.Categories.Count > 0 ? update.Categories[0].Name : "Unknown";
         }
 
         string GetKB(IUpdate update)
         {
-            try
-            {
-                return update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "KBUnknown";
-            }
-            catch (Exception err)
-            {
-                return "";
-            }
+             return update.KBArticleIDs.Count > 0 ? "KB" + update.KBArticleIDs[0] : "KBUnknown";
         }
 
         string GetSizeStr(IUpdate update)

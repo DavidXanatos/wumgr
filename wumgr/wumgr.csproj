@@ -59,6 +59,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -72,7 +73,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppLog.cs" />
-    <Compile Include="TrayIcon.cs" />
+    <Compile Include="GPO.cs" />
+    <Compile Include="ServiceHelper.cs" />
     <Compile Include="WebDownloader.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -137,12 +139,32 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
-      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
-      <Name>ObjectListView2012</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="res\icons8-add-database-32.png" />
+    <None Include="res\icons8-available-updates-32.png" />
+    <None Include="res\icons8-cancel-32.png" />
+    <None Include="res\icons8-checkmark-32.png" />
+    <None Include="res\icons8-delete-32.png" />
+    <None Include="res\icons8-delete-database-32.png" />
+    <None Include="res\icons8-delete-shield-32.png" />
+    <None Include="res\icons8-device-manager-32.png" />
+    <None Include="res\icons8-downloading-updates-32.png" />
+    <None Include="res\icons8-exit-without-update-32.png" />
+    <None Include="res\icons8-hide-32.png" />
+    <None Include="res\icons8-installing-updates-32.png" />
+    <None Include="res\icons8-link-32.png" />
+    <None Include="res\icons8-refresh-32.png" />
+    <None Include="res\icons8-registry-editor-32.png" />
+    <None Include="res\icons8-restart-32.png" />
+    <None Include="res\icons8-software-installer-32.png" />
+    <None Include="res\icons8-trash-32.png" />
+    <None Include="res\icons8-uninstalling-updates-32.png" />
+    <None Include="res\icons8-update-32.png" />
+    <None Include="res\icons8-update-50.png" />
+    <None Include="res\icons8-exe-32.png" />
+    <None Include="res\icons8-maintenance-32.png" />
+    <None Include="res\icons8-settings-32.png" />
+    <None Include="res\icons8-eye-32.png" />
+    <None Include="res\icons8-invisible-32.png" />
     <Content Include="wu.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +178,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
+      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
+      <Name>ObjectListView2012</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

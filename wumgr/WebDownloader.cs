@@ -31,11 +31,22 @@ namespace wumgr
 
         protected override WebResponse GetWebResponse(WebRequest request, IAsyncResult result)
         {
-            WebResponse response = base.GetWebResponse(request, result);
-            mResponseUri = response.ResponseUri;
-            mNewUri = true;
-            return response;
+            LastException = null;
+            try
+            {
+                WebResponse response = base.GetWebResponse(request, result);
+                mResponseUri = response.ResponseUri;
+                mNewUri = true;
+                return response;
+            }
+            catch(Exception err) // note: thats a realy uggly workaround
+            {
+                LastException = err;
+                return null;
+            }
         }
+
+        public Exception LastException = null;
     }
 
     class WebDownloader
@@ -44,17 +55,20 @@ namespace wumgr
             public string Url;
             public string Path;
             public string FileName;
+            public bool Failed;
         }
+
+        private MyWebClient mWebClient = null;
+        private List<Task> mDownloads = null;
+        private int mCurrentTask = 0;
         private string mDownloadFileName = "";
         private string mDownloadPath = "";
-
-        MyWebClient mWebClient = null;
-        List<Task> mDownloads = null;
-        int mCurrentTask = 0;
 
         public WebDownloader()
         {
             mWebClient = new MyWebClient();
+            mWebClient.DownloadProgressChanged += wc_dlProgress;
+            mWebClient.DownloadFileCompleted += wd_Finish;
         }
 
         public bool Download(List<Task> Downloads)
@@ -67,6 +81,16 @@ namespace wumgr
 
             DownloadNextFile();
             return true;
+        }
+
+        public bool IsBusy()
+        {
+            return (mDownloads != null);
+        }
+
+        public void CancelOperations()
+        {
+            mWebClient.CancelAsync();
         }
 
         static public string GetNextTempFile(string path, string baseName)
@@ -82,37 +106,46 @@ namespace wumgr
 
         private void DownloadNextFile()
         {
-            if (mDownloads.Count > mCurrentTask)
+            while (mCurrentTask != -1 && mDownloads.Count > mCurrentTask)
             {
                 Task Download = mDownloads[mCurrentTask];
-
-                if (!Directory.Exists(Download.Path))
-                    Directory.CreateDirectory(Download.Path);
-
-                if (Download.FileName == null)
+                try
                 {
-                    mDownloadFileName = Path.GetFileName(Download.Url);
-                    if (mDownloadFileName.Length == 0 || mDownloadFileName[0] == '?')
-                        mDownloadFileName = GetNextTempFile(Download.Path, "Download");
+                    if (!Directory.Exists(Download.Path))
+                        Directory.CreateDirectory(Download.Path);
+
+                    if (Download.FileName == null)
+                    {
+                        mDownloadFileName = Path.GetFileName(Download.Url);
+                        if (mDownloadFileName.Length == 0 || mDownloadFileName[0] == '?')
+                            mDownloadFileName = GetNextTempFile(Download.Path, "Download");
+                    }
+                    else
+                        mDownloadFileName = Download.FileName;
+
+                    mDownloadPath = Download.Path + @"\" + mDownloadFileName + ".tmp";
+
+                    var fi = new FileInfo(mDownloadPath);
+
+                    if (fi.Exists)
+                        fi.Delete();
                 }
-                else
-                    mDownloadFileName = Download.FileName;
-
-                mDownloadPath = Download.Path + @"\" + mDownloadFileName + ".tmp";
-
-                var fi = new FileInfo(mDownloadPath);
-                // TODO: try catch
-                if (!fi.Exists)
-                    fi.Delete();
+                catch
+                {
+                    mCurrentTask++;
+                    Download.Failed = true;
+                    mDownloads[mCurrentTask] = Download;
+                    continue;
+                }
 
                 mWebClient.DownloadFileAsync(new Uri(Download.Url), mDownloadPath);
-                mWebClient.DownloadProgressChanged += wc_dlProgress;
-                mWebClient.DownloadFileCompleted += wd_Finish;
+                return;
             }
-            else
-            {
-                Finished?.Invoke(this, new FinishedEventArgs());
-            }
+
+            FinishedEventArgs args = new FinishedEventArgs();
+            args.Downloads = mDownloads;
+            mDownloads = null;
+            Finished?.Invoke(this, args);
         }
 
         void wc_dlProgress(object sender, DownloadProgressChangedEventArgs e)
@@ -129,42 +162,66 @@ namespace wumgr
                         mDownloadFileName = FileName;
                 }
             }
-            
-            // TODO: progress
+
+            Progress?.Invoke(this, new ProgressEventArgs(mDownloads.Count, mDownloads.Count == 0 ? 0 : (100 * mCurrentTask + e.ProgressPercentage) / mDownloads.Count, mCurrentTask, e.ProgressPercentage));
         }
 
         void wd_Finish(object sender, AsyncCompletedEventArgs args)
         {
+            Task Download = mDownloads[mCurrentTask];
             if (args.Error != null || args.Cancelled)
             {
-                mWebClient = null;
-                if (args.Error != null)
+                var fi = new FileInfo(Download.Path + @"\" + mDownloadFileName);
+                try { fi.Delete(); } catch { } // delete partial file
+                if (!args.Cancelled)
                 {
-                    // TODO: add more info
-                    AppLog.Line(Program.fmt("Download failed: {0}", args.Error.ToString()));
+                    AppLog.Line(Program.fmt("Download failed: {0}", (mWebClient.LastException != null ? mWebClient.LastException : args.Error).ToString()));
+                    Download.Failed = true;
                 }
             }
             else
             {
-                Task Download = mDownloads[mCurrentTask];
-
                 var fi = new FileInfo(Download.Path + @"\" + mDownloadFileName);
-                if (fi.Exists)
+                try
                 {
-                    // TODO: try catch
-                    fi.Delete();
+                    if (fi.Exists)
+                        fi.Delete();
+                    var tfi = new FileInfo(mDownloadPath);
+                    tfi.MoveTo(Download.Path + @"\" + mDownloadFileName);
+
+                    Download.FileName = mDownloadFileName;
                 }
+                catch
+                {
+                    AppLog.Line(Program.fmt("Failed to rename download {0} to {1}", mDownloadPath, mDownloadFileName));
 
-                var tfi = new FileInfo(mDownloadPath);
-                // TODO: try catch
-                tfi.MoveTo(Download.Path + @"\" + mDownloadFileName);
+                    Download.FileName = mDownloadFileName + ".tmp";
+                }
             }
+            mDownloads[mCurrentTask] = Download;
 
-            mCurrentTask++;
+            if(args.Cancelled)
+                mCurrentTask = -1;
+            else
+                mCurrentTask++;
             DownloadNextFile();
         }
 
-        public class FinishedEventArgs : EventArgs {}
+        public class FinishedEventArgs : EventArgs
+        {
+            public List<Task> Downloads;
+            public bool Success
+            {
+                get {
+                    foreach (Task task in Downloads)
+                    {
+                        if (task.Failed)
+                            return false;
+                    }
+                    return true;
+                }
+            }
+        }
         public event EventHandler<FinishedEventArgs> Finished;
 
         public class ProgressEventArgs : EventArgs
