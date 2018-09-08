@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4] - 2018-09-08
+### Added
+- option to register and unregister microsoft update
+- added commandline option -offline [download|no_download|download_new]
+- added commandline option -online [serviceID]
+- added GPO to block connections to M$ update servers on pro/home SKU's based on the "Windows Restricted Traffic Limited Functionality Baseline"
+- added check to switch between "manual" download/instalation (that is done by WuMgr without using windows update facilities) and the usage of wuauserv
+- added propepr icons
+- automatically hiding the windows update page when update is disabled or access to M$ servers restricted
+- added about dialog
+- added configuration ini file
+
+### Changed
+- improved applog
+- improved agent events
+- fixed category and state display for history
+- unifyed catalog cab and update download
+- improved custom update downloader
+
 ## [0.3] - 2018-09-02
 ### Added
 - System tray Icon
