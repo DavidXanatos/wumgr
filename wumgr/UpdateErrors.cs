@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace wumgr
 {
-    static class WinErrors
+    static class UpdateErrors
     {
         static public string GetErrorStr(uint id)
         {

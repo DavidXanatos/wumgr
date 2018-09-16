@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -47,7 +47,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -72,14 +72,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppLog.cs" />
+    <Compile Include="Common\HttpTask.cs" />
+    <Compile Include="Common\FileOps.cs" />
+    <Compile Include="Common\AppLog.cs" />
+    <Compile Include="Common\MultiValueDictionary.cs" />
     <Compile Include="GPO.cs" />
-    <Compile Include="ServiceHelper.cs" />
-    <Compile Include="WebDownloader.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="WinConsole.cs" />
-    <Compile Include="WinErrors.cs" />
+    <Compile Include="Common\MiscFunc.cs" />
+    <Compile Include="Common\ServiceHelper.cs" />
+    <Compile Include="MsUpdate.cs" />
+    <Compile Include="UpdateDownloader.cs" />
+    <Compile Include="Common\WinConsole.cs" />
+    <Compile Include="UpdateErrors.cs" />
+    <Compile Include="UpdateInstaller.cs" />
     <Compile Include="WuAgent.cs" />
     <Compile Include="WuMgr.cs">
       <SubType>Form</SubType>

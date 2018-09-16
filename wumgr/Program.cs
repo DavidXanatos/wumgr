@@ -11,16 +11,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TaskScheduler;
+using System.Collections.Specialized;
 
 namespace wumgr
 {
     static class Program
     {
-        public static String fmt(string str, params object[] args)
-        {
-            return string.Format(str, args);
-        }
-
         public static string[] args = null;
         public static bool mConsole = false;
         public static string mVersion = "0.0";
@@ -28,6 +24,20 @@ namespace wumgr
         private static string nTaskName = "WuMgrNoUAC";
         public static string appPath = "";
         private static string mINIPath = "";
+        public static WuAgent Agent = null;
+
+        public const Int32 WM_USER = 0x0400;
+        public const Int32 WM_APP = 0x0800; // to 0xBFFF
+        [DllImport("user32.dll")]
+        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string lpClassName, String lpWindowName);
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern int SendMessageTimeout(IntPtr windowHandle, uint Msg, IntPtr wParam, IntPtr lParam, uint flags, uint timeout, out IntPtr result);
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
@@ -52,12 +62,44 @@ namespace wumgr
             mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
 
             AppLog Log = new AppLog();
-            AppLog.Line(Program.fmt("{0}, Version v{1} by David Xanatos", mName, mVersion));
-            AppLog.Line(Program.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
+            AppLog.Line(MiscFunc.fmt("{0}, Version v{1} by David Xanatos", mName, mVersion));
+            AppLog.Line(MiscFunc.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
 
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
 
+            Process current = Process.GetCurrentProcess();
+            foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+            {
+                if (process.Id != current.Id)
+                {
+                    AppLog.Line(MiscFunc.fmt("Application is already running. Only one instance of this application is allowed"));
+                    //IntPtr WindowToFind = FindWindow(null, Program.mName);
+                    IntPtr result = IntPtr.Zero;
+                    if (SendMessageTimeout(process.MainWindowHandle, WM_APP, IntPtr.Zero, IntPtr.Zero, 0, 3000, out result) == 0)
+                    {
+                        MessageBox.Show(MiscFunc.fmt("Application is already running, but not responding.\r\nClose it using a task manager and restart."));
+                    }
+                    //SetForegroundWindow(process.MainWindowHandle);
+                    return;
+                }
+            }
+
+
             mINIPath = appPath + @"\wumgr.ini";
+
+            /*switch(FileOps.TestFileAdminSec(mINIPath))
+            {
+                case 0:
+                    AppLog.Line(MiscFunc.fmt("Warning wumgr.ini was writable by non administrative users, it was renamed to wumgr.ini.old and replaced with a empty one.\r\n"));
+                    if (!FileOps.MoveFile(mINIPath, mINIPath + ".old", true))
+                        return;
+                    goto case 2;
+                case 2: // file missing, create
+                    FileOps.SetFileAdminSec(mINIPath);
+                    break;
+                case 1: // every thign's fine ini file is only writable by admins
+                    break;
+            }*/
 
 #if DEBUG
             Test();
@@ -79,14 +121,9 @@ namespace wumgr
                 return;
             }
 
-            WuAgent Agent = new WuAgent();
+            Agent = new WuAgent();
 
-            if (int.Parse(IniReadValue("OnStart", "EnableWuAuServ", "0")) != 0)
-                Agent.EnableWuAuServ(true);
-
-            string OnStart = IniReadValue("OnStart", "Exec", "");
-            if(OnStart.Length > 0)
-                Process.Start(OnStart);
+            ExecOnStart();
 
             Agent.Init();
 
@@ -96,17 +133,45 @@ namespace wumgr
 
             Agent.UnInit();
 
+            ExecOnClose();
+        }
+
+        static private void ExecOnStart()
+        {
+            if (int.Parse(IniReadValue("OnStart", "EnableWuAuServ", "0")) != 0)
+                Agent.EnableWuAuServ(true);
+
+            string OnStart = IniReadValue("OnStart", "Exec", "");
+            if (OnStart.Length > 0)
+            {
+                Process proc = Process.Start(OnStart);
+                proc.WaitForExit();
+            }
+        }
+
+        static private void ExecOnClose()
+        {
             string OnClose = IniReadValue("OnClose", "Exec", "");
             if (OnClose.Length > 0)
-                Process.Start(OnClose);
+            {
+                Process proc = Process.Start(OnClose);
+                proc.WaitForExit();
+            }
 
             if (int.Parse(IniReadValue("OnClose", "DisableWuAuServ", "0")) != 0)
                 Agent.EnableWuAuServ(false);
 
-            for (int i = 0; i < Program.args.Length; i++)
+            // Note: With the UAC bypass the onclose parameter can be used for a local privilege escalation exploit
+            if (!TestArg("-NoUAC"))
             {
-                if (Program.args[i].Equals("-onclose", StringComparison.CurrentCultureIgnoreCase))
-                    Process.Start(Program.args[++i]);
+                for (int i = 0; i < Program.args.Length; i++)
+                {
+                    if (Program.args[i].Equals("-onclose", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        Process proc = Process.Start(Program.args[++i]);
+                        proc.WaitForExit();
+                    }
+                }
             }
         }
 
@@ -117,18 +182,25 @@ namespace wumgr
 
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
-        public static void IniWriteValue(string Section, string Key, string Value)
+        public static void IniWriteValue(string Section, string Key, string Value, string INIPath = null)
         {
-            WritePrivateProfileString(Section, Key, Value, mINIPath);
+            WritePrivateProfileString(Section, Key, Value, INIPath != null ? INIPath : mINIPath);
         }
 
         [DllImport("kernel32")]
-        private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
-        public static string IniReadValue(string Section, string Key, string Default = "")
+        private static extern int GetPrivateProfileString(string section, string key, string def, [In, Out] char[] retVal, int size, string filePath);
+        public static string IniReadValue(string Section, string Key, string Default = "", string INIPath = null)
         {
-            StringBuilder temp = new StringBuilder(1025);
-            int i = GetPrivateProfileString(Section, Key, Default, temp, 1025, mINIPath);
-            return temp.ToString();
+            char[] chars = new char[8193];
+            int size = GetPrivateProfileString(Section, Key, Default, chars, 8193, INIPath != null ? INIPath : mINIPath);
+            return new String(chars, 0, size);
+        }
+
+        public static string[] IniEnumSections(string INIPath = null)
+        {
+            char[] chars = new char[8193];
+            int size = GetPrivateProfileString(null, null, null, chars, 8193, INIPath != null ? INIPath : mINIPath);
+            return new String(chars, 0, size).Split('\0');
         }
 
         private static bool IsAdministrator()
@@ -218,7 +290,7 @@ namespace wumgr
                     IExecAction action = (IExecAction)task.Actions.Create(_TASK_ACTION_TYPE.TASK_ACTION_EXEC);
                     action.Path = System.Reflection.Assembly.GetExecutingAssembly().Location;
                     action.WorkingDirectory = appPath;
-                    action.Arguments = "$(Arg0)";
+                    action.Arguments = "-NoUAC $(Arg0)";
 
                     IRegisteredTask registered_task = folder.RegisterTaskDefinition(nTaskName, task, (int)_TASK_CREATION.TASK_CREATE_OR_UPDATE, null, null, _TASK_LOGON_TYPE.TASK_LOGON_INTERACTIVE_TOKEN);
 
@@ -232,7 +304,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(Program.fmt("SkipUacEnable Error {0}", err.ToString()));
+                AppLog.Line(MiscFunc.fmt("SkipUacEnable Error {0}", err.ToString()));
                 return false;
             }
         }
@@ -269,7 +341,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(Program.fmt("SkipUacRun Error {0}", err.ToString()));
+                AppLog.Line(MiscFunc.fmt("SkipUacRun Error {0}", err.ToString()));
             }
             return false;
         }
