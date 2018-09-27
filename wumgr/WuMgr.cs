@@ -119,7 +119,7 @@ namespace wumgr
                 notifyIcon.Visible = true;
             }
 
-            this.Text = MiscFunc.fmt("{0} by David Xanatos", Program.mName);
+            //this.Text = MiscFunc.fmt("{0} by David Xanatos", Program.mName);
 
             toolTip.SetToolTip(btnSearch, "Search");
             toolTip.SetToolTip(btnInstall, "Install");

@@ -793,7 +793,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "WuMgr";
-            this.Text = "Windows Update Manager";
+            this.Text = "Update Manager for Windows";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WuMgr_FormClosing);
             this.Load += new System.EventHandler(this.WuMgr_Load);
             this.tableLayoutPanel3.ResumeLayout(false);

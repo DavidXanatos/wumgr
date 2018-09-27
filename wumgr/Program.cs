@@ -20,7 +20,7 @@ namespace wumgr
         public static string[] args = null;
         public static bool mConsole = false;
         public static string mVersion = "0.0";
-        public static string mName = "Windows Update Manager";
+        public static string mName = "Update Manager for Windows";
         private static string nTaskName = "WuMgrNoUAC";
         public static string appPath = "";
         private static string mINIPath = "";
@@ -67,20 +67,23 @@ namespace wumgr
 
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
 
-            Process current = Process.GetCurrentProcess();
-            foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+            if (!TestArg("-NoUAC"))
             {
-                if (process.Id != current.Id)
+                Process current = Process.GetCurrentProcess();
+                foreach (Process process in Process.GetProcessesByName(current.ProcessName))
                 {
-                    AppLog.Line(MiscFunc.fmt("Application is already running. Only one instance of this application is allowed"));
-                    //IntPtr WindowToFind = FindWindow(null, Program.mName);
-                    IntPtr result = IntPtr.Zero;
-                    if (SendMessageTimeout(process.MainWindowHandle, WM_APP, IntPtr.Zero, IntPtr.Zero, 0, 3000, out result) == 0)
+                    if (process.Id != current.Id)
                     {
-                        MessageBox.Show(MiscFunc.fmt("Application is already running, but not responding.\r\nClose it using a task manager and restart."));
+                        AppLog.Line(MiscFunc.fmt("Application is already running. Only one instance of this application is allowed"));
+                        //IntPtr WindowToFind = FindWindow(null, Program.mName);
+                        IntPtr result = IntPtr.Zero;
+                        if (SendMessageTimeout(process.MainWindowHandle, WM_APP, IntPtr.Zero, IntPtr.Zero, 0, 3000, out result) == 0)
+                        {
+                            MessageBox.Show(MiscFunc.fmt("Application is already running, but not responding.\r\nClose it using a task manager and restart."));
+                        }
+                        //SetForegroundWindow(process.MainWindowHandle);
+                        return;
                     }
-                    //SetForegroundWindow(process.MainWindowHandle);
-                    return;
                 }
             }
 
@@ -110,12 +113,13 @@ namespace wumgr
                 Console.WriteLine("Trying to get admin privilegs...");
                 if (!SkipUacRun())
                 {
+                    MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs.\r\nPlease restart the application as Administrator.\r\n\r\nYou can use the option Start->'Bypass User Account Control' to solve this issue for future startsups.", mName), mName);
                     // Restart program and run as admin
-                    var exeName = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    /*var exeName = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                     string arguments = "\"" + string.Join("\" \"", args) + "\"";
                     ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
                     startInfo.Verb = "runas";
-                    System.Diagnostics.Process.Start(startInfo);
+                    System.Diagnostics.Process.Start(startInfo);*/
                 }
                 Application.Exit();
                 return;
