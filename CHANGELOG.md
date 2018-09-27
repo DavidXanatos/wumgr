@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5] - 2018-09-16
+### Added
+- wumgr.ini is restricted to be writeble only by administrators
+- added better download system, now server date is checked and files get downloaded only if there are newer ont he server
+- automatic check for updates
+- added support url label
+- added customizable tools menu tin better integrate 3rd aprty tools, accessible from tray and the window system menu.
+- added update cache such to remembet the last state between application restarts
+
+### Changed
+- UAC bypass implementation to prevent possible privilege escalation
+- Cleanuped the code base
+- auto start option is now called run in background, when closing the window ehen in that mode the application sontinues to run in tray
+
+### Fixed
+- fixed size display for kb sized patches
+- auto update issue introduced in 0.4
+- update list not updating when updates were installed/uninstalled/etc
+- two instances cant longer be started at once
+
 ## [0.4] - 2018-09-08
 ### Added
 - option to register and unregister microsoft update
