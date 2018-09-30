@@ -84,7 +84,7 @@ namespace wumgr
             else if (ext.Equals(".cab", StringComparison.CurrentCultureIgnoreCase))
                 ;
             else
-                AppLog.Line(MiscFunc.fmt("Unknown Update format: {0}", ext));
+                AppLog.Line("Unknown Update format: {0}", ext);
             // TODO do install
 
             mDispatcher.BeginInvoke(new Action(() => {

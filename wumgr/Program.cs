@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TaskScheduler;
 using System.Collections.Specialized;
+using System.Collections.Concurrent;
 
 namespace wumgr
 {
@@ -25,19 +26,7 @@ namespace wumgr
         public static string appPath = "";
         private static string mINIPath = "";
         public static WuAgent Agent = null;
-
-        public const Int32 WM_USER = 0x0400;
-        public const Int32 WM_APP = 0x0800; // to 0xBFFF
-        [DllImport("user32.dll")]
-        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-        [DllImport("user32.dll")]
-        public static extern IntPtr FindWindow(string lpClassName, String lpWindowName);
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
-        [DllImport("user32.dll")]
-        public static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        public static extern int SendMessageTimeout(IntPtr windowHandle, uint Msg, IntPtr wParam, IntPtr lParam, uint flags, uint timeout, out IntPtr result);
+        public static PipeIPC ipc = null;
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
@@ -55,64 +44,42 @@ namespace wumgr
                 return;
             }
 
+            if (TestArg("-dbg_wait"))
+                MessageBox.Show("Waiting for debugger. (press ok when attached)");
+
             Console.WriteLine("Starting...");
 
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
+            if (fvi.FileBuildPart != 0)
+                mVersion += (char)('a' + (fvi.FileBuildPart - 1));
 
             AppLog Log = new AppLog();
-            AppLog.Line(MiscFunc.fmt("{0}, Version v{1} by David Xanatos", mName, mVersion));
-            AppLog.Line(MiscFunc.fmt("This Tool is Open Source under the GNU General Public License, Version 3\r\n"));
+            AppLog.Line("{0}, Version v{1} by David Xanatos", mName, mVersion);
+            AppLog.Line("This Tool is Open Source under the GNU General Public License, Version 3\r\n");
 
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
 
-            if (!TestArg("-NoUAC"))
+            ipc = new PipeIPC("wumgr_pipe");
+
+            var client = ipc.Connect(100);
+            if (client != null)
             {
-                Process current = Process.GetCurrentProcess();
-                foreach (Process process in Process.GetProcessesByName(current.ProcessName))
-                {
-                    if (process.Id != current.Id)
-                    {
-                        AppLog.Line(MiscFunc.fmt("Application is already running. Only one instance of this application is allowed"));
-                        //IntPtr WindowToFind = FindWindow(null, Program.mName);
-                        IntPtr result = IntPtr.Zero;
-                        if (SendMessageTimeout(process.MainWindowHandle, WM_APP, IntPtr.Zero, IntPtr.Zero, 0, 3000, out result) == 0)
-                        {
-                            MessageBox.Show(MiscFunc.fmt("Application is already running, but not responding.\r\nClose it using a task manager and restart."));
-                        }
-                        //SetForegroundWindow(process.MainWindowHandle);
-                        return;
-                    }
-                }
+                AppLog.Line("Application is already running.");
+                client.Send("show");
+                string ret = client.Read(1000);
+                if(!ret.Equals("ok", StringComparison.CurrentCultureIgnoreCase))
+                    MessageBox.Show(MiscFunc.fmt("Application is already running."));
+                return;
             }
-
-
-            mINIPath = appPath + @"\wumgr.ini";
-
-            /*switch(FileOps.TestFileAdminSec(mINIPath))
-            {
-                case 0:
-                    AppLog.Line(MiscFunc.fmt("Warning wumgr.ini was writable by non administrative users, it was renamed to wumgr.ini.old and replaced with a empty one.\r\n"));
-                    if (!FileOps.MoveFile(mINIPath, mINIPath + ".old", true))
-                        return;
-                    goto case 2;
-                case 2: // file missing, create
-                    FileOps.SetFileAdminSec(mINIPath);
-                    break;
-                case 1: // every thign's fine ini file is only writable by admins
-                    break;
-            }*/
-
-#if DEBUG
-            Test();
-#endif
 
             if (IsAdministrator() == false)
             {
                 Console.WriteLine("Trying to get admin privilegs...");
                 if (!SkipUacRun())
                 {
+                    Console.WriteLine("Trying to start with 'runas'...");
                     // Restart program and run as admin
                     var exeName = Process.GetCurrentProcess().MainModule.FileName;
                     string arguments = "\"" + string.Join("\" \"", args) + "\"";
@@ -131,6 +98,22 @@ namespace wumgr
                 Application.Exit();
                 return;
             }
+
+            mINIPath = appPath + @"\wumgr.ini";
+
+            /*switch(FileOps.TestFileAdminSec(mINIPath))
+            {
+                case 0:
+                    AppLog.Line("Warning wumgr.ini was writable by non administrative users, it was renamed to wumgr.ini.old and replaced with a empty one.\r\n");
+                    if (!FileOps.MoveFile(mINIPath, mINIPath + ".old", true))
+                        return;
+                    goto case 2;
+                case 2: // file missing, create
+                    FileOps.SetFileAdminSec(mINIPath);
+                    break;
+                case 1: // every thign's fine ini file is only writable by admins
+                    break;
+            }*/
 
             Agent = new WuAgent();
 
@@ -229,11 +212,6 @@ namespace wumgr
             }
             return true;
 
-        }
-
-        static private void Test()
-        {
-            
         }
 
         [DllImport("kernel32")]
@@ -360,19 +338,23 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(MiscFunc.fmt("SkipUacEnable Error {0}", err.ToString()));
+                AppLog.Line("Enable SkipUAC Error {0}", err.ToString());
                 return false;
             }
         }
 
         static public bool SkipUacRun()
         {
+            bool silent = true;
             try
             {
                 TaskScheduler.TaskScheduler service = new TaskScheduler.TaskScheduler();
                 service.Connect();
                 ITaskFolder folder = service.GetFolder(@"\"); // root
                 IRegisteredTask task = folder.GetTask(nTaskName);
+
+                silent = false;
+                AppLog.Line("Trying to SkipUAC ...");
 
                 IExecAction action = (IExecAction)task.Definition.Actions[1];
                 if (action.Path.Equals(System.Reflection.Assembly.GetExecutingAssembly().Location, StringComparison.CurrentCultureIgnoreCase))
@@ -397,7 +379,8 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(MiscFunc.fmt("SkipUacRun Error {0}", err.ToString()));
+                if(!silent)
+                    AppLog.Line("SkipUAC Error {0}", err.ToString());
             }
             return false;
         }

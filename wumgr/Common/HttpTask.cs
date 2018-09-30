@@ -134,7 +134,7 @@ class HttpTask
             }
             catch
             {
-                AppLog.Line(MiscFunc.fmt("Failed to rename download {0}", mDlPath + @"\" + mDlName + ".tmp"));
+                AppLog.Line("Failed to rename download {0}", mDlPath + @"\" + mDlName + ".tmp");
                 mDlName += ".tmp";
             }
 
@@ -142,12 +142,12 @@ class HttpTask
         }
         else if (Success == 2)
         {
-            AppLog.Line(MiscFunc.fmt("File already dowllaoded {0}", mDlPath + @"\" + mDlName));
+            AppLog.Line("File already dowllaoded {0}", mDlPath + @"\" + mDlName);
         }
         else
         {
             try { File.Delete(mDlPath + @"\" + mDlName + ".tmp"); } catch { } // delete partial file
-            AppLog.Line(MiscFunc.fmt("Failed to download file {0}", mDlPath + @"\" + mDlName));
+            AppLog.Line("Failed to download file {0}", mDlPath + @"\" + mDlName);
         }
 
         Finished?.Invoke(this, new FinishedEventArgs(Success > 0 ? 0 : Canceled ? -1 : ErrCode, Error));

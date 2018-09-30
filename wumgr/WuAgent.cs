@@ -58,7 +58,7 @@ namespace wumgr
 
             WindowsUpdateAgentInfo info = new WindowsUpdateAgentInfo();
             var currentVersion = info.GetInfo("ApiMajorVersion").ToString().Trim() + "." + info.GetInfo("ApiMinorVersion").ToString().Trim() + " (" + info.GetInfo("ProductVersionString").ToString().Trim() + ")";
-            AppLog.Line(MiscFunc.fmt("Windows Update Agent Version: {0}", currentVersion));
+            AppLog.Line("Windows Update Agent Version: {0}", currentVersion);
 
             mUpdateSession = new UpdateSession();
             mUpdateSession.ClientApplicationID = Program.mName;
@@ -137,7 +137,7 @@ namespace wumgr
         private void LogError(Exception error)
         {
             uint errCode = (uint)error.HResult;
-            AppLog.Line(MiscFunc.fmt("Error 0x{0}: {1}", errCode.ToString("X").PadLeft(8,'0'), UpdateErrors.GetErrorStr(errCode)));
+            AppLog.Line("Error 0x{0}: {1}", errCode.ToString("X").PadLeft(8,'0'), UpdateErrors.GetErrorStr(errCode));
         }
 
         public static string MsUpdGUID = "7971f918-a847-4430-9279-4a52d1efe18d"; // Microsoft Update
@@ -213,7 +213,7 @@ namespace wumgr
             {
                 if (mOfflineService == null)
                 {
-                    AppLog.Line(MiscFunc.fmt("Setting up 'Offline Sync Service'"));
+                    AppLog.Line("Setting up 'Offline Sync Service'");
 
                     // http://go.microsoft.com/fwlink/p/?LinkID=74689
                     mOfflineService = mUpdateServiceManager.AddScanPackageService(mMyOfflineSvc, dlPath + @"\wsusscn2.cab");
@@ -312,7 +312,7 @@ namespace wumgr
             {
                 OnProgress(-1, 0, 0, 0);
 
-                AppLog.Line(MiscFunc.fmt("downloading wsusscn2.cab"));
+                AppLog.Line("downloading wsusscn2.cab");
 
                 List<UpdateDownloader.Task> downloads = new List<UpdateDownloader.Task>();
                 UpdateDownloader.Task download = new UpdateDownloader.Task();
@@ -342,7 +342,7 @@ namespace wumgr
 
             mCallback = new UpdateCallback(this);
 
-            AppLog.Line(MiscFunc.fmt("Searching for updates"));
+            AppLog.Line("Searching for updates");
             //for the above search criteria refer to 
             // http://msdn.microsoft.com/en-us/library/windows/desktop/aa386526(v=VS.85).aspx
             mSearchJob = mUpdateSearcher.BeginSearch("(IsInstalled = 0 and IsHidden = 0) or (IsInstalled = 1 and IsHidden = 0) or (IsHidden = 1)", mCallback, null);
@@ -414,7 +414,7 @@ namespace wumgr
             {
                 if (Update.Downloads.Count == 0)
                 {
-                    AppLog.Line(MiscFunc.fmt("Error: No Download Url's found for update {0}", Update.Title));
+                    AppLog.Line("Error: No Download Url's found for update {0}", Update.Title);
                     continue;
                 }
 
@@ -471,7 +471,7 @@ namespace wumgr
         {
             if (mCurOperation == AgentOperation.PreparingCheck)
             {
-                AppLog.Line(MiscFunc.fmt("wsusscn2.cab downloaded"));
+                AppLog.Line("wsusscn2.cab downloaded");
 
                 ClearOffline();
                 SetupOffline();
@@ -499,7 +499,7 @@ namespace wumgr
                 }*/
 
                 if (mCurOperation != AgentOperation.PreparingUpdates)
-                    AppLog.Line(MiscFunc.fmt("Updates downloaded to {0}", dlPath));
+                    AppLog.Line("Updates downloaded to {0}", dlPath);
                 else if (InstallUpdatesOffline(args.Updates, AllFiles))
                     return;
 
@@ -516,7 +516,7 @@ namespace wumgr
         {
             if (args.Success)
             {
-                AppLog.Line(MiscFunc.fmt("Updates (Un)Installed succesfully"));
+                AppLog.Line("Updates (Un)Installed succesfully");
 
                 foreach (MsUpdate Update in args.Updates)
                 {
@@ -539,10 +539,10 @@ namespace wumgr
                 }
 
                 if (args.Reboot)
-                    AppLog.Line(MiscFunc.fmt("Reboot is required for one of more updates"));
+                    AppLog.Line("Reboot is required for one of more updates");
             }
             else
-                AppLog.Line(MiscFunc.fmt("Updates failed to (Un)Install"));
+                AppLog.Line("Updates failed to (Un)Install");
 
             OnUpdatesChanged();
 
@@ -578,7 +578,7 @@ namespace wumgr
 
             if (mDownloader.Updates.Count == 0)
             {
-                AppLog.Line(MiscFunc.fmt("No updates selected for download"));
+                AppLog.Line("No updates selected for download");
                 return false;
             }
 
@@ -588,7 +588,7 @@ namespace wumgr
 
             mCallback = new UpdateCallback(this);
 
-            AppLog.Line(MiscFunc.fmt("Downloading Updates... This may take several minutes."));
+            AppLog.Line("Downloading Updates... This may take several minutes.");
             mDownloadJob = mDownloader.BeginDownload(mCallback, mCallback, Updates);
             return true;
         }
@@ -613,7 +613,7 @@ namespace wumgr
 
             if (mInstaller.Updates.Count == 0)
             {
-                AppLog.Line(MiscFunc.fmt("No updates selected for instalation"));
+                AppLog.Line("No updates selected for instalation");
                 return false;
             }
 
@@ -623,7 +623,7 @@ namespace wumgr
 
             mCallback = new UpdateCallback(this);
 
-            AppLog.Line(MiscFunc.fmt("Installing Updates... This may take several minutes."));
+            AppLog.Line("Installing Updates... This may take several minutes.");
             mInstalationJob = mInstaller.BeginInstall(mCallback, mCallback, Updates);
             return true;
         }
@@ -645,14 +645,14 @@ namespace wumgr
 
                 if (!update.IsUninstallable)
                 {
-                    AppLog.Line(MiscFunc.fmt("Update can not be uninstalled: {0}", update.Title));
+                    AppLog.Line("Update can not be uninstalled: {0}", update.Title);
                     continue;
                 }
                 mInstaller.Updates.Add(update);
             }
             if (mDownloader.Updates.Count == 0)
             {
-                AppLog.Line(MiscFunc.fmt("No updates selected or eligible for uninstallation"));
+                AppLog.Line("No updates selected or eligible for uninstallation");
                 return false;
             }
 
@@ -662,7 +662,7 @@ namespace wumgr
 
             mCallback = new UpdateCallback(this);
 
-            AppLog.Line(MiscFunc.fmt("Removing Updates... This may take several minutes."));
+            AppLog.Line("Removing Updates... This may take several minutes.");
             mInstalationJob = mInstaller.BeginUninstall(mCallback, mCallback, Updates);
             return true;
         }
@@ -724,7 +724,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(MiscFunc.fmt("Search for updats failed"));
+                AppLog.Line("Search for updats failed");
                 LogError(err);
                 OnFinished(false);
                 return;
@@ -746,7 +746,7 @@ namespace wumgr
                 Console.WriteLine(update.Title);
             }
 
-            AppLog.Line(MiscFunc.fmt("Found {0} pending updates.", mPendingUpdates.Count));
+            AppLog.Line("Found {0} pending updates.", mPendingUpdates.Count);
 
             OnUpdatesChanged(true);
 
@@ -767,7 +767,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(MiscFunc.fmt("Downloading updates failed"));
+                AppLog.Line("Downloading updates failed");
                 LogError(err);
                 OnFinished(false);
                 return;
@@ -779,7 +779,7 @@ namespace wumgr
                 InstallUpdates(Updates);
             else
             {
-                AppLog.Line(MiscFunc.fmt("Updates downloaded to %windir%\\SoftwareDistribution\\Download"));
+                AppLog.Line("Updates downloaded to %windir%\\SoftwareDistribution\\Download");
                 OnFinished(DownloadResults.ResultCode == OperationResultCode.orcSucceeded);
             }
         }
@@ -802,7 +802,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line(MiscFunc.fmt("(Un)Installing updates failed"));
+                AppLog.Line("(Un)Installing updates failed");
                 LogError(err);
                 OnFinished(false);
                 return;
@@ -810,7 +810,7 @@ namespace wumgr
 
             if (InstallationResults.ResultCode == OperationResultCode.orcSucceeded)
             {
-                AppLog.Line(MiscFunc.fmt("Updates (Un)Installed succesfully"));
+                AppLog.Line("Updates (Un)Installed succesfully");
 
                 foreach (MsUpdate Update in Updates)
                 {
@@ -833,10 +833,10 @@ namespace wumgr
                 }
 
                 if (InstallationResults.RebootRequired == true)
-                    AppLog.Line(MiscFunc.fmt("Reboot is required for one of more updates"));
+                    AppLog.Line("Reboot is required for one of more updates");
             }
             else
-                AppLog.Line(MiscFunc.fmt("Updates failed to (Un)Install"));
+                AppLog.Line("Updates failed to (Un)Install");
 
             OnUpdatesChanged();
 

@@ -95,6 +95,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Common\MultiValueDictionary.cs" />
+    <Compile Include="Common\PipeIPC.cs" />
     <Compile Include="GPO.cs" />
     <Compile Include="Common\MiscFunc.cs" />
     <Compile Include="Common\ServiceHelper.cs" />

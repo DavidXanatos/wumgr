@@ -2,19 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6b] - 2018-09-30
+
+### Fixed
+- issues only one instance restriction
+- issues with list view separation
+
+
 ## [0.6] - 2018-09-30
 ### Added
 - checkbox to hide the WU settings page instead of automatic operation
 - when access elevation fails the tool now asks for admin rights
+- added tool entry to setup/remove windows defender update task
 
 ### Changed
 - ObjectListView.dll is not longer required instead a simple self contained control is used
-
+- replaced the app icon with a nicer one
 
 ### Fixed
-- issue when UC bypass failed due to restriction to only one instance
+- issue when UAC bypass failed due to restriction to only one instance
 - then starting a tool from the menu it sets working directory to the tool's directory
-- fixed issues with -onclose now no console window is shown and metter "" parsing is implemented
+- fixed issues with -onclose now no console window is shown and better "" parsing is implemented
 
 
 ## [0.5] - 2018-09-16

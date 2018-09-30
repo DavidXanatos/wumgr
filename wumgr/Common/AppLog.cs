@@ -9,6 +9,11 @@ class AppLog
 {
     private List<string> mLogList = new List<string>();
 
+    static public void Line(string str, params object[] args)
+    {
+        Line(string.Format(str, args));
+    }
+
     static public void Line(String line)
     {
         if (mInstance != null)

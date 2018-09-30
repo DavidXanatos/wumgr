@@ -37,7 +37,7 @@ namespace wumgr
         /// Windows 95/98/Me: SendMessageW is supported by the Microsoft Layer for Unicode (MSLU). To use this, you must add certain files to your application, as outlined in Microsoft Layer for Unicode on Windows 95/98/Me Systems.
         /// </returns>
         [DllImport("User32.dll"), Description("Sends the specified message to a window or windows. The SendMessage function calls the window procedure for the specified window and does not return until the window procedure has processed the message. To send a message and return immediately, use the SendMessageCallback or SendNotifyMessage function. To post a message to a thread's message queue and return immediately, use the PostMessage or PostThreadMessage function.")]
-        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, LVGROUP lParam);
+        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
         private static int? GetGroupID(ListViewGroup lstvwgrp)
         {
@@ -58,7 +58,7 @@ namespace wumgr
             return rtnval;
         }
 
-        private static void setGrpState(ListViewGroup lstvwgrp, ListViewGroupState state)
+        public static void setGrpState(ListViewGroup lstvwgrp, ListViewGroupState state)
         {
             if (Environment.OSVersion.Version.Major < 6)   //Only Vista and forward allows collaps of ListViewGroups
                 return;
@@ -74,23 +74,39 @@ namespace wumgr
                 group.CbSize = Marshal.SizeOf(group);
                 group.State = state;
                 group.Mask = ListViewGroupMask.State;
-                if (GrpId != null)
+
+                IntPtr ip = IntPtr.Zero;
+                try
                 {
-                    group.IGroupId = GrpId.Value;
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, GrpId.Value, group);
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, GrpId.Value, group);
+                    ip = Marshal.AllocHGlobal(group.CbSize);
+                    if (GrpId != null)
+                    {
+                        group.IGroupId = GrpId.Value;
+                        Marshal.StructureToPtr(group, ip, false);
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)GrpId.Value, ip);
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)GrpId.Value, ip);
+                    }
+                    else
+                    {
+                        group.IGroupId = gIndex;
+                        Marshal.StructureToPtr(group, ip, false);
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)gIndex, ip);
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)gIndex, ip);
+                    }
+                    lstvwgrp.ListView.Refresh();
                 }
-                else
+                catch (Exception ex)
                 {
-                    group.IGroupId = gIndex;
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, gIndex, group);
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, gIndex, group);
+                    System.Diagnostics.Trace.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
                 }
-                lstvwgrp.ListView.Refresh();
+                finally
+                {
+                    if (null != ip) Marshal.FreeHGlobal(ip);
+                }
             }
         }
 
-        private static void setGrpFooter(ListViewGroup lstvwgrp, string footer)
+        public static void setGrpFooter(ListViewGroup lstvwgrp, string footer)
         {
             if (Environment.OSVersion.Version.Major < 6)   //Only Vista and forward allows footer on ListViewGroups
                 return;
@@ -106,15 +122,29 @@ namespace wumgr
                 group.CbSize = Marshal.SizeOf(group);
                 group.PszFooter = footer;
                 group.Mask = ListViewGroupMask.Footer;
-                if (GrpId != null)
+
+                IntPtr ip = IntPtr.Zero;
+                try
                 {
-                    group.IGroupId = GrpId.Value;
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, GrpId.Value, group);
+                    ip = Marshal.AllocHGlobal(group.CbSize);
+                    if (GrpId != null)
+                    {
+                        group.IGroupId = GrpId.Value;
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)GrpId.Value, ip);
+                    }
+                    else
+                    {
+                        group.IGroupId = gIndex;
+                        SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, (IntPtr)gIndex, ip);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    group.IGroupId = gIndex;
-                    SendMessage(lstvwgrp.ListView.Handle, LVM_SETGROUPINFO, gIndex, group);
+                    System.Diagnostics.Trace.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+                }
+                finally
+                {
+                    if (null != ip) Marshal.FreeHGlobal(ip);
                 }
             }
         }
@@ -127,7 +157,7 @@ namespace wumgr
 
         public void SetGroupFooter(ListViewGroup lvg, string footerText)
         {
-                setGrpFooter(lvg, footerText);
+            setGrpFooter(lvg, footerText);
         }
 
         protected override void WndProc(ref Message m)
@@ -177,7 +207,7 @@ namespace wumgr
     /// The structure may or may not hold errors inside the code, so use at own risk.
     /// Reference url: http://msdn.microsoft.com/en-us/library/bb774769(VS.85).aspx
     /// </remarks>
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode), Description("LVGROUP StructureUsed to set and retrieve groups.")]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto), Description("LVGROUP StructureUsed to set and retrieve groups.")]
     public struct LVGROUP
     {
         /// <summary>

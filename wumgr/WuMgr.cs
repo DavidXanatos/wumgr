@@ -64,14 +64,6 @@ namespace wumgr
                         }
                     }
                     break;
-                case Program.WM_APP:
-                    if (msg.WParam == IntPtr.Zero && msg.LParam == IntPtr.Zero)
-                    {
-                        notifyIcon_BalloonTipClicked(null, null);
-                        msg.Result = IntPtr.Zero;
-                        return;
-                    }
-                    break;
             }
             base.WndProc(ref msg);
         }
@@ -119,7 +111,7 @@ namespace wumgr
                 notifyIcon.Visible = true;
             }
 
-            this.Text = MiscFunc.fmt("{0} by David Xanatos", Program.mName);
+            this.Text = MiscFunc.fmt("{0} v{1} by David Xanatos", Program.mName, Program.mVersion);
 
             toolTip.SetToolTip(btnSearch, "Search");
             toolTip.SetToolTip(btnInstall, "Install");
@@ -199,7 +191,7 @@ namespace wumgr
 
             try {
                 LastCheck = DateTime.Parse(GetConfig("LastCheck", ""));
-                AppLog.Line(MiscFunc.fmt("Last Checked for updates: {0}", LastCheck.ToString()));
+                AppLog.Line("Last Checked for updates: {0}", LastCheck.ToString());
             } catch { }
 
             LoadProviders(source);
@@ -250,6 +242,22 @@ namespace wumgr
             mTimer.Interval = 1000; // once epr second
             mTimer.Tick += OnTimedEvent;
             mTimer.Enabled = true;
+
+            Program.ipc.PipeMessage += new PipeIPC.DelegateMessage(PipesMessageHandler);
+            Program.ipc.Listen();
+        }
+
+        private void PipesMessageHandler(PipeIPC.PipeServer pipe, string data)
+        {
+            if (data.Equals("show", StringComparison.CurrentCultureIgnoreCase))
+            {
+                notifyIcon_BalloonTipClicked(null, null);
+                pipe.Send("ok");
+            }
+            else
+            {
+                pipe.Send("unknown");
+            }
         }
 
         private static Timer mTimer = null;
@@ -268,7 +276,7 @@ namespace wumgr
                     uint idleTime = MiscFunc.GetIdleTime();
                     if (IdleDelay * 60 < idleTime)
                     {
-                        AppLog.Line(MiscFunc.fmt("Starting automatic search for updates."));
+                        AppLog.Line("Starting automatic search for updates.");
                         updateNow = true;
                     }
                     else if(daysDue > GetGraceDays())
@@ -470,12 +478,16 @@ namespace wumgr
 
                 ListViewGroup lvg = updateView.Groups[Update.Category];
                 if (lvg == null)
+                {
                     lvg = updateView.Groups.Add(Update.Category, Update.Category);
+                    ListViewExtended.setGrpState(lvg, ListViewGroupState.Collapsible);
+                }
                 items[i].Group = lvg;
             }
             updateView.Items.AddRange(items);
 
-            updateView.SetGroupState(ListViewGroupState.Collapsible);
+            // Note: this has caused issues in the past
+            //updateView.SetGroupState(ListViewGroupState.Collapsible);
         }
 
         public List<MsUpdate> GetUpdates()
@@ -731,18 +743,28 @@ namespace wumgr
 
         private void btnGetLink_Click(object sender, EventArgs e)
         {
+            string Links = "";
             foreach (MsUpdate Update in GetUpdates())
             {
-                AppLog.Line(Update.Title);
+                Links += Update.Title + "\r\n";
                 foreach (string url in Update.Downloads)
-                    AppLog.Line(url);
-                AppLog.Line("");
+                    Links += url + "\r\n";
+                Links += "\r\n";
             }
+
+            if (Links.Length != 0)
+            {
+                Clipboard.SetText(Links);
+                AppLog.Line("Update Download Links copyed to clipboard");
+            }
+            else
+                AppLog.Line("No updates sellected");
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             agent.CancelOperations();
+            OnFinished(null, null);
         }
 
         void OnProgress(object sender, WuAgent.ProgressArgs args)

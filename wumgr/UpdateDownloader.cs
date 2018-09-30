@@ -86,9 +86,9 @@ namespace wumgr
                 Task Download = mDownloads[mCurrentTask];
                 if (args.ErrCode != 0)
                 {
-                    AppLog.Line(MiscFunc.fmt("Download failed: {0}", args.GetError()));
+                    AppLog.Line("Download failed: {0}", args.GetError());
                     if (File.Exists(mCurTask.DlPath + @"\" + mCurTask.DlName))
-                        AppLog.Line(MiscFunc.fmt("An older version is present and will be used."));
+                        AppLog.Line("An older version is present and will be used.");
                     else
                         Download.Failed = true;
                 }

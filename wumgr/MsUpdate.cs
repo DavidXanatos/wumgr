@@ -16,56 +16,65 @@ namespace wumgr
         public MsUpdate(IUpdate update, UpdateState state)
         {
             Entry = update;
-            UUID = update.Identity.UpdateID;
 
-            Title = update.Title;
-            Category = GetCategory(update.Categories);
-            Description = update.Description;
-            Size = update.MaxDownloadSize;
-            Date = update.LastDeploymentChangeTime;
-            KB = GetKB(update);
-            SupportUrl = update.SupportUrl;
-
-            UpdateDownloads();
-
-            State = state;
-
-            Attributes |= update.IsBeta ? (int)UpdateAttr.Beta : 0;
-            Attributes |= update.IsDownloaded ? (int)UpdateAttr.Downloaded : 0;
-            Attributes |= update.IsHidden ? (int)UpdateAttr.Hidden : 0;
-            Attributes |= update.IsInstalled ? (int)UpdateAttr.Installed : 0;
-            Attributes |= update.IsMandatory ? (int)UpdateAttr.Mandatory : 0;
-            Attributes |= update.IsUninstallable ? (int)UpdateAttr.Uninstallable : 0;
-            Attributes |= update.AutoSelectOnWebSites ? (int)UpdateAttr.AutoSelect : 0;
-
-            if (update.InstallationBehavior.Impact == InstallationImpact.iiRequiresExclusiveHandling)
-                Attributes |= (int)UpdateAttr.Exclusive;
-
-            switch (update.InstallationBehavior.RebootBehavior)
+            try
             {
-                case InstallationRebootBehavior.irbAlwaysRequiresReboot:
-                    Attributes |= (int)UpdateAttr.Reboot;
-                    break;
-                case InstallationRebootBehavior.irbCanRequestReboot:
-                case InstallationRebootBehavior.irbNeverReboots:
-                    break;
+                UUID = update.Identity.UpdateID;
+
+                Title = update.Title;
+                Category = GetCategory(update.Categories);
+                Description = update.Description;
+                Size = update.MaxDownloadSize;
+                Date = update.LastDeploymentChangeTime;
+                KB = GetKB(update);
+                SupportUrl = update.SupportUrl;
+
+                UpdateDownloads();
+
+                State = state;
+
+                Attributes |= update.IsBeta ? (int)UpdateAttr.Beta : 0;
+                Attributes |= update.IsDownloaded ? (int)UpdateAttr.Downloaded : 0;
+                Attributes |= update.IsHidden ? (int)UpdateAttr.Hidden : 0;
+                Attributes |= update.IsInstalled ? (int)UpdateAttr.Installed : 0;
+                Attributes |= update.IsMandatory ? (int)UpdateAttr.Mandatory : 0;
+                Attributes |= update.IsUninstallable ? (int)UpdateAttr.Uninstallable : 0;
+                Attributes |= update.AutoSelectOnWebSites ? (int)UpdateAttr.AutoSelect : 0;
+
+                if (update.InstallationBehavior.Impact == InstallationImpact.iiRequiresExclusiveHandling)
+                    Attributes |= (int)UpdateAttr.Exclusive;
+
+                switch (update.InstallationBehavior.RebootBehavior)
+                {
+                    case InstallationRebootBehavior.irbAlwaysRequiresReboot:
+                        Attributes |= (int)UpdateAttr.Reboot;
+                        break;
+                    case InstallationRebootBehavior.irbCanRequestReboot:
+                    case InstallationRebootBehavior.irbNeverReboots:
+                        break;
+                }
             }
+            catch { }
         }
 
         public MsUpdate(IUpdateHistoryEntry2 update)
         {
-            UUID = update.UpdateIdentity.UpdateID;
+            try
+            {
+                UUID = update.UpdateIdentity.UpdateID;
 
-            Title = update.Title;
-            Category = GetCategory(update.Categories);
-            Description = update.Description;
-            Date = update.Date;
-            SupportUrl = update.SupportUrl;
+                Title = update.Title;
+                Category = GetCategory(update.Categories);
+                Description = update.Description;
+                Date = update.Date;
+                SupportUrl = update.SupportUrl;
 
-            State = UpdateState.History;
+                State = UpdateState.History;
 
-            ResultCode = (int)update.ResultCode;
-            HResult = update.HResult;
+                ResultCode = (int)update.ResultCode;
+                HResult = update.HResult;
+            }
+            catch { }
         }
 
         public void UpdateDownloads()
