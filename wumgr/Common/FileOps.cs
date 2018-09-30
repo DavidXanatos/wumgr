@@ -10,6 +10,19 @@ using System.IO;
 
 class FileOps
 {
+    static public string FormatSize(decimal size)
+    {
+        if (size == 0)
+            return "";
+        if (size > 1024 * 1024 * 1024)
+            return (size / (1024 * 1024 * 1024)).ToString("F") + " Gb";
+        if (size > 1024 * 1024)
+            return (size / (1024 * 1024)).ToString("F") + " Mb";
+        if (size > 1024)
+            return (size / (1024)).ToString("F") + " Kb";
+        return ((Int64)size).ToString() + " b";
+    }
+
     static public bool MoveFile(string from, string to, bool Overwrite = false)
     {
         try

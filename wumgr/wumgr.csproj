@@ -91,6 +91,9 @@
     <Compile Include="Common\HttpTask.cs" />
     <Compile Include="Common\FileOps.cs" />
     <Compile Include="Common\AppLog.cs" />
+    <Compile Include="Common\ListViewExtended.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Common\MultiValueDictionary.cs" />
     <Compile Include="GPO.cs" />
     <Compile Include="Common\MiscFunc.cs" />
@@ -198,12 +201,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
-      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
-      <Name>ObjectListView2012</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

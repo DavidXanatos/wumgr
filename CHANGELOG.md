@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.6] - 2018-09-30
+### Added
+- checkbox to hide the WU settings page instead of automatic operation
+- when access elevation fails the tool now asks for admin rights
+
+### Changed
+- ObjectListView.dll is not longer required instead a simple self contained control is used
+
+
+### Fixed
+- issue when UC bypass failed due to restriction to only one instance
+- then starting a tool from the menu it sets working directory to the tool's directory
+- fixed issues with -onclose now no console window is shown and metter "" parsing is implemented
+
+
 ## [0.5] - 2018-09-16
 ### Added
 - wumgr.ini is restricted to be writeble only by administrators

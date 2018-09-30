@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WUApiLib;//this is required to use the Interfaces given by microsoft. 
-using BrightIdeasSoftware;
 using System.Collections;
 using Microsoft.Win32;
 using System.Security.AccessControl;
@@ -20,6 +19,7 @@ namespace wumgr
 {
     public partial class WuMgr : Form
     {
+
         public const Int32 WM_SYSCOMMAND = 0x112;
 
         public const Int32 MF_BITMAP = 0x00000004;
@@ -119,7 +119,7 @@ namespace wumgr
                 notifyIcon.Visible = true;
             }
 
-            //this.Text = MiscFunc.fmt("{0} by David Xanatos", Program.mName);
+            this.Text = MiscFunc.fmt("{0} by David Xanatos", Program.mName);
 
             toolTip.SetToolTip(btnSearch, "Search");
             toolTip.SetToolTip(btnInstall, "Install");
@@ -158,12 +158,6 @@ namespace wumgr
                 }
             }
 
-            updateView.ShowGroups = true;
-            updateView.ShowItemCountOnGroups = true;
-            updateView.AlwaysGroupByColumn = updateView.ColumnsInDisplayOrder[1];
-            updateView.Sort();
-
-
             mSuspendUpdate = true;
             chkDrivers.CheckState = (CheckState)GPO.GetDriverAU();
             int day, time;
@@ -174,7 +168,6 @@ namespace wumgr
             chkAutoRun.Checked = Program.IsAutoStart();
             IdleDelay = MiscFunc.parseInt(GetConfig("IdleDelay", "20"));
             chkNoUAC.Checked = Program.IsSkipUacRun();
-
 
 
             chkOffline.Checked = MiscFunc.parseInt(GetConfig("Offline", "1")) != 0;
@@ -218,6 +211,9 @@ namespace wumgr
                 dlPolMode.Enabled = false;
                 //toolTip.SetToolTip(dlPolMode, "Windows 10 Pro and Home do not respect this GPO setting");
             }
+
+            chkHideWU.Enabled = GPO.IsRespected() != 2;
+            chkHideWU.Checked = GPO.IsUpdatePageHidden();
 
             mSuspendUpdate = false;
 
@@ -309,7 +305,7 @@ namespace wumgr
 
         private void WuMgr_Load(object sender, EventArgs e)
         {
-           
+            this.Width = 900;
         }
 
         private int GetAutoUpdateDue()
@@ -392,7 +388,6 @@ namespace wumgr
         void LoadList()
         {
             updateView.CheckBoxes = CurrentList != UpdateLists.UpdateHistory;
-
             updateView.ForeColor = updateView.CheckBoxes && !agent.IsValid() ? Color.Gray : Color.Black;
 
             switch (CurrentList)
@@ -406,18 +401,88 @@ namespace wumgr
 
         void LoadList(List<MsUpdate> List)
         {
-            updateView.ClearObjects();
-            List<UpdateItem> list = new List<UpdateItem>();
-            foreach (MsUpdate update in List)
-                list.Add(new UpdateItem(update));
-            updateView.AddObjects(list);
+            updateView.Items.Clear();
+            ListViewItem[] items = new ListViewItem[List.Count];
+            for (int i = 0; i < List.Count; i++)
+            {
+                MsUpdate Update = List[i];
+                string State = "";
+                switch (Update.State)
+                {
+                    case MsUpdate.UpdateState.History:
+                        switch ((OperationResultCode)Update.ResultCode)
+                        {
+                            case OperationResultCode.orcNotStarted: State = "Not Started"; break;
+                            case OperationResultCode.orcInProgress: State = "In Progress"; break;
+                            case OperationResultCode.orcSucceeded: State = "Succeeded"; break;
+                            case OperationResultCode.orcSucceededWithErrors: State = "Succeeded with Errors"; break;
+                            case OperationResultCode.orcFailed: State = "Failed"; break;
+                            case OperationResultCode.orcAborted: State = "Aborted"; break;
+                        }
+                        State += " (0x" + String.Format("{0:X8}", Update.HResult) + ")";
+                        break;
+
+                    default:
+                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Beta) != 0)
+                            State = "Beta ";
+
+                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Installed) != 0)
+                        {
+                            State += "Installed";
+                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Uninstallable) != 0)
+                                State += " Removable";
+                        }
+                        else if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Hidden) != 0)
+                        {
+                            State += "Hidden";
+                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
+                                State += " Downloaded";
+                        }
+                        else
+                        {
+                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
+                                State += "Downloaded";
+                            else
+                                State += "Pending";
+                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.AutoSelect) != 0)
+                                State += " (!)";
+                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Mandatory) != 0)
+                                State += " Manatory";
+                        }
+
+                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Exclusive) != 0)
+                            State += ", Exclusive";
+
+                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Reboot) != 0)
+                            State += ", Needs Reboot";
+                        break;
+                }
+
+                items[i] = new ListViewItem(new string[] {
+                    Update.Title,
+                    Update.Category,
+                    Update.KB,
+                    FileOps.FormatSize(Update.Size),
+                    Update.Date.ToString("dd.MM.yyyy"),
+                    State});
+
+                items[i].Tag = Update;
+
+                ListViewGroup lvg = updateView.Groups[Update.Category];
+                if (lvg == null)
+                    lvg = updateView.Groups.Add(Update.Category, Update.Category);
+                items[i].Group = lvg;
+            }
+            updateView.Items.AddRange(items);
+
+            updateView.SetGroupState(ListViewGroupState.Collapsible);
         }
 
         public List<MsUpdate> GetUpdates()
         {
             List<MsUpdate> updates = new List<MsUpdate>();
-            foreach (UpdateItem item in updateView.CheckedObjects)
-                updates.Add(item.Update);
+            foreach (ListViewItem item in updateView.CheckedItems)
+                updates.Add((MsUpdate)item.Tag);
             return updates;
         }
 
@@ -481,7 +546,6 @@ namespace wumgr
             wuauMenu.Checked = agent.TestWuAuServ();
             wuauMenu.Click += new System.EventHandler(menuWuAu_Click);
             mToolsMenu.MenuItems.Add(wuauMenu);
-
             mToolsMenu.MenuItems.Add(new MenuItem("-"));
 
             if (Directory.Exists(Program.appPath + @"\Tools"))
@@ -495,8 +559,9 @@ namespace wumgr
                     toolMenu.Text = Program.IniReadValue("Root", "Name", Name, INIPath);
 
                     string Exec = Program.IniReadValue("Root", "Exec", "", INIPath);
+                    bool Silent = MiscFunc.parseInt(Program.IniReadValue("Root", "Silent", "0", INIPath)) != 0;
                     if (Exec.Length > 0)
-                        toolMenu.Click += delegate (object sender, EventArgs e) { menuExec_Click(sender, e, Exec); };
+                        toolMenu.Click += delegate (object sender, EventArgs e) { menuExec_Click(sender, e, Exec, subDir, Silent); };
                     else
                     {
                         int count = MiscFunc.parseInt(Program.IniReadValue("Root", "Entries", "", INIPath), 99);
@@ -514,7 +579,8 @@ namespace wumgr
                             subMenu.Text = name;
 
                             string exec = Program.IniReadValue("Entry" + i.ToString(), "Exec", "", INIPath);
-                            subMenu.Click += delegate (object sender, EventArgs e) { menuExec_Click(sender, e, exec); };
+                            bool silent = MiscFunc.parseInt(Program.IniReadValue("Entry" + i.ToString(), "Silent", "0", INIPath)) != 0;
+                            subMenu.Click += delegate (object sender, EventArgs e) { menuExec_Click(sender, e, exec, subDir, silent); };
 
                             toolMenu.MenuItems.Add(subMenu);
                         }
@@ -532,9 +598,12 @@ namespace wumgr
             mToolsMenu.MenuItems.Add(refreshMenu);
         }
 
-        private void menuExec_Click(object Sender, EventArgs e, string exec)
+        private void menuExec_Click(object Sender, EventArgs e, string exec, string dir, bool silent = false)
         {
-            Process.Start(exec);
+            ProcessStartInfo startInfo = Program.PrepExec(exec, silent);
+            startInfo.WorkingDirectory = dir;
+            if(!Program.DoExec(startInfo))
+                MessageBox.Show(MiscFunc.fmt("Filed to start tool"), Program.mName);
         }
 
         private void menuExit_Click(object Sender, EventArgs e)
@@ -600,7 +669,6 @@ namespace wumgr
             SwitchList(UpdateLists.UpdateHistory);
         }
         
-
         private void btnSearch_Click(object sender, EventArgs e)
         {
             if (!agent.IsActive() || agent.IsBusy())
@@ -778,7 +846,6 @@ namespace wumgr
             if (mSuspendUpdate)
                 return;
             GPO.ConfigAU(dlPolMode.SelectedIndex, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
-            CheckAndHideUpdatePage();
         }
 
         private void dlShDay_SelectedIndexChanged(object sender, EventArgs e)
@@ -800,7 +867,6 @@ namespace wumgr
             if (mSuspendUpdate)
                 return;
             GPO.BlockMS(chkBlockMS.Checked);
-            CheckAndHideUpdatePage();
         }
 
         private void chkAutoRun_CheckedChanged(object sender, EventArgs e)
@@ -841,22 +907,23 @@ namespace wumgr
             UpdateState();
             SetConfig("Manual", chkManual.Checked ? "1" : "0");
         }
-
-        private void CheckAndHideUpdatePage()
+        
+        private void chkHideWU_CheckedChanged(object sender, EventArgs e)
         {
-            if(GPO.IsRespected() != 2) // 2 means some unknown windows most likely pre win 10
-                GPO.HideUpdatePage(chkBlockMS.Checked || dlPolMode.SelectedIndex == 1);
+            if (mSuspendUpdate)
+                return;
+            GPO.HideUpdatePage(chkHideWU.Checked);
         }
 
         private void updateView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            UpdateItem update = (UpdateItem)updateView.SelectedObject;
-            if (update != null)
+            if(updateView.SelectedItems.Count == 1)
             {
-                lblSupport.Links[0].LinkData = update.SupportUrl;
+                MsUpdate Update = (MsUpdate)updateView.SelectedItems[0].Tag;
+                lblSupport.Links[0].LinkData = Update.SupportUrl;
                 lblSupport.Links[0].Visited = false;
                 lblSupport.Visible = true;
-                toolTip.SetToolTip(lblSupport, update.SupportUrl);
+                toolTip.SetToolTip(lblSupport, Update.SupportUrl);
             }
             else
                 lblSupport.Visible = false;
@@ -899,109 +966,29 @@ namespace wumgr
                 this.WindowState = FormWindowState.Normal;   
             SetForegroundWindow(this.Handle.ToInt32());
         }
-    }
 
-
-    class UpdateItem : INotifyPropertyChanged
-    {
-        public UpdateItem(MsUpdate update)
+        private void updateView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            Update = update;
+            updateView.ListViewItemSorter = new ListViewItemComparer(e.Column);
+            updateView.Sort();
         }
 
-        public MsUpdate Update = null;
-
-        public String Title { get { return Update.Title; } }
-        public String Category { get { return Update.Category; } }
-        public String KB { get { return Update.KB; } }
-        public String Date { get { return Update.Date.ToString("dd.MM.yyyy"); } }
-        public string Size
+        // Implements the manual sorting of items by columns.
+        class ListViewItemComparer : IComparer
         {
-            get
+            private int col;
+            public ListViewItemComparer()
             {
-                decimal size = Update.Size;
-                if (size == 0)
-                    return "";
-                if (size > 1024 * 1024 * 1024)
-                    return (size / (1024 * 1024 * 1024)).ToString("F") + " Gb";
-                if (size > 1024 * 1024)
-                    return (size / (1024 * 1024)).ToString("F") + " Mb";
-                if (size > 1024)
-                    return (size / (1024)).ToString("F") + " Kb";
-                return ((Int64)size).ToString() + " b";
+                col = 0;
+            }
+            public ListViewItemComparer(int column)
+            {
+                col = column;
+            }
+            public int Compare(object x, object y)
+            {
+                return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
             }
         }
-        public String Description { get { return Update.Description; } }
-        public String State
-        {
-            get
-            {
-                string State = "";
-                switch (Update.State)
-                {
-                    case MsUpdate.UpdateState.History:
-                        switch ((OperationResultCode)Update.ResultCode)
-                        {
-                            case OperationResultCode.orcNotStarted: State = "Not Started"; break;
-                            case OperationResultCode.orcInProgress: State = "In Progress"; break;
-                            case OperationResultCode.orcSucceeded: State = "Succeeded"; break;
-                            case OperationResultCode.orcSucceededWithErrors: State = "Succeeded with Errors"; break;
-                            case OperationResultCode.orcFailed: State = "Failed"; break;
-                            case OperationResultCode.orcAborted: State = "Aborted"; break;
-                        }
-                        State += " (0x" + String.Format("{0:X8}", Update.HResult) + ")";
-                        break;
-
-                    default:
-                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Beta) != 0)
-                            State = "Beta ";
-
-                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Installed) != 0)
-                        {
-                            State += "Installed";
-                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Uninstallable) != 0)
-                                State += " Removable";
-                        }
-                        else if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Hidden) != 0)
-                        {
-                            State += "Hidden";
-                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
-                                State += " Downloaded";
-                        }
-                        else
-                        {
-                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
-                                State += "Downloaded";
-                            else
-                                State += "Pending";
-                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.AutoSelect) != 0)
-                                State += " (!)";
-                            if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Mandatory) != 0)
-                                State += " Manatory";
-                        }
-
-                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Exclusive) != 0)
-                            State += ", Exclusive";
-
-                        if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Reboot) != 0)
-                            State += ", Needs Reboot";
-                        break;
-                }
-                return State;
-            }
-        }
-        public String SupportUrl { get { return Update.SupportUrl; } }
-
-        #region Implementation of INotifyPropertyChanged
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion
     }
 }

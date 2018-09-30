@@ -113,13 +113,20 @@ namespace wumgr
                 Console.WriteLine("Trying to get admin privilegs...");
                 if (!SkipUacRun())
                 {
-                    MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs.\r\nPlease restart the application as Administrator.\r\n\r\nYou can use the option Start->'Bypass User Account Control' to solve this issue for future startsups.", mName), mName);
                     // Restart program and run as admin
-                    /*var exeName = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    var exeName = Process.GetCurrentProcess().MainModule.FileName;
                     string arguments = "\"" + string.Join("\" \"", args) + "\"";
                     ProcessStartInfo startInfo = new ProcessStartInfo(exeName, arguments);
+                    startInfo.UseShellExecute = true;
                     startInfo.Verb = "runas";
-                    System.Diagnostics.Process.Start(startInfo);*/
+                    try
+                    {
+                        Process.Start(startInfo);
+                    }
+                    catch
+                    {
+                        MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs.\r\nPlease restart the application as Administrator.\r\n\r\nYou can use the option Start->'Bypass User Account Control' to solve this issue for future startsups.", mName), mName);
+                    }
                 }
                 Application.Exit();
                 return;
@@ -147,20 +154,14 @@ namespace wumgr
 
             string OnStart = IniReadValue("OnStart", "Exec", "");
             if (OnStart.Length > 0)
-            {
-                Process proc = Process.Start(OnStart);
-                proc.WaitForExit();
-            }
+                DoExec(PrepExec(OnStart, MiscFunc.parseInt(IniReadValue("OnStart", "Silent", "1")) != 0), true);
         }
 
         static private void ExecOnClose()
         {
             string OnClose = IniReadValue("OnClose", "Exec", "");
             if (OnClose.Length > 0)
-            {
-                Process proc = Process.Start(OnClose);
-                proc.WaitForExit();
-            }
+                DoExec(PrepExec(OnClose, MiscFunc.parseInt(IniReadValue("OnClose", "Silent", "1")) != 0), true);
 
             if (int.Parse(IniReadValue("OnClose", "DisableWuAuServ", "0")) != 0)
                 Agent.EnableWuAuServ(false);
@@ -171,12 +172,63 @@ namespace wumgr
                 for (int i = 0; i < Program.args.Length; i++)
                 {
                     if (Program.args[i].Equals("-onclose", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        Process proc = Process.Start(Program.args[++i]);
-                        proc.WaitForExit();
-                    }
+                        DoExec(PrepExec(Program.args[++i], true));
                 }
             }
+        }
+
+        static public ProcessStartInfo PrepExec(string command, bool silent = true)
+        {
+            // -onclose """cm d.exe"" /c ping 10.70.0.1" -test
+            int pos = -1;
+            if (command.Length > 0 && command.Substring(0, 1) == "\"")
+            {
+                command = command.Remove(0, 1).Trim();
+                pos = command.IndexOf("\"");
+            }
+            else
+                pos = command.IndexOf(" ");
+
+            string exec;
+            string arguments = "";
+            if (pos != -1)
+            {
+                exec = command.Substring(0, pos);
+                arguments = command.Substring(pos + 1).Trim();
+            }
+            else
+                exec = command;
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = exec;
+            startInfo.Arguments = arguments;
+            if (silent)
+            {
+                startInfo.RedirectStandardOutput = true;
+                startInfo.RedirectStandardError = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+            }
+            return startInfo;
+        }
+
+        static public bool DoExec(ProcessStartInfo startInfo, bool wait = false)
+        {
+            try
+            {
+                Process proc = new Process();
+                proc.StartInfo = startInfo;
+                proc.EnableRaisingEvents = true;
+                proc.Start();
+                if (wait)
+                    proc.WaitForExit();
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+
         }
 
         static private void Test()

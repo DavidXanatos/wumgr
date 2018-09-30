@@ -124,6 +124,13 @@ namespace wumgr
                 subKey.DeleteValue("SettingsPageVisibility", false);
         }
 
+        static public bool IsUpdatePageHidden()
+        {
+            var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", true);
+            string value = subKey.GetValue("SettingsPageVisibility", "").ToString();
+            return value.Contains("hide:windowsupdate");
+        }
+
         static public void BlockMS(bool block = true)
         {
             if (block)
