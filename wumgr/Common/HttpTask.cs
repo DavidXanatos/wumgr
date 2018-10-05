@@ -153,11 +153,6 @@ class HttpTask
         Finished?.Invoke(this, new FinishedEventArgs(Success > 0 ? 0 : Canceled ? -1 : ErrCode, Error));
     }
 
-    private void ReportProgress()
-    {
-        Progress?.Invoke(this, new ProgressEventArgs(mLength > 0 ? (int)((Int64)100 * mOffset / mLength) : -1));
-    }
-
     static public string GetNextTempFile(string path, string baseName)
     {
         for (int i = 0; i < 10000; i++)
@@ -235,8 +230,31 @@ class HttpTask
                 task.streamWriter = info.OpenWrite();
 
                 // Begin the Reading of the contents of the HTML page and print it to the console.
-                IAsyncResult asynchronousInputRead = task.streamResponse.BeginRead(task.BufferRead, 0, BUFFER_SIZE, new AsyncCallback(ReadCallBack), task);
+                task.streamResponse.BeginRead(task.BufferRead, 0, BUFFER_SIZE, new AsyncCallback(ReadCallBack), task);
                 return;
+            }
+        }
+        catch (WebException e)
+        {
+            if (e.Response != null)
+            {
+                string fileName = Path.GetFileName(e.Response.ResponseUri.AbsolutePath.ToString());
+
+                if (task.mDlName == null)
+                    task.mDlName = fileName;
+
+                FileInfo testInfo = new FileInfo(task.mDlPath + @"\" + task.mDlName);
+                if (testInfo.Exists)
+                    Success = 2;
+            }
+
+            if(Success == 0)
+            {
+                ErrCode = -2;
+                Error = e;
+                Console.WriteLine("\nRespCallback Exception raised!");
+                Console.WriteLine("\nMessage:{0}", e.Message);
+                Console.WriteLine("\nStatus:{0}", e.Status);
             }
         }
         catch (Exception e)
@@ -250,6 +268,8 @@ class HttpTask
             task.Finish(Success, ErrCode, Error);
         }));
     }
+
+    private int mOldPercent = -1;
 
     private static void ReadCallBack(IAsyncResult asyncResult)
     {
@@ -266,12 +286,17 @@ class HttpTask
                 task.streamWriter.Write(task.BufferRead, 0, read);
                 task.mOffset += read;
 
-                task.mDispatcher.Invoke(new Action(() => {
-                    task.ReportProgress();
-                }));
+                int Percent = task.mLength > 0 ? (int)((Int64)100 * task.mOffset / task.mLength) : -1;
+                if (Percent != task.mOldPercent)
+                {
+                    task.mOldPercent = Percent;
+                    task.mDispatcher.Invoke(new Action(() => {
+                        task.Progress?.Invoke(task, new ProgressEventArgs(Percent));
+                    }));
+                }
 
                 // setup next read
-                IAsyncResult asynchronousResult = task.streamResponse.BeginRead(task.BufferRead, 0, BUFFER_SIZE, new AsyncCallback(ReadCallBack), task);
+                task.streamResponse.BeginRead(task.BufferRead, 0, BUFFER_SIZE, new AsyncCallback(ReadCallBack), task);
                 return;
             }
             else
@@ -308,10 +333,12 @@ class HttpTask
                 return Error.ToString();
             switch(ErrCode)
             {
+                case 0: return "Ok";
                 case -1: return "Canceled";
                 default: return ErrCode.ToString();
             }
         }
+        public bool Success { get { return ErrCode == 0; } }
         public bool Cancelled { get { return ErrCode == -1; } }
 
         public int ErrCode = 0;

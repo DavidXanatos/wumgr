@@ -5,7 +5,6 @@ using System.Text;
 
 public class MultiValueDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
 {
-
     public MultiValueDictionary() : base()
     {
     }
@@ -68,8 +67,20 @@ public class MultiValueDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
         int Count = 0;
         foreach (KeyValuePair<TKey, List<TValue>> pair in this)
         {
-            if (Count + pair.Value.Count >= index)
+            if (Count + pair.Value.Count > index)
                 return pair.Value[index - Count];
+            Count += pair.Value.Count;
+        }
+        throw new IndexOutOfRangeException();
+    }
+
+    public TKey GetKey(int index)
+    {
+        int Count = 0;
+        foreach (KeyValuePair<TKey, List<TValue>> pair in this)
+        {
+            if (Count + pair.Value.Count > index)
+                return pair.Key;
             Count += pair.Value.Count;
         }
         throw new IndexOutOfRangeException();

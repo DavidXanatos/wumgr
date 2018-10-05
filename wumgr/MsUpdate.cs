@@ -29,7 +29,7 @@ namespace wumgr
                 KB = GetKB(update);
                 SupportUrl = update.SupportUrl;
 
-                UpdateDownloads();
+                AddUpdates();
 
                 State = state;
 
@@ -77,16 +77,25 @@ namespace wumgr
             catch { }
         }
 
-        public void UpdateDownloads()
+        private void AddUpdates()
         {
-            foreach (IUpdate bundle in Entry.BundledUpdates)
+            AddUpdates(Entry.DownloadContents);
+            if (Downloads.Count == 0)
             {
-                foreach (IUpdateDownloadContent udc in bundle.DownloadContents)
-                {
-                    if (String.IsNullOrEmpty(udc.DownloadUrl))
-                        continue; // sanity check
-                    Downloads.Add(udc.DownloadUrl);
-                }
+                foreach (IUpdate5 bundle in Entry.BundledUpdates)
+                    AddUpdates(bundle.DownloadContents);
+            }
+        }
+
+        private void AddUpdates(IUpdateDownloadContentCollection content)
+        {
+            foreach (IUpdateDownloadContent2 udc in content)
+            {
+                if (udc.IsDeltaCompressedContent)
+                    continue;
+                if (String.IsNullOrEmpty(udc.DownloadUrl))
+                    continue; // sanity check
+                Downloads.Add(udc.DownloadUrl);
             }
         }
 
@@ -105,9 +114,11 @@ namespace wumgr
                     classification = cat.Name;
                 else if (cat.Type.Equals("Product"))
                     product = cat.Name;
+                else
+                    continue;
 
             }
-            return product + "; " + classification;
+            return product.Length == 0 ? classification  : (product + "; " + classification);
         }
 
         public void Invalidate() { Entry = null; }

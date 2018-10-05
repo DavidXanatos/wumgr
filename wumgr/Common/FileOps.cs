@@ -124,6 +124,21 @@ class FileOps
         File.SetAccessControl(filePath, fs);
     }
 
+    static public bool TestWrite(string filePath)
+    {
+        FileInfo fi = new FileInfo(filePath);
+        try
+        {
+            FileStream f_out = fi.OpenWrite();
+            f_out.Close();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static string SID_null = "S-1-0-0"; //	Null SID
     public static string SID_Worls = "S-1-1-0"; //	World
     public static string SID_Local = "S-1-2-0"; //	Local
@@ -185,4 +200,31 @@ class FileOps
     public static string SID_PPLevel = "S-1-16-20480"; //	Protected Process Mandatory Level
     public static string SID_SPLevel = "S-1-16-28672"; //	Secure Process Mandatory Level
 
+    internal static bool TakeOwn(string path)
+    {
+        bool ret = true;
+        try
+        {
+            //TokenManipulator.AddPrivilege("SeRestorePrivilege");
+            //TokenManipulator.AddPrivilege("SeBackupPrivilege");
+            TokenManipulator.AddPrivilege("SeTakeOwnershipPrivilege");
+
+
+            FileSecurity ac = File.GetAccessControl(path);
+            ac.SetOwner(new SecurityIdentifier(FileOps.SID_Admins));
+            File.SetAccessControl(path, ac);
+        }
+        catch (PrivilegeNotHeldException err)
+        {
+            AppLog.Line("Enable SkipUAC Error {0}", err.ToString());
+            ret = false;
+        }
+        finally
+        {
+            //TokenManipulator.RemovePrivilege("SeRestorePrivilege");
+            //TokenManipulator.RemovePrivilege("SeBackupPrivilege");
+            TokenManipulator.RemovePrivilege("SeTakeOwnershipPrivilege");
+        }
+        return ret;
+    }
 }

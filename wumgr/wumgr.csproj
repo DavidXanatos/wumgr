@@ -47,7 +47,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -75,6 +75,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -91,11 +92,13 @@
     <Compile Include="Common\HttpTask.cs" />
     <Compile Include="Common\FileOps.cs" />
     <Compile Include="Common\AppLog.cs" />
+    <Compile Include="Common\KnownFolders.cs" />
     <Compile Include="Common\ListViewExtended.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Common\MultiValueDictionary.cs" />
     <Compile Include="Common\PipeIPC.cs" />
+    <Compile Include="Common\TokenManipulator.cs" />
     <Compile Include="GPO.cs" />
     <Compile Include="Common\MiscFunc.cs" />
     <Compile Include="Common\ServiceHelper.cs" />

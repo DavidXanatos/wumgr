@@ -84,6 +84,8 @@ namespace wumgr
         }
 
         private bool mSuspendUpdate = false;
+        GPO.Respect mGPORespect = GPO.Respect.Unknown;
+        float mWinVersion = 0.0f;
 
 
         enum AutoUpdateOptions
@@ -111,7 +113,8 @@ namespace wumgr
                 notifyIcon.Visible = true;
             }
 
-            this.Text = MiscFunc.fmt("{0} v{1} by David Xanatos", Program.mName, Program.mVersion);
+            if(!MiscFunc.IsRunningAsUwp())
+                this.Text = MiscFunc.fmt("{0} v{1} by David Xanatos", Program.mName, Program.mVersion);
 
             toolTip.SetToolTip(btnSearch, "Search");
             toolTip.SetToolTip(btnInstall, "Install");
@@ -152,19 +155,75 @@ namespace wumgr
 
             mSuspendUpdate = true;
             chkDrivers.CheckState = (CheckState)GPO.GetDriverAU();
-            int day, time;
-            dlPolMode.SelectedIndex = GPO.GetAU(out day, out time);
-            dlShDay.SelectedIndex = day; dlShTime.SelectedIndex = time;
+
+            mGPORespect = GPO.GetRespect();
+            mWinVersion = GPO.GetWinVersion();
+
+            if (mWinVersion < 10) // 8.1 or below
+                chkHideWU.Enabled = false;
+            chkHideWU.Checked = GPO.IsUpdatePageHidden();
+
+            if (mGPORespect == GPO.Respect.Partial || mGPORespect == GPO.Respect.None)
+                radSchedule.Enabled = radDownload.Enabled = radNotify.Enabled = false;
+            else if (mGPORespect == GPO.Respect.Unknown)
+                AppLog.Line("Unrecognized Windows Edition, respect for GPO settings is unknown.");
+
+            if (mGPORespect == GPO.Respect.None)
+                chkBlockMS.Enabled = false;
             chkBlockMS.CheckState = (CheckState)GPO.GetBlockMS();
+
+            int day, time;
+            switch (GPO.GetAU(out day, out time))
+            {
+                case GPO.AUOptions.Default: radDefault.Checked = true; break;
+                case GPO.AUOptions.Disabled: radDisable.Checked = true; break;
+                case GPO.AUOptions.Notification: radNotify.Checked = true; break;
+                case GPO.AUOptions.Download: radDownload.Checked = true; break;
+                case GPO.AUOptions.Scheduled: radSchedule.Checked = true; break;
+            }
+            dlShDay.SelectedIndex = day; dlShTime.SelectedIndex = time;
+
+            if (mWinVersion >= 10) // 10 or abive
+                chkDisableAU.Checked = GPO.GetDisableAU();
+
+            if (mWinVersion < 6.2) // win 7 or below
+                chkStore.Enabled = false;
+            chkStore.Checked = GPO.GetStoreAU();
+
             dlAutoCheck.SelectedIndex = MiscFunc.parseInt(GetConfig("AutoUpdate", "0"));
             chkAutoRun.Checked = Program.IsAutoStart();
+            if (MiscFunc.IsRunningAsUwp() && chkAutoRun.CheckState == CheckState.Checked)
+                chkAutoRun.Enabled = false;
             IdleDelay = MiscFunc.parseInt(GetConfig("IdleDelay", "20"));
             chkNoUAC.Checked = Program.IsSkipUacRun();
+            chkNoUAC.Enabled = MiscFunc.IsAdministrator();
+            chkNoUAC.Visible = chkNoUAC.Enabled || chkNoUAC.Checked || !MiscFunc.IsRunningAsUwp();
 
 
-            chkOffline.Checked = MiscFunc.parseInt(GetConfig("Offline", "1")) != 0;
+            chkOffline.Checked = MiscFunc.parseInt(GetConfig("Offline", "0")) != 0;
             chkDownload.Checked = MiscFunc.parseInt(GetConfig("Download", "1")) != 0;
             chkManual.Checked = MiscFunc.parseInt(GetConfig("Manual", "0")) != 0;
+            if (!MiscFunc.IsAdministrator())
+            {
+                if (MiscFunc.IsRunningAsUwp())
+                {
+                    chkOffline.Enabled = false;
+                    chkOffline.Checked = false;
+
+                    chkManual.Enabled = false;
+                    chkManual.Checked = true;
+                }
+                chkMsUpd.Enabled = false;
+            }
+            chkMsUpd.Checked = agent.IsActive() && agent.TestService(WuAgent.MsUpdGUID);
+
+            // Note: when running in the UWP sandbox we cant write the real registry even as admins
+            if (!MiscFunc.IsAdministrator() || MiscFunc.IsRunningAsUwp())
+            {
+                foreach (Control ctl in tabGPO.Controls)
+                    ctl.Enabled = false;
+            }
+
             chkOld.Checked = MiscFunc.parseInt(GetConfig("IncludeOld", "0")) != 0;
             string source = GetConfig("Source", "Windows Update");
 
@@ -195,17 +254,6 @@ namespace wumgr
             } catch { }
 
             LoadProviders(source);
-
-            chkMsUpd.Checked = agent.IsActive() && agent.TestService(WuAgent.MsUpdGUID);
-
-            if (GPO.IsRespected() == 0)
-            {
-                dlPolMode.Enabled = false;
-                //toolTip.SetToolTip(dlPolMode, "Windows 10 Pro and Home do not respect this GPO setting");
-            }
-
-            chkHideWU.Enabled = GPO.IsRespected() != 2;
-            chkHideWU.Checked = GPO.IsUpdatePageHidden();
 
             mSuspendUpdate = false;
 
@@ -539,11 +587,13 @@ namespace wumgr
             bool isValid = agent.IsValid();
             bool isValid2 = isValid || chkManual.Checked;
 
+            bool admin = MiscFunc.IsAdministrator() || !MiscFunc.IsRunningAsUwp();
+
             bool enable = agent.IsActive() && !busy;
             btnSearch.Enabled = enable;
             btnDownload.Enabled = enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
-            btnInstall.Enabled = enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
-            btnUnInstall.Enabled = enable && isValid2 && (CurrentList == UpdateLists.InstaledUpdates);
+            btnInstall.Enabled = admin && enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
+            btnUnInstall.Enabled = admin && enable && isValid2 && (CurrentList == UpdateLists.InstaledUpdates);
             btnHide.Enabled = enable && isValid && (CurrentList == UpdateLists.PendingUpdates || CurrentList == UpdateLists.HiddenUpdates);
             btnGetLink.Enabled = CurrentList != UpdateLists.UpdateHistory;
         }
@@ -560,9 +610,9 @@ namespace wumgr
             mToolsMenu.MenuItems.Add(wuauMenu);
             mToolsMenu.MenuItems.Add(new MenuItem("-"));
 
-            if (Directory.Exists(Program.appPath + @"\Tools"))
+            if (Directory.Exists(Program.GetToolsPath()))
             {
-                foreach (string subDir in Directory.GetDirectories(Program.appPath + @"\Tools"))
+                foreach (string subDir in Directory.GetDirectories(Program.GetToolsPath()))
                 {
                     string Name = Path.GetFileName(subDir);
                     string INIPath = subDir + @"\" + Name + ".ini";
@@ -685,49 +735,66 @@ namespace wumgr
         {
             if (!agent.IsActive() || agent.IsBusy())
                 return;
+            WuAgent.RetCodes ret = WuAgent.RetCodes.Undefined;
             if (chkOffline.Checked)
-                agent.SearchForUpdates(chkDownload.Checked, chkOld.Checked);
+                ret = agent.SearchForUpdates(chkDownload.Checked, chkOld.Checked);
             else
-                agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
+                ret = agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
+            ShowResult(WuAgent.AgentOperation.CheckingUpdates, ret);
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
         {
+            if (!chkManual.Checked && !MiscFunc.IsAdministrator())
+            {
+                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to download updates using windows update services. Use 'Manual' download instead."), Program.mName);
+                return;
+            }
+
             if (!agent.IsActive() || agent.IsBusy())
                 return;
-            if (CurrentList == UpdateLists.PendingUpdates)
-            {
-                if (chkOffline.Checked && chkManual.Checked)
-                    agent.DownloadUpdatesOffline(GetUpdates());
-                else
-                    agent.DownloadUpdates(GetUpdates());
-            }
+            WuAgent.RetCodes ret = WuAgent.RetCodes.Undefined;
+            if (chkManual.Checked)
+                ret = agent.DownloadUpdatesManually(GetUpdates());
+            else
+                ret = agent.DownloadUpdates(GetUpdates());
+            ShowResult(WuAgent.AgentOperation.DownloadingUpdates, ret);
         }
 
         private void btnInstall_Click(object sender, EventArgs e)
         {
+            if (!MiscFunc.IsAdministrator())
+            {
+                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to install updates."), Program.mName);
+                return;
+            }
+
             if (!agent.IsActive() || agent.IsBusy())
                 return;
-            if (CurrentList == UpdateLists.PendingUpdates)
-            {
-                if (chkOffline.Checked && chkManual.Checked)
-                    agent.DownloadUpdatesOffline(GetUpdates(), true);
-                else
-                    agent.DownloadUpdates(GetUpdates(), true);
-            }
+            WuAgent.RetCodes ret = WuAgent.RetCodes.Undefined;
+            if (chkManual.Checked)
+                ret = agent.DownloadUpdatesManually(GetUpdates(), true);
+            else
+                ret = agent.DownloadUpdates(GetUpdates(), true);
+            ShowResult(WuAgent.AgentOperation.InstallingUpdates, ret);
         }
 
         private void btnUnInstall_Click(object sender, EventArgs e)
         {
+            if (!MiscFunc.IsAdministrator())
+            {
+                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to remove updates."), Program.mName);
+                return;
+            }
+
             if (!agent.IsActive() || agent.IsBusy())
                 return;
-            if (CurrentList == UpdateLists.InstaledUpdates)
-            {
-                if (chkOffline.Checked && chkManual.Checked)
-                    agent.UnInstallUpdatesOffline(GetUpdates());
-                else
-                    agent.UnInstallUpdates(GetUpdates());
-            }
+            WuAgent.RetCodes ret = WuAgent.RetCodes.Undefined;
+            if (chkManual.Checked)
+                ret = agent.UnInstallUpdatesOffline(GetUpdates());
+            else
+                ret = agent.UnInstallUpdates(GetUpdates());
+            ShowResult(WuAgent.AgentOperation.RemoveingUpdates, ret);
         }
 
         private void btnHide_Click(object sender, EventArgs e)
@@ -764,24 +831,28 @@ namespace wumgr
         private void btnCancel_Click(object sender, EventArgs e)
         {
             agent.CancelOperations();
-            OnFinished(null, null);
+        }
+
+        string GetOpStr(WuAgent.AgentOperation op)
+        {
+            switch (op)
+            {
+                case WuAgent.AgentOperation.CheckingUpdates: return "Checking for Updates";
+                case WuAgent.AgentOperation.PreparingCheck: return "Preparing Check"; 
+                case WuAgent.AgentOperation.PreparingUpdates:
+                case WuAgent.AgentOperation.DownloadingUpdates: return "Downloading Updates"; 
+                case WuAgent.AgentOperation.InstallingUpdates: return "Installing Updates"; 
+                case WuAgent.AgentOperation.RemoveingUpdates: return "Removing Updates"; 
+                case WuAgent.AgentOperation.CancelingOperation: return "Canceling Operation"; 
+            }
+            return "Unknown Operation";
         }
 
         void OnProgress(object sender, WuAgent.ProgressArgs args)
         {
-            string Status = "";
+            string Status = GetOpStr(agent.CurOperation());
 
-            switch(agent.CurOperation())
-            {
-                case WuAgent.AgentOperation.CheckingUpdates:    Status = "Checking for Updates"; break;
-                case WuAgent.AgentOperation.PreparingCheck:     Status = "Preparing Check"; break;
-                case WuAgent.AgentOperation.PreparingUpdates:
-                case WuAgent.AgentOperation.DownloadingUpdates: Status = "Downloading Updates"; break;
-                case WuAgent.AgentOperation.InstallingUpdates:  Status = "Installing Updates"; break;
-                case WuAgent.AgentOperation.RemoveingUpdtes:    Status = "Removing Updates"; break;
-            }
-
-            if (args.TotalUpdates == -1)
+            if (args.TotalCount == -1)
             {
                 progTotal.Style = ProgressBarStyle.Marquee;
                 progTotal.MarqueeAnimationSpeed = 30;
@@ -792,10 +863,11 @@ namespace wumgr
                 progTotal.Style = ProgressBarStyle.Continuous;
                 progTotal.MarqueeAnimationSpeed = 0;
 
-                progTotal.Value = args.TotalPercent;
+                if(args.TotalPercent >= 0 && args.TotalPercent <= 100)
+                    progTotal.Value = args.TotalPercent;
 
-                if(args.TotalUpdates > 1)
-                    Status += " " + args.CurrentIndex + "/" + args.TotalUpdates + " ";
+                if(args.TotalCount > 1)
+                    Status += " " + args.CurrentIndex + "/" + args.TotalCount + " ";
 
                 //if (args.UpdatePercent != 0)
                 //    Status += " " + args.UpdatePercent + "%";
@@ -818,7 +890,7 @@ namespace wumgr
             {
                 LoadList();
 
-                if (MiscFunc.parseInt(Program.IniReadValue("Options", "Refresh", "0")) == 1 && (agent.CurOperation() == WuAgent.AgentOperation.InstallingUpdates || agent.CurOperation() == WuAgent.AgentOperation.RemoveingUpdtes))
+                if (MiscFunc.parseInt(Program.IniReadValue("Options", "Refresh", "0")) == 1 && (agent.CurOperation() == WuAgent.AgentOperation.InstallingUpdates || agent.CurOperation() == WuAgent.AgentOperation.RemoveingUpdates))
                     doUpdte = true;
             }
         }
@@ -828,6 +900,58 @@ namespace wumgr
             UpdateState();
             lblStatus.Text = "";
             toolTip.SetToolTip(lblStatus, "");
+
+            ShowResult(args.Op, args.Ret, args.RebootNeeded);
+        }
+
+        private void ShowResult(WuAgent.AgentOperation op, WuAgent.RetCodes ret, bool reboot = false)
+        {
+            if (op == WuAgent.AgentOperation.DownloadingUpdates && chkManual.Checked)
+            {
+                if (ret == WuAgent.RetCodes.Success)
+                {
+                    MessageBox.Show(MiscFunc.fmt("Updates downloaded to {0}, \r\nready to be installed by the user.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else if (ret == WuAgent.RetCodes.DownloadFailed)
+                {
+                    MessageBox.Show(MiscFunc.fmt("Updates downloaded to {0}, \r\nsome updates failed to download.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+            }
+
+            if (op == WuAgent.AgentOperation.InstallingUpdates && reboot)
+            {
+                if (ret == WuAgent.RetCodes.Success)
+                {
+                    MessageBox.Show(MiscFunc.fmt("Updates successfully installed, howeever a reboot is required.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else if (ret == WuAgent.RetCodes.DownloadFailed)
+                {
+                    MessageBox.Show(MiscFunc.fmt("Instalation of some Updates has failed, also a reboot is required.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+            }
+
+            string status = "";
+            switch (ret)
+            {
+                case WuAgent.RetCodes.Success:
+                case WuAgent.RetCodes.Abborted:
+                case WuAgent.RetCodes.InProgress: return;
+                case WuAgent.RetCodes.AccessError: status = MiscFunc.fmt("Required privilegs are not available"); break;
+                case WuAgent.RetCodes.Busy: status = MiscFunc.fmt("Anotehr operation is already in progress"); break;
+                case WuAgent.RetCodes.DownloadFailed: status = MiscFunc.fmt("Download failed"); break;
+                case WuAgent.RetCodes.InstallFailed: status = MiscFunc.fmt("Instalation failed"); break;
+                case WuAgent.RetCodes.NoUpdated: status = MiscFunc.fmt("No selected updates or no updates eligible for the operation"); break;
+                case WuAgent.RetCodes.InternalError: status = MiscFunc.fmt("Inernal error"); break;
+                case WuAgent.RetCodes.FileNotFound: status = MiscFunc.fmt("Required file(s) could not be found"); break;
+            }
+
+            string action = GetOpStr(op);
+
+            MessageBox.Show(MiscFunc.fmt("{0} failed: {1}.", action, status), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void dlSource_SelectedIndexChanged(object sender, EventArgs e)
@@ -839,7 +963,6 @@ namespace wumgr
         {
             dlSource.Enabled = !chkOffline.Checked;
             chkDownload.Enabled = chkOffline.Checked;
-            chkManual.Enabled = chkOffline.Checked;
 
             SetConfig("Offline", chkOffline.Checked ? "1" : "0");
         }
@@ -861,34 +984,122 @@ namespace wumgr
             GPO.ConfigDriverAU((int)chkDrivers.CheckState);
         }
 
-        private void dlPolMode_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            dlShDay.Enabled = dlShTime.Enabled = dlPolMode.SelectedIndex == 4;
-
-            if (mSuspendUpdate)
-                return;
-            GPO.ConfigAU(dlPolMode.SelectedIndex, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
-        }
-
         private void dlShDay_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-            GPO.ConfigAU(4, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+            GPO.ConfigAU(GPO.AUOptions.Scheduled, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
         }
 
         private void dlShTime_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
-            GPO.ConfigAU(4, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+            GPO.ConfigAU(GPO.AUOptions.Scheduled, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+        }
+
+        private void radGPO_CheckedChanged(object sender, EventArgs e)
+        {
+            dlShDay.Enabled = dlShTime.Enabled = radSchedule.Checked;
+
+            if (radDisable.Checked)
+            {
+                switch (mGPORespect)
+                {
+                    case GPO.Respect.Partial:
+                        if (chkBlockMS.Checked == true)
+                        {
+                            chkDisableAU.Enabled = true;
+                            break;
+                        }
+                        goto case GPO.Respect.None;
+                    case GPO.Respect.None:
+                        chkDisableAU.Enabled = false;
+                        chkDisableAU.Checked = true;
+                        break;
+                    case GPO.Respect.Full: // we can do whatever we want
+                        chkDisableAU.Enabled = mWinVersion >= 10;
+                        break;
+                }
+            }
+            else
+                chkDisableAU.Enabled = false;
+
+            if (mSuspendUpdate)
+                return;
+
+            if (radDisable.Checked)
+            {
+                if(chkDisableAU.Checked)
+                    GPO.DisableAU(true);
+
+                GPO.ConfigAU(GPO.AUOptions.Disabled);
+            }
+            else
+            {
+                chkDisableAU.Checked = false; // Note: this triggers chkDisableAU_CheckedChanged
+
+                if (radNotify.Checked)
+                    GPO.ConfigAU(GPO.AUOptions.Notification);
+                else if (radDownload.Checked)
+                    GPO.ConfigAU(GPO.AUOptions.Download);
+                else if (radSchedule.Checked)
+                    GPO.ConfigAU(GPO.AUOptions.Scheduled, dlShDay.SelectedIndex, dlShTime.SelectedIndex);
+                else //if (radDefault.Checked)
+                    GPO.ConfigAU(GPO.AUOptions.Default);
+            }
         }
 
         private void chkBlockMS_CheckedChanged(object sender, EventArgs e)
         {
             if (mSuspendUpdate)
                 return;
+
+            if (radDisable.Checked && mGPORespect == GPO.Respect.Partial)
+            {
+                if (chkBlockMS.Checked)
+                {
+                    chkDisableAU.Enabled = true;
+                }
+                else
+                {
+                    if (!chkDisableAU.Checked)
+                    {
+                        switch (MessageBox.Show("Your version of Windows does not respect the standard GPO's, to keep autoamtic windows update disabled update facilitation services must be disabled.", Program.mName, MessageBoxButtons.YesNoCancel))
+                        {
+                            case DialogResult.Yes:
+                                chkDisableAU.Checked = true; // Note: this triggers chkDisableAU_CheckedChanged
+                                break;
+                            case DialogResult.No:
+                                radDefault.Checked = true;
+                                break;
+                            case DialogResult.Cancel:
+                                mSuspendUpdate = true;
+                                chkBlockMS.Checked = true;
+                                mSuspendUpdate = false;
+                                return;
+                        }
+                    }
+                    chkDisableAU.Enabled = false;
+                }
+            }
+
             GPO.BlockMS(chkBlockMS.Checked);
+        }
+
+        private void chkDisableAU_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkDisableAU.Checked)
+            {
+                chkHideWU.Checked = true;
+                chkHideWU.Enabled = false;
+            }
+            else
+                chkHideWU.Enabled = true;
+
+            if (mSuspendUpdate)
+                return;
+            GPO.DisableAU(chkDisableAU.Checked);
         }
 
         private void chkAutoRun_CheckedChanged(object sender, EventArgs e)
@@ -897,6 +1108,18 @@ namespace wumgr
             AutoUpdate = chkAutoRun.Checked ? (AutoUpdateOptions)dlAutoCheck.SelectedIndex : AutoUpdateOptions.No;
             if (mSuspendUpdate)
                 return;
+            if (chkAutoRun.CheckState == CheckState.Indeterminate)
+                return;
+            if (MiscFunc.IsRunningAsUwp())
+            {
+                if (chkAutoRun.CheckState == CheckState.Checked)
+                {
+                    mSuspendUpdate = true;
+                    chkAutoRun.CheckState = CheckState.Indeterminate;
+                    mSuspendUpdate = false;
+                }
+                return;
+            }
             Program.AutoStart(chkAutoRun.Checked);
         }
 
@@ -935,6 +1158,13 @@ namespace wumgr
             if (mSuspendUpdate)
                 return;
             GPO.HideUpdatePage(chkHideWU.Checked);
+        }
+
+        private void chkStore_CheckedChanged(object sender, EventArgs e)
+        {
+            if (mSuspendUpdate)
+                return;
+            GPO.SetStoreAU(chkStore.Checked);
         }
 
         private void updateView_SelectedIndexChanged(object sender, EventArgs e)

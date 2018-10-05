@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.7] - 2018-10-05
+### Added
+- option to disable update facilitation services
+- ability to "manually" install updates
+
+### Changed
+- automatic update GPO handling, now much more user friendly
+- reworked error handling to allow limited non admin operation
+- reworked status codes for better ui expirience
+- when download fails but the file was already downloaded in the previuse session the old file is used
+- reworked UAC bypass handling
+
+### Fixed
+- windows 10 version detection
+- issue when started rom a read only directory, fallback to ...\{UserProfile}\Downloads\WuMgr\
+- crash bug when firewall blocks downloads
+- issue client not properl abborting operations on cancesss
+
 ## [0.6b] - 2018-09-30
 
 ### Fixed

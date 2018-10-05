@@ -61,28 +61,31 @@
             this.btnInstalled = new System.Windows.Forms.CheckBox();
             this.btnWinUpd = new System.Windows.Forms.CheckBox();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.chkBlockMS = new System.Windows.Forms.CheckBox();
-            this.chkDrivers = new System.Windows.Forms.CheckBox();
-            this.dlShTime = new System.Windows.Forms.ComboBox();
-            this.dlShDay = new System.Windows.Forms.ComboBox();
-            this.dlPolMode = new System.Windows.Forms.ComboBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.dlAutoCheck = new System.Windows.Forms.ComboBox();
+            this.tabOptions = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.chkNoUAC = new System.Windows.Forms.CheckBox();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.chkHideWU = new System.Windows.Forms.CheckBox();
-            this.chkMsUpd = new System.Windows.Forms.CheckBox();
-            this.tabControl2 = new System.Windows.Forms.TabControl();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.chkOld = new System.Windows.Forms.CheckBox();
+            this.dlAutoCheck = new System.Windows.Forms.ComboBox();
             this.dlSource = new System.Windows.Forms.ComboBox();
             this.chkOffline = new System.Windows.Forms.CheckBox();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.chkDownload = new System.Windows.Forms.CheckBox();
+            this.chkMsUpd = new System.Windows.Forms.CheckBox();
+            this.chkOld = new System.Windows.Forms.CheckBox();
             this.chkManual = new System.Windows.Forms.CheckBox();
+            this.chkDownload = new System.Windows.Forms.CheckBox();
+            this.tabGPO = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
+            this.chkDrivers = new System.Windows.Forms.CheckBox();
+            this.chkStore = new System.Windows.Forms.CheckBox();
+            this.chkHideWU = new System.Windows.Forms.CheckBox();
+            this.chkDisableAU = new System.Windows.Forms.CheckBox();
+            this.radDefault = new System.Windows.Forms.RadioButton();
+            this.radSchedule = new System.Windows.Forms.RadioButton();
+            this.radDownload = new System.Windows.Forms.RadioButton();
+            this.chkBlockMS = new System.Windows.Forms.CheckBox();
+            this.radNotify = new System.Windows.Forms.RadioButton();
+            this.radDisable = new System.Windows.Forms.RadioButton();
+            this.dlShDay = new System.Windows.Forms.ComboBox();
+            this.dlShTime = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
@@ -90,25 +93,22 @@
             this.tableLayoutPanel4.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.tableLayoutPanel6.SuspendLayout();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.tabPage3.SuspendLayout();
-            this.tabControl2.SuspendLayout();
-            this.tabPage4.SuspendLayout();
-            this.tabPage5.SuspendLayout();
+            this.tabOptions.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.tabGPO.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // chkAutoRun
             // 
             this.chkAutoRun.AutoSize = true;
-            this.chkAutoRun.Location = new System.Drawing.Point(7, 7);
+            this.chkAutoRun.Location = new System.Drawing.Point(3, 16);
             this.chkAutoRun.Name = "chkAutoRun";
             this.chkAutoRun.Size = new System.Drawing.Size(117, 17);
             this.chkAutoRun.TabIndex = 0;
             this.chkAutoRun.Text = "Run in background";
+            this.chkAutoRun.ThreeState = true;
             this.toolTip.SetToolTip(this.chkAutoRun, "Auto Start with Windows");
             this.chkAutoRun.UseVisualStyleBackColor = true;
             this.chkAutoRun.CheckedChanged += new System.EventHandler(this.chkAutoRun_CheckedChanged);
@@ -241,7 +241,7 @@
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel6, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.tabControl1, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -452,64 +452,179 @@
             this.lblStatus.Size = new System.Drawing.Size(180, 13);
             this.lblStatus.TabIndex = 9;
             // 
-            // tableLayoutPanel6
-            // 
-            this.tableLayoutPanel6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel6.ColumnCount = 1;
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Controls.Add(this.tabControl1, 0, 1);
-            this.tableLayoutPanel6.Controls.Add(this.tabControl2, 0, 0);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 211);
-            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45.25862F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 54.74138F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(188, 232);
-            this.tableLayoutPanel6.TabIndex = 1;
-            // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Location = new System.Drawing.Point(3, 108);
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl1.Controls.Add(this.tabOptions);
+            this.tabControl1.Controls.Add(this.tabGPO);
+            this.tabControl1.Location = new System.Drawing.Point(3, 213);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(182, 119);
+            this.tabControl1.Size = new System.Drawing.Size(182, 227);
             this.tabControl1.TabIndex = 1;
             // 
-            // tabPage1
+            // tabOptions
             // 
-            this.tabPage1.Controls.Add(this.chkBlockMS);
-            this.tabPage1.Controls.Add(this.chkDrivers);
-            this.tabPage1.Controls.Add(this.dlShTime);
-            this.tabPage1.Controls.Add(this.dlShDay);
-            this.tabPage1.Controls.Add(this.dlPolMode);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(174, 93);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "GPO";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.tabOptions.Controls.Add(this.groupBox1);
+            this.tabOptions.Controls.Add(this.dlSource);
+            this.tabOptions.Controls.Add(this.chkOffline);
+            this.tabOptions.Controls.Add(this.chkMsUpd);
+            this.tabOptions.Controls.Add(this.chkOld);
+            this.tabOptions.Controls.Add(this.chkManual);
+            this.tabOptions.Controls.Add(this.chkDownload);
+            this.tabOptions.Location = new System.Drawing.Point(4, 22);
+            this.tabOptions.Name = "tabOptions";
+            this.tabOptions.Padding = new System.Windows.Forms.Padding(3);
+            this.tabOptions.Size = new System.Drawing.Size(174, 201);
+            this.tabOptions.TabIndex = 0;
+            this.tabOptions.Text = "Options";
+            this.tabOptions.UseVisualStyleBackColor = true;
             // 
-            // chkBlockMS
+            // groupBox1
             // 
-            this.chkBlockMS.AutoSize = true;
-            this.chkBlockMS.Location = new System.Drawing.Point(5, 77);
-            this.chkBlockMS.Name = "chkBlockMS";
-            this.chkBlockMS.Size = new System.Drawing.Size(173, 17);
-            this.chkBlockMS.TabIndex = 4;
-            this.chkBlockMS.Text = "Restrict Access to WU Servers";
-            this.chkBlockMS.UseVisualStyleBackColor = true;
-            this.chkBlockMS.CheckedChanged += new System.EventHandler(this.chkBlockMS_CheckedChanged);
+            this.groupBox1.Controls.Add(this.chkAutoRun);
+            this.groupBox1.Controls.Add(this.chkNoUAC);
+            this.groupBox1.Controls.Add(this.dlAutoCheck);
+            this.groupBox1.Location = new System.Drawing.Point(1, 125);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(170, 75);
+            this.groupBox1.TabIndex = 8;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Startup";
+            // 
+            // chkNoUAC
+            // 
+            this.chkNoUAC.AutoSize = true;
+            this.chkNoUAC.Location = new System.Drawing.Point(3, 56);
+            this.chkNoUAC.Name = "chkNoUAC";
+            this.chkNoUAC.Size = new System.Drawing.Size(154, 17);
+            this.chkNoUAC.TabIndex = 1;
+            this.chkNoUAC.Text = "Always run as Administrator";
+            this.chkNoUAC.UseVisualStyleBackColor = true;
+            this.chkNoUAC.CheckedChanged += new System.EventHandler(this.chkNoUAC_CheckedChanged);
+            // 
+            // dlAutoCheck
+            // 
+            this.dlAutoCheck.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dlAutoCheck.Enabled = false;
+            this.dlAutoCheck.FormattingEnabled = true;
+            this.dlAutoCheck.Items.AddRange(new object[] {
+            "No auto search for updates",
+            "Search updates every day",
+            "Search updates once a week",
+            "Search updates every month"});
+            this.dlAutoCheck.Location = new System.Drawing.Point(3, 33);
+            this.dlAutoCheck.Name = "dlAutoCheck";
+            this.dlAutoCheck.Size = new System.Drawing.Size(163, 21);
+            this.dlAutoCheck.TabIndex = 2;
+            this.dlAutoCheck.SelectedIndexChanged += new System.EventHandler(this.dlAutoCheck_SelectedIndexChanged);
+            // 
+            // dlSource
+            // 
+            this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dlSource.Enabled = false;
+            this.dlSource.FormattingEnabled = true;
+            this.dlSource.Location = new System.Drawing.Point(4, 5);
+            this.dlSource.Name = "dlSource";
+            this.dlSource.Size = new System.Drawing.Size(164, 21);
+            this.dlSource.TabIndex = 0;
+            this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
+            // 
+            // chkOffline
+            // 
+            this.chkOffline.AutoSize = true;
+            this.chkOffline.Checked = true;
+            this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkOffline.Location = new System.Drawing.Point(4, 29);
+            this.chkOffline.Name = "chkOffline";
+            this.chkOffline.Size = new System.Drawing.Size(86, 17);
+            this.chkOffline.TabIndex = 1;
+            this.chkOffline.Text = "Offline Mode";
+            this.chkOffline.UseVisualStyleBackColor = true;
+            this.chkOffline.CheckedChanged += new System.EventHandler(this.chkOffline_CheckedChanged);
+            // 
+            // chkMsUpd
+            // 
+            this.chkMsUpd.AutoSize = true;
+            this.chkMsUpd.Location = new System.Drawing.Point(4, 93);
+            this.chkMsUpd.Name = "chkMsUpd";
+            this.chkMsUpd.Size = new System.Drawing.Size(149, 17);
+            this.chkMsUpd.TabIndex = 0;
+            this.chkMsUpd.Text = "Register Microsoft Update";
+            this.chkMsUpd.UseVisualStyleBackColor = true;
+            this.chkMsUpd.CheckedChanged += new System.EventHandler(this.chkMsUpd_CheckedChanged);
+            // 
+            // chkOld
+            // 
+            this.chkOld.AutoSize = true;
+            this.chkOld.Location = new System.Drawing.Point(4, 77);
+            this.chkOld.Name = "chkOld";
+            this.chkOld.Size = new System.Drawing.Size(119, 17);
+            this.chkOld.TabIndex = 2;
+            this.chkOld.Text = "Include superseded";
+            this.chkOld.UseVisualStyleBackColor = true;
+            this.chkOld.CheckedChanged += new System.EventHandler(this.chkOld_CheckedChanged);
+            // 
+            // chkManual
+            // 
+            this.chkManual.AutoSize = true;
+            this.chkManual.Location = new System.Drawing.Point(4, 61);
+            this.chkManual.Name = "chkManual";
+            this.chkManual.Size = new System.Drawing.Size(148, 17);
+            this.chkManual.TabIndex = 0;
+            this.chkManual.Text = "\'Manual\' Download/Install";
+            this.chkManual.UseVisualStyleBackColor = true;
+            this.chkManual.CheckedChanged += new System.EventHandler(this.chkManual_CheckedChanged);
+            // 
+            // chkDownload
+            // 
+            this.chkDownload.AutoSize = true;
+            this.chkDownload.Checked = true;
+            this.chkDownload.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDownload.Location = new System.Drawing.Point(4, 45);
+            this.chkDownload.Name = "chkDownload";
+            this.chkDownload.Size = new System.Drawing.Size(145, 17);
+            this.chkDownload.TabIndex = 3;
+            this.chkDownload.Text = "Download wsusscn2.cab";
+            this.chkDownload.UseVisualStyleBackColor = true;
+            this.chkDownload.CheckedChanged += new System.EventHandler(this.chkDownload_CheckedChanged);
+            // 
+            // tabGPO
+            // 
+            this.tabGPO.Controls.Add(this.label1);
+            this.tabGPO.Controls.Add(this.chkDrivers);
+            this.tabGPO.Controls.Add(this.chkStore);
+            this.tabGPO.Controls.Add(this.chkHideWU);
+            this.tabGPO.Controls.Add(this.chkDisableAU);
+            this.tabGPO.Controls.Add(this.radDefault);
+            this.tabGPO.Controls.Add(this.radSchedule);
+            this.tabGPO.Controls.Add(this.radDownload);
+            this.tabGPO.Controls.Add(this.chkBlockMS);
+            this.tabGPO.Controls.Add(this.radNotify);
+            this.tabGPO.Controls.Add(this.radDisable);
+            this.tabGPO.Controls.Add(this.dlShDay);
+            this.tabGPO.Controls.Add(this.dlShTime);
+            this.tabGPO.Location = new System.Drawing.Point(4, 22);
+            this.tabGPO.Name = "tabGPO";
+            this.tabGPO.Padding = new System.Windows.Forms.Padding(3);
+            this.tabGPO.Size = new System.Drawing.Size(174, 201);
+            this.tabGPO.TabIndex = 1;
+            this.tabGPO.Text = "Auto Update";
+            this.tabGPO.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label1.Location = new System.Drawing.Point(0, 149);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(174, 2);
+            this.label1.TabIndex = 22;
             // 
             // chkDrivers
             // 
             this.chkDrivers.AutoSize = true;
-            this.chkDrivers.Location = new System.Drawing.Point(5, 59);
+            this.chkDrivers.Location = new System.Drawing.Point(4, 186);
             this.chkDrivers.Name = "chkDrivers";
             this.chkDrivers.Size = new System.Drawing.Size(97, 17);
             this.chkDrivers.TabIndex = 7;
@@ -517,6 +632,129 @@
             this.chkDrivers.ThreeState = true;
             this.chkDrivers.UseVisualStyleBackColor = true;
             this.chkDrivers.CheckStateChanged += new System.EventHandler(this.chkDrivers_CheckStateChanged);
+            // 
+            // chkStore
+            // 
+            this.chkStore.AutoSize = true;
+            this.chkStore.Location = new System.Drawing.Point(4, 170);
+            this.chkStore.Name = "chkStore";
+            this.chkStore.Size = new System.Drawing.Size(152, 17);
+            this.chkStore.TabIndex = 21;
+            this.chkStore.Text = "Disable Store Auto Update";
+            this.chkStore.UseVisualStyleBackColor = true;
+            this.chkStore.CheckedChanged += new System.EventHandler(this.chkStore_CheckedChanged);
+            // 
+            // chkHideWU
+            // 
+            this.chkHideWU.AutoSize = true;
+            this.chkHideWU.Location = new System.Drawing.Point(4, 154);
+            this.chkHideWU.Name = "chkHideWU";
+            this.chkHideWU.Size = new System.Drawing.Size(139, 17);
+            this.chkHideWU.TabIndex = 1;
+            this.chkHideWU.Text = "Hide WU Settings Page";
+            this.chkHideWU.UseVisualStyleBackColor = true;
+            this.chkHideWU.CheckedChanged += new System.EventHandler(this.chkHideWU_CheckedChanged);
+            // 
+            // chkDisableAU
+            // 
+            this.chkDisableAU.Location = new System.Drawing.Point(16, 37);
+            this.chkDisableAU.Name = "chkDisableAU";
+            this.chkDisableAU.Size = new System.Drawing.Size(155, 21);
+            this.chkDisableAU.TabIndex = 20;
+            this.chkDisableAU.Text = "Disable Update Facilitators";
+            this.chkDisableAU.UseVisualStyleBackColor = true;
+            this.chkDisableAU.CheckedChanged += new System.EventHandler(this.chkDisableAU_CheckedChanged);
+            // 
+            // radDefault
+            // 
+            this.radDefault.AutoSize = true;
+            this.radDefault.Location = new System.Drawing.Point(4, 130);
+            this.radDefault.Name = "radDefault";
+            this.radDefault.Size = new System.Drawing.Size(151, 17);
+            this.radDefault.TabIndex = 19;
+            this.radDefault.TabStop = true;
+            this.radDefault.Text = "Automatic Update (default)";
+            this.radDefault.UseVisualStyleBackColor = true;
+            this.radDefault.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
+            // 
+            // radSchedule
+            // 
+            this.radSchedule.AutoSize = true;
+            this.radSchedule.Location = new System.Drawing.Point(4, 91);
+            this.radSchedule.Name = "radSchedule";
+            this.radSchedule.Size = new System.Drawing.Size(121, 17);
+            this.radSchedule.TabIndex = 18;
+            this.radSchedule.TabStop = true;
+            this.radSchedule.Text = "Sheduled Instalation";
+            this.radSchedule.UseVisualStyleBackColor = true;
+            this.radSchedule.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
+            // 
+            // radDownload
+            // 
+            this.radDownload.AutoSize = true;
+            this.radDownload.Location = new System.Drawing.Point(4, 73);
+            this.radDownload.Name = "radDownload";
+            this.radDownload.Size = new System.Drawing.Size(97, 17);
+            this.radDownload.TabIndex = 17;
+            this.radDownload.TabStop = true;
+            this.radDownload.Text = "Download Only";
+            this.radDownload.UseVisualStyleBackColor = true;
+            this.radDownload.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
+            // 
+            // chkBlockMS
+            // 
+            this.chkBlockMS.AutoSize = true;
+            this.chkBlockMS.Location = new System.Drawing.Point(4, 4);
+            this.chkBlockMS.Name = "chkBlockMS";
+            this.chkBlockMS.Size = new System.Drawing.Size(164, 17);
+            this.chkBlockMS.TabIndex = 4;
+            this.chkBlockMS.Text = "Block Access to WU Servers";
+            this.chkBlockMS.UseVisualStyleBackColor = true;
+            this.chkBlockMS.CheckedChanged += new System.EventHandler(this.chkBlockMS_CheckedChanged);
+            // 
+            // radNotify
+            // 
+            this.radNotify.AutoSize = true;
+            this.radNotify.Location = new System.Drawing.Point(4, 55);
+            this.radNotify.Name = "radNotify";
+            this.radNotify.Size = new System.Drawing.Size(102, 17);
+            this.radNotify.TabIndex = 16;
+            this.radNotify.TabStop = true;
+            this.radNotify.Text = "Notification Only";
+            this.radNotify.UseVisualStyleBackColor = true;
+            this.radNotify.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
+            // 
+            // radDisable
+            // 
+            this.radDisable.AutoSize = true;
+            this.radDisable.Location = new System.Drawing.Point(4, 22);
+            this.radDisable.Name = "radDisable";
+            this.radDisable.Size = new System.Drawing.Size(148, 17);
+            this.radDisable.TabIndex = 15;
+            this.radDisable.TabStop = true;
+            this.radDisable.Text = "Disable Automatic Update";
+            this.radDisable.UseVisualStyleBackColor = true;
+            this.radDisable.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
+            // 
+            // dlShDay
+            // 
+            this.dlShDay.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dlShDay.Enabled = false;
+            this.dlShDay.FormattingEnabled = true;
+            this.dlShDay.Items.AddRange(new object[] {
+            "Daily",
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"});
+            this.dlShDay.Location = new System.Drawing.Point(18, 108);
+            this.dlShDay.Name = "dlShDay";
+            this.dlShDay.Size = new System.Drawing.Size(90, 21);
+            this.dlShDay.TabIndex = 5;
+            this.dlShDay.SelectedIndexChanged += new System.EventHandler(this.dlShDay_SelectedIndexChanged);
             // 
             // dlShTime
             // 
@@ -548,215 +786,11 @@
             "21:00",
             "22:00",
             "23:00"});
-            this.dlShTime.Location = new System.Drawing.Point(101, 35);
+            this.dlShTime.Location = new System.Drawing.Point(114, 108);
             this.dlShTime.Name = "dlShTime";
-            this.dlShTime.Size = new System.Drawing.Size(69, 21);
+            this.dlShTime.Size = new System.Drawing.Size(55, 21);
             this.dlShTime.TabIndex = 6;
             this.dlShTime.SelectedIndexChanged += new System.EventHandler(this.dlShTime_SelectedIndexChanged);
-            // 
-            // dlShDay
-            // 
-            this.dlShDay.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dlShDay.Enabled = false;
-            this.dlShDay.FormattingEnabled = true;
-            this.dlShDay.Items.AddRange(new object[] {
-            "Daily",
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"});
-            this.dlShDay.Location = new System.Drawing.Point(5, 35);
-            this.dlShDay.Name = "dlShDay";
-            this.dlShDay.Size = new System.Drawing.Size(90, 21);
-            this.dlShDay.TabIndex = 5;
-            this.dlShDay.SelectedIndexChanged += new System.EventHandler(this.dlShDay_SelectedIndexChanged);
-            // 
-            // dlPolMode
-            // 
-            this.dlPolMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dlPolMode.FormattingEnabled = true;
-            this.dlPolMode.Items.AddRange(new object[] {
-            "Automatic (default)",
-            "Disabled",
-            "Notification only",
-            "Download only",
-            "Scheduled Installation",
-            "Managed by Admin"});
-            this.dlPolMode.Location = new System.Drawing.Point(5, 8);
-            this.dlPolMode.Name = "dlPolMode";
-            this.dlPolMode.Size = new System.Drawing.Size(165, 21);
-            this.dlPolMode.TabIndex = 4;
-            this.dlPolMode.SelectedIndexChanged += new System.EventHandler(this.dlPolMode_SelectedIndexChanged);
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.dlAutoCheck);
-            this.tabPage2.Controls.Add(this.chkNoUAC);
-            this.tabPage2.Controls.Add(this.chkAutoRun);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(174, 93);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Start";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // dlAutoCheck
-            // 
-            this.dlAutoCheck.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dlAutoCheck.Enabled = false;
-            this.dlAutoCheck.FormattingEnabled = true;
-            this.dlAutoCheck.Items.AddRange(new object[] {
-            "No auto search for updates",
-            "Search updates every day",
-            "Search updates once a week",
-            "Search updates every month"});
-            this.dlAutoCheck.Location = new System.Drawing.Point(5, 26);
-            this.dlAutoCheck.Name = "dlAutoCheck";
-            this.dlAutoCheck.Size = new System.Drawing.Size(163, 21);
-            this.dlAutoCheck.TabIndex = 2;
-            this.dlAutoCheck.SelectedIndexChanged += new System.EventHandler(this.dlAutoCheck_SelectedIndexChanged);
-            // 
-            // chkNoUAC
-            // 
-            this.chkNoUAC.AutoSize = true;
-            this.chkNoUAC.Location = new System.Drawing.Point(7, 74);
-            this.chkNoUAC.Name = "chkNoUAC";
-            this.chkNoUAC.Size = new System.Drawing.Size(164, 17);
-            this.chkNoUAC.TabIndex = 1;
-            this.chkNoUAC.Text = "Bypass User Account Control";
-            this.chkNoUAC.UseVisualStyleBackColor = true;
-            this.chkNoUAC.CheckedChanged += new System.EventHandler(this.chkNoUAC_CheckedChanged);
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Controls.Add(this.chkHideWU);
-            this.tabPage3.Controls.Add(this.chkMsUpd);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(174, 93);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Misc";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // chkHideWU
-            // 
-            this.chkHideWU.AutoSize = true;
-            this.chkHideWU.Location = new System.Drawing.Point(7, 28);
-            this.chkHideWU.Name = "chkHideWU";
-            this.chkHideWU.Size = new System.Drawing.Size(139, 17);
-            this.chkHideWU.TabIndex = 1;
-            this.chkHideWU.Text = "Hide WU Settings Page";
-            this.chkHideWU.UseVisualStyleBackColor = true;
-            this.chkHideWU.CheckedChanged += new System.EventHandler(this.chkHideWU_CheckedChanged);
-            // 
-            // chkMsUpd
-            // 
-            this.chkMsUpd.AutoSize = true;
-            this.chkMsUpd.Location = new System.Drawing.Point(7, 7);
-            this.chkMsUpd.Name = "chkMsUpd";
-            this.chkMsUpd.Size = new System.Drawing.Size(149, 17);
-            this.chkMsUpd.TabIndex = 0;
-            this.chkMsUpd.Text = "Register Microsoft Update";
-            this.chkMsUpd.UseVisualStyleBackColor = true;
-            this.chkMsUpd.CheckedChanged += new System.EventHandler(this.chkMsUpd_CheckedChanged);
-            // 
-            // tabControl2
-            // 
-            this.tabControl2.Controls.Add(this.tabPage4);
-            this.tabControl2.Controls.Add(this.tabPage5);
-            this.tabControl2.Location = new System.Drawing.Point(3, 3);
-            this.tabControl2.Name = "tabControl2";
-            this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(182, 98);
-            this.tabControl2.TabIndex = 2;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Controls.Add(this.chkOld);
-            this.tabPage4.Controls.Add(this.dlSource);
-            this.tabPage4.Controls.Add(this.chkOffline);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(174, 72);
-            this.tabPage4.TabIndex = 0;
-            this.tabPage4.Text = "Update Source";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // chkOld
-            // 
-            this.chkOld.AutoSize = true;
-            this.chkOld.Location = new System.Drawing.Point(5, 50);
-            this.chkOld.Name = "chkOld";
-            this.chkOld.Size = new System.Drawing.Size(119, 17);
-            this.chkOld.TabIndex = 2;
-            this.chkOld.Text = "Include superseded";
-            this.chkOld.UseVisualStyleBackColor = true;
-            this.chkOld.CheckedChanged += new System.EventHandler(this.chkOld_CheckedChanged);
-            // 
-            // dlSource
-            // 
-            this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dlSource.Enabled = false;
-            this.dlSource.FormattingEnabled = true;
-            this.dlSource.Location = new System.Drawing.Point(5, 6);
-            this.dlSource.Name = "dlSource";
-            this.dlSource.Size = new System.Drawing.Size(164, 21);
-            this.dlSource.TabIndex = 0;
-            this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
-            // 
-            // chkOffline
-            // 
-            this.chkOffline.AutoSize = true;
-            this.chkOffline.Checked = true;
-            this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOffline.Location = new System.Drawing.Point(5, 32);
-            this.chkOffline.Name = "chkOffline";
-            this.chkOffline.Size = new System.Drawing.Size(86, 17);
-            this.chkOffline.TabIndex = 1;
-            this.chkOffline.Text = "Offline Mode";
-            this.chkOffline.UseVisualStyleBackColor = true;
-            this.chkOffline.CheckedChanged += new System.EventHandler(this.chkOffline_CheckedChanged);
-            // 
-            // tabPage5
-            // 
-            this.tabPage5.Controls.Add(this.chkDownload);
-            this.tabPage5.Controls.Add(this.chkManual);
-            this.tabPage5.Location = new System.Drawing.Point(4, 22);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(174, 72);
-            this.tabPage5.TabIndex = 1;
-            this.tabPage5.Text = "Offline Options";
-            this.tabPage5.UseVisualStyleBackColor = true;
-            // 
-            // chkDownload
-            // 
-            this.chkDownload.AutoSize = true;
-            this.chkDownload.Checked = true;
-            this.chkDownload.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDownload.Location = new System.Drawing.Point(5, 6);
-            this.chkDownload.Name = "chkDownload";
-            this.chkDownload.Size = new System.Drawing.Size(145, 17);
-            this.chkDownload.TabIndex = 3;
-            this.chkDownload.Text = "Download wsusscn2.cab";
-            this.chkDownload.UseVisualStyleBackColor = true;
-            this.chkDownload.CheckedChanged += new System.EventHandler(this.chkDownload_CheckedChanged);
-            // 
-            // chkManual
-            // 
-            this.chkManual.AutoSize = true;
-            this.chkManual.Location = new System.Drawing.Point(5, 24);
-            this.chkManual.Name = "chkManual";
-            this.chkManual.Size = new System.Drawing.Size(154, 17);
-            this.chkManual.TabIndex = 0;
-            this.chkManual.Text = "\"Manual\" Download/Install";
-            this.chkManual.UseVisualStyleBackColor = true;
-            this.chkManual.CheckedChanged += new System.EventHandler(this.chkManual_CheckedChanged);
             // 
             // tableLayoutPanel1
             // 
@@ -780,7 +814,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(684, 446);
+            this.ClientSize = new System.Drawing.Size(685, 447);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(700, 485);
@@ -796,19 +830,13 @@
             this.tableLayoutPanel4.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
-            this.tableLayoutPanel6.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
-            this.tabControl2.ResumeLayout(false);
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
-            this.tabPage5.ResumeLayout(false);
-            this.tabPage5.PerformLayout();
+            this.tabOptions.ResumeLayout(false);
+            this.tabOptions.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.tabGPO.ResumeLayout(false);
+            this.tabGPO.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -835,32 +863,21 @@
         private System.Windows.Forms.CheckBox btnInstalled;
         private System.Windows.Forms.CheckBox btnWinUpd;
         private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.CheckBox chkBlockMS;
         private System.Windows.Forms.CheckBox chkDrivers;
         private System.Windows.Forms.ComboBox dlShTime;
         private System.Windows.Forms.ComboBox dlShDay;
-        private System.Windows.Forms.ComboBox dlPolMode;
-        private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.CheckBox chkNoUAC;
-        private System.Windows.Forms.CheckBox chkAutoRun;
-        private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.CheckBox chkMsUpd;
-        private System.Windows.Forms.TabControl tabControl2;
-        private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.CheckBox chkOld;
         private System.Windows.Forms.ComboBox dlSource;
         private System.Windows.Forms.CheckBox chkOffline;
-        private System.Windows.Forms.TabPage tabPage5;
         private System.Windows.Forms.CheckBox chkDownload;
         private System.Windows.Forms.CheckBox chkManual;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.RichTextBox logBox;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
         private System.Windows.Forms.LinkLabel lblSupport;
-        private System.Windows.Forms.ComboBox dlAutoCheck;
         private System.Windows.Forms.CheckBox chkHideWU;
         private ListViewExtended updateView;
         private System.Windows.Forms.ColumnHeader columnHeader1;
@@ -869,6 +886,20 @@
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabOptions;
+        private System.Windows.Forms.ComboBox dlAutoCheck;
+        private System.Windows.Forms.CheckBox chkAutoRun;
+        private System.Windows.Forms.TabPage tabGPO;
+        private System.Windows.Forms.CheckBox chkStore;
+        private System.Windows.Forms.CheckBox chkDisableAU;
+        private System.Windows.Forms.RadioButton radDefault;
+        private System.Windows.Forms.RadioButton radSchedule;
+        private System.Windows.Forms.RadioButton radDownload;
+        private System.Windows.Forms.RadioButton radNotify;
+        private System.Windows.Forms.RadioButton radDisable;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label1;
     }
 }
 

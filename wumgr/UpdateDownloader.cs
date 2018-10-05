@@ -24,7 +24,9 @@ namespace wumgr
         private List<Task> mDownloads = null;
         private List<MsUpdate> mUpdates = null;
         private int mCurrentTask = 0;
+        private bool Canceled = false;
         private HttpTask mCurTask = null;
+        private string mInfo = "";
 
         public UpdateDownloader()
         {
@@ -35,8 +37,10 @@ namespace wumgr
             if (mDownloads != null)
                 return false;
 
+            Canceled = false;
             mDownloads = Downloads;
             mCurrentTask = 0;
+            mInfo = "";
             mUpdates = Updates;
 
             DownloadNextFile();
@@ -56,14 +60,29 @@ namespace wumgr
 
         private void DownloadNextFile()
         {
-            while (mCurrentTask != -1 && mDownloads.Count > mCurrentTask)
+            while (!Canceled && mDownloads.Count > mCurrentTask)
             {
                 Task Download = mDownloads[mCurrentTask];
+
+                if (mUpdates != null)
+                {
+                    foreach (MsUpdate update in mUpdates)
+                    {
+                        if (update.KB.Equals(Download.KB))
+                        {
+                            mInfo = update.Title;
+                            break;
+                        }
+                    }
+                }
+
                 mCurTask = new HttpTask(Download.Url, Download.Path, Download.FileName, true); // todo update flag
                 mCurTask.Progress += OnProgress;
                 mCurTask.Finished += OnFinished;
                 if (mCurTask.Start())
                     return;
+                // Failedto start this task lets try an otehr one
+                mCurrentTask++;
             }
 
             FinishedEventArgs args = new FinishedEventArgs();
@@ -76,7 +95,7 @@ namespace wumgr
 
         void OnProgress(object sender, HttpTask.ProgressEventArgs args)
         {
-            Progress?.Invoke(this, new ProgressEventArgs(mDownloads.Count, mDownloads.Count == 0 ? 0 : (100 * mCurrentTask + args.Percent) / mDownloads.Count, mCurrentTask, args.Percent));
+            Progress?.Invoke(this, new WuAgent.ProgressArgs(mDownloads.Count, mDownloads.Count == 0 ? 0 : (100 * mCurrentTask + args.Percent) / mDownloads.Count, mCurrentTask + 1, args.Percent, mInfo));
         }
 
         void OnFinished(object sender, HttpTask.FinishedEventArgs args)
@@ -84,15 +103,15 @@ namespace wumgr
             if (!args.Cancelled)
             {
                 Task Download = mDownloads[mCurrentTask];
-                if (args.ErrCode != 0)
+                if (!args.Success)
                 {
                     AppLog.Line("Download failed: {0}", args.GetError());
-                    if (File.Exists(mCurTask.DlPath + @"\" + mCurTask.DlName))
+                    if (mCurTask.DlName != null && File.Exists(mCurTask.DlPath + @"\" + mCurTask.DlName))
                         AppLog.Line("An older version is present and will be used.");
                     else
                         Download.Failed = true;
                 }
-                
+
                 Download.FileName = mCurTask.DlName;
                 mDownloads[mCurrentTask] = Download;
                 mCurTask = null;
@@ -100,7 +119,7 @@ namespace wumgr
                 mCurrentTask++;
             }
             else
-                mCurrentTask = -1;
+                Canceled = true;
             DownloadNextFile();
         }
 
@@ -122,21 +141,6 @@ namespace wumgr
         }
         public event EventHandler<FinishedEventArgs> Finished;
 
-        public class ProgressEventArgs : EventArgs
-        {
-            public ProgressEventArgs(int TotalFiles, int TotalPercent, int CurrentIndex, int CurrentPercent)
-            {
-                this.TotalFiles = TotalFiles;
-                this.TotalPercent = TotalPercent;
-                this.CurrentIndex = CurrentIndex;
-                this.CurrentPercent = CurrentPercent;
-            }
-
-            public int TotalFiles = 0;
-            public int TotalPercent = 0;
-            public int CurrentIndex = 0;
-            public int CurrentPercent = 0;
-        }
-        public event EventHandler<ProgressEventArgs> Progress;
+        public event EventHandler<WuAgent.ProgressArgs> Progress;
     }
 }

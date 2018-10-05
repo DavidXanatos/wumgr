@@ -13,6 +13,9 @@ using System.Windows.Forms;
 using TaskScheduler;
 using System.Collections.Specialized;
 using System.Collections.Concurrent;
+using System.Security;
+using System.Security.Permissions;
+using System.Security.AccessControl;
 
 namespace wumgr
 {
@@ -24,9 +27,13 @@ namespace wumgr
         public static string mName = "Update Manager for Windows";
         private static string nTaskName = "WuMgrNoUAC";
         public static string appPath = "";
-        private static string mINIPath = "";
+        public static string wrkPath = "";
         public static WuAgent Agent = null;
         public static PipeIPC ipc = null;
+
+        private static string GetINIPath() { return wrkPath + @"\wumgr.ini"; }
+        public static string GetToolsPath() { return appPath + @"\Tools"; }
+        
 
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
@@ -59,8 +66,6 @@ namespace wumgr
             AppLog.Line("{0}, Version v{1} by David Xanatos", mName, mVersion);
             AppLog.Line("This Tool is Open Source under the GNU General Public License, Version 3\r\n");
 
-            appPath = Path.GetDirectoryName(Application.ExecutablePath);
-
             ipc = new PipeIPC("wumgr_pipe");
 
             var client = ipc.Connect(100);
@@ -74,10 +79,17 @@ namespace wumgr
                 return;
             }
 
-            if (IsAdministrator() == false)
+            if (!MiscFunc.IsAdministrator() && !MiscFunc.IsDebugging())
             {
                 Console.WriteLine("Trying to get admin privilegs...");
-                if (!SkipUacRun())
+
+                if (SkipUacRun())
+                {
+                    Application.Exit();
+                    return;
+                }
+
+                if (!MiscFunc.IsRunningAsUwp())
                 {
                     Console.WriteLine("Trying to start with 'runas'...");
                     // Restart program and run as admin
@@ -89,17 +101,38 @@ namespace wumgr
                     try
                     {
                         Process.Start(startInfo);
+                        Application.Exit();
+                        return;
                     }
                     catch
                     {
-                        MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs.\r\nPlease restart the application as Administrator.\r\n\r\nYou can use the option Start->'Bypass User Account Control' to solve this issue for future startsups.", mName), mName);
+                        //MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs in order to install updates", mName), mName);
+                        AppLog.Line("Administrator privilegs are required in order to install updates.");
                     }
                 }
-                Application.Exit();
-                return;
             }
 
-            mINIPath = appPath + @"\wumgr.ini";
+            wrkPath = appPath = Path.GetDirectoryName(Application.ExecutablePath);
+
+            if (!FileOps.TestWrite(GetINIPath()))
+            {
+                Console.WriteLine("Can't write to default working directory.");
+
+                string downloadFolder = KnownFolders.GetPath(KnownFolder.Downloads);
+                if (downloadFolder == null)
+                    downloadFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
+
+                wrkPath = downloadFolder + @"\WuMgr";
+                try
+                {
+                    if (!Directory.Exists(wrkPath))
+                        Directory.CreateDirectory(wrkPath);
+                }
+                catch
+                {
+                    MessageBox.Show(MiscFunc.fmt("Can't write to working directory: {0}", wrkPath), mName);
+                }
+            }
 
             /*switch(FileOps.TestFileAdminSec(mINIPath))
             {
@@ -114,6 +147,8 @@ namespace wumgr
                 case 1: // every thign's fine ini file is only writable by admins
                     break;
             }*/
+
+            AppLog.Line("Working Directory: {0}", wrkPath);
 
             Agent = new WuAgent();
 
@@ -132,21 +167,25 @@ namespace wumgr
 
         static private void ExecOnStart()
         {
-            if (int.Parse(IniReadValue("OnStart", "EnableWuAuServ", "0")) != 0)
+            string ToolsINI = GetToolsPath() +@"\Tools.ini";
+
+            if (int.Parse(IniReadValue("OnStart", "EnableWuAuServ", "0", ToolsINI)) != 0)
                 Agent.EnableWuAuServ(true);
 
-            string OnStart = IniReadValue("OnStart", "Exec", "");
+            string OnStart = IniReadValue("OnStart", "Exec", "", ToolsINI);
             if (OnStart.Length > 0)
-                DoExec(PrepExec(OnStart, MiscFunc.parseInt(IniReadValue("OnStart", "Silent", "1")) != 0), true);
+                DoExec(PrepExec(OnStart, MiscFunc.parseInt(IniReadValue("OnStart", "Silent", "1", ToolsINI)) != 0), true);
         }
 
         static private void ExecOnClose()
         {
-            string OnClose = IniReadValue("OnClose", "Exec", "");
-            if (OnClose.Length > 0)
-                DoExec(PrepExec(OnClose, MiscFunc.parseInt(IniReadValue("OnClose", "Silent", "1")) != 0), true);
+            string ToolsINI = GetToolsPath() + @"\Tools.ini";
 
-            if (int.Parse(IniReadValue("OnClose", "DisableWuAuServ", "0")) != 0)
+            string OnClose = IniReadValue("OnClose", "Exec", "", ToolsINI);
+            if (OnClose.Length > 0)
+                DoExec(PrepExec(OnClose, MiscFunc.parseInt(IniReadValue("OnClose", "Silent", "1", ToolsINI)) != 0), true);
+
+            if (int.Parse(IniReadValue("OnClose", "DisableWuAuServ", "0", ToolsINI)) != 0)
                 Agent.EnableWuAuServ(false);
 
             // Note: With the UAC bypass the onclose parameter can be used for a local privilege escalation exploit
@@ -218,7 +257,7 @@ namespace wumgr
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
         public static void IniWriteValue(string Section, string Key, string Value, string INIPath = null)
         {
-            WritePrivateProfileString(Section, Key, Value, INIPath != null ? INIPath : mINIPath);
+            WritePrivateProfileString(Section, Key, Value, INIPath != null ? INIPath : GetINIPath());
         }
 
         [DllImport("kernel32")]
@@ -226,22 +265,15 @@ namespace wumgr
         public static string IniReadValue(string Section, string Key, string Default = "", string INIPath = null)
         {
             char[] chars = new char[8193];
-            int size = GetPrivateProfileString(Section, Key, Default, chars, 8193, INIPath != null ? INIPath : mINIPath);
+            int size = GetPrivateProfileString(Section, Key, Default, chars, 8193, INIPath != null ? INIPath : GetINIPath());
             return new String(chars, 0, size);
         }
 
         public static string[] IniEnumSections(string INIPath = null)
         {
             char[] chars = new char[8193];
-            int size = GetPrivateProfileString(null, null, null, chars, 8193, INIPath != null ? INIPath : mINIPath);
+            int size = GetPrivateProfileString(null, null, null, chars, 8193, INIPath != null ? INIPath : GetINIPath());
             return new String(chars, 0, size).Split('\0');
-        }
-
-        private static bool IsAdministrator()
-        {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
 
         public static bool TestArg(string name)
@@ -310,6 +342,8 @@ namespace wumgr
                 ITaskFolder folder = service.GetFolder(@"\"); // root
                 if (is_enable)
                 {
+                    string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
                     ITaskDefinition task = service.NewTask(0);
                     task.RegistrationInfo.Author = "WuMgr";
                     task.Principal.RunLevel = _TASK_RUNLEVEL.TASK_RUNLEVEL_HIGHEST;
@@ -322,25 +356,35 @@ namespace wumgr
                     task.Settings.ExecutionTimeLimit = "PT0S";
 
                     IExecAction action = (IExecAction)task.Actions.Create(_TASK_ACTION_TYPE.TASK_ACTION_EXEC);
-                    action.Path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    action.Path = exePath;
                     action.WorkingDirectory = appPath;
                     action.Arguments = "-NoUAC $(Arg0)";
 
                     IRegisteredTask registered_task = folder.RegisterTaskDefinition(nTaskName, task, (int)_TASK_CREATION.TASK_CREATE_OR_UPDATE, null, null, _TASK_LOGON_TYPE.TASK_LOGON_INTERACTIVE_TOKEN);
 
-                    return registered_task != null;
+                    if(registered_task == null)
+                        return false;
+
+                    // Note: if we run as UWP we need to adjust the file permissions for this workaround to work
+                    if (MiscFunc.IsRunningAsUwp())
+                    {
+                        if (!FileOps.TakeOwn(exePath))
+                            return false;
+
+                        FileSecurity ac = File.GetAccessControl(exePath);
+                        ac.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(FileOps.SID_Worls), FileSystemRights.ReadAndExecute, AccessControlType.Allow));
+                        File.SetAccessControl(exePath, ac);
+                    }
                 }
                 else
-                {
                     folder.DeleteTask(nTaskName, 0);
-                    return true;
-                }
             }
             catch (Exception err)
             {
                 AppLog.Line("Enable SkipUAC Error {0}", err.ToString());
                 return false;
             }
+            return true;
         }
 
         static public bool SkipUacRun()

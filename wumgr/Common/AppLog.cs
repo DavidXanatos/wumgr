@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Threading;
 
 class AppLog
 {
     private List<string> mLogList = new List<string>();
+    private Dispatcher mDispatcher;
 
     static public void Line(string str, params object[] args)
     {
@@ -22,16 +23,13 @@ class AppLog
 
     public void logLine(String line)
     {
-        if (Logger != null)
-        {
+        mDispatcher.BeginInvoke(new Action(() => {
             mLogList.Add(line);
             while (mLogList.Count > 100)
                 mLogList.RemoveAt(0);
 
-            LogEventArgs args = new LogEventArgs();
-            args.line = line;
-            Logger(this, args);
-        }
+            Logger?.Invoke(this, new LogEventArgs(line));
+        }));
     }
 
     static public List<string> GetLog() { return mInstance.mLogList; }
@@ -39,6 +37,7 @@ class AppLog
     public class LogEventArgs : EventArgs
     {
         public string line { get; set; }
+        public LogEventArgs(string _line) { line = _line; }
     }
 
     static public event EventHandler<LogEventArgs> Logger;
@@ -55,6 +54,8 @@ class AppLog
     public AppLog()
     {
         mInstance = this;
+
+        mDispatcher = Dispatcher.CurrentDispatcher;
 
         Logger += LineLogger;
     }
