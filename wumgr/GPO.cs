@@ -140,7 +140,7 @@ namespace wumgr
         static public bool IsUpdatePageHidden()
         {
             var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer");
-            string value = subKey.GetValue("SettingsPageVisibility", "").ToString();
+            string value = subKey == null ? null : subKey.GetValue("SettingsPageVisibility", "").ToString();
             return value.Contains("hide:windowsupdate");
         }
 
@@ -173,13 +173,11 @@ namespace wumgr
         static public int GetBlockMS()
         {
             var subKey = Registry.LocalMachine.OpenSubKey(mWuGPO);
-            object value_block = subKey.GetValue("DoNotConnectToWindowsUpdateInternetLocations");
-            /*subKey.DeleteValue("WUServer", false);
-            subKey.DeleteValue("WUStatusServer", false);
-            subKey.DeleteValue("UpdateServiceUrlAlternate", false);*/
+
+            object value_block = subKey == null ? null : subKey.GetValue("DoNotConnectToWindowsUpdateInternetLocations");
 
             var subKey2 = Registry.LocalMachine.OpenSubKey(mWuGPO + @"\AU");
-            object value_wsus = subKey2.GetValue("UseWUServer");
+            object value_wsus = subKey2 == null ? null : subKey2.GetValue("UseWUServer");
 
             if ((value_block != null && (int)value_block == 1) && (value_wsus != null && (int)value_wsus == 1))
                 return 1; // CheckState.Checked;
@@ -191,7 +189,7 @@ namespace wumgr
 
         static public void SetStoreAU(bool disable)
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore");
+            var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore", true);
             //var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", true);
             if (disable)
                 subKey.SetValue("AutoDownload", 2);
@@ -202,8 +200,8 @@ namespace wumgr
         static public bool GetStoreAU()
         {
             var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore");
-            //var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", true);
-            object value_block = subKey.GetValue("AutoDownload");
+            //var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate");
+            object value_block = subKey == null ? null : subKey.GetValue("AutoDownload");
             return (value_block != null && (int)value_block == 2);
         }
 
@@ -224,26 +222,37 @@ namespace wumgr
         static public void ConfigSvc(string name, ServiceStartMode mode)
         {
             ServiceController svc = new ServiceController(name);
+            bool showErr = false;
             try
             {
                 if (mode == ServiceStartMode.Disabled && svc.Status == ServiceControllerStatus.Running)
+                {
                     svc.Stop();
+                    showErr = false;
+                }
 
                 // Note: for UsoSvc and for WaaSMedicSvc this call fails with an access error so we have to set the registry
                 //ServiceHelper.ChangeStartMode(svc, mode);
             }
             catch (Exception err)
             {
-                AppLog.Line("Error: " + err.Message);
+                if(showErr)
+                    AppLog.Line("Error Stoping Service: {0}", name);
             }
             svc.Close();
 
             var subKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\" + name, RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryRights.SetValue | RegistryRights.ChangePermissions | RegistryRights.TakeOwnership);
+            if (subKey == null)
+            {
+                AppLog.Line("Service {0} does not exist", name);
+                return;
+            }
+
             subKey.SetValue("Start", (int)mode);
 
             var ac = subKey.GetAccessControl();
             AuthorizationRuleCollection rules = ac.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier)); // get as SID not string
-                                                                                                                                     // cleanup old roule
+            // cleanup old roule
             foreach (RegistryAccessRule rule in rules)
             {
                 if (rule.IdentityReference.Value.Equals(FileOps.SID_System))
@@ -276,62 +285,71 @@ namespace wumgr
 
         static public Respect GetRespect()
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-            //string edition = subKey.GetValue("EditionID", "").ToString();
-            string name = subKey.GetValue("ProductName", "").ToString();
-            string type = subKey.GetValue("InstallationType", "").ToString();
-
-            if (GetWinVersion() < 10.0f || type.Equals("Server", StringComparison.CurrentCultureIgnoreCase) || name.Contains("Education") || name.Contains("Enterprise"))
-                return Respect.Full;
-
-            if (type.Equals("Client", StringComparison.CurrentCultureIgnoreCase))
+            try
             {
-                if(name.Contains("Pro"))
-                    return Respect.Partial;
-                if (name.Contains("Home"))
-                    return Respect.None;
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                //string edition = subKey.GetValue("EditionID", "").ToString();
+                string name = subKey.GetValue("ProductName", "").ToString();
+                string type = subKey.GetValue("InstallationType", "").ToString();
+
+                if (GetWinVersion() < 10.0f || type.Equals("Server", StringComparison.CurrentCultureIgnoreCase) || name.Contains("Education") || name.Contains("Enterprise"))
+                    return Respect.Full;
+
+                if (type.Equals("Client", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (name.Contains("Pro"))
+                        return Respect.Partial;
+                    if (name.Contains("Home"))
+                        return Respect.None;
+                }
             }
+            catch { }
             return Respect.Unknown;
         }
 
         static public float GetWinVersion()
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-            //string Majorversion = subKey.GetValue("CurrentMajorVersionNumber", "0").ToString(); // this is 10 on 10 but not present on earlier editions
-            string version = subKey.GetValue("CurrentVersion", "0").ToString();
-            float version_num = float.Parse(version, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-            //string name = subKey.GetValue("ProductName", "").ToString();
-
-            /*
-                Operating system              Version number
-                ----------------------------  --------------
-                Windows 10                      6.3 WTF why not 10
-                Windows Server 2016             6.3 WTF why not 10
-                Windows 8.1                     6.3
-                Windows Server 2012 R2          6.3
-                Windows 8                       6.2
-                Windows Server 2012             6.2
-                Windows 7                       6.1
-                Windows Server 2008 R2          6.1
-                Windows Server 2008             6.0
-                Windows Vista                   6.0
-                Windows Server 2003 R2          5.2
-                Windows Server 2003             5.2
-                Windows XP 64-Bit Edition       5.2
-                Windows XP                      5.1
-                Windows 2000                    5.0
-                Windows ME                      4.9
-                Windows 98                      4.10
-             */
-
-            if (version_num >= 6.3)
+            try
             {
-                //!name.Contains("8.1") && !name.Contains("2012 R2");
-                int build = MiscFunc.parseInt(subKey.GetValue("CurrentBuildNumber", "0").ToString());
-                if (build >= 10000) // 1507 RTM release
-                    return 10.0f;
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                //string Majorversion = subKey.GetValue("CurrentMajorVersionNumber", "0").ToString(); // this is 10 on 10 but not present on earlier editions
+                string version = subKey.GetValue("CurrentVersion", "0").ToString();
+                float version_num = float.Parse(version, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                //string name = subKey.GetValue("ProductName", "").ToString();
+
+                /*
+                    Operating system              Version number
+                    ----------------------------  --------------
+                    Windows 10                      6.3 WTF why not 10
+                    Windows Server 2016             6.3 WTF why not 10
+                    Windows 8.1                     6.3
+                    Windows Server 2012 R2          6.3
+                    Windows 8                       6.2
+                    Windows Server 2012             6.2
+                    Windows 7                       6.1
+                    Windows Server 2008 R2          6.1
+                    Windows Server 2008             6.0
+                    Windows Vista                   6.0
+                    Windows Server 2003 R2          5.2
+                    Windows Server 2003             5.2
+                    Windows XP 64-Bit Edition       5.2
+                    Windows XP                      5.1
+                    Windows 2000                    5.0
+                    Windows ME                      4.9
+                    Windows 98                      4.10
+                 */
+
+                if (version_num >= 6.3)
+                {
+                    //!name.Contains("8.1") && !name.Contains("2012 R2");
+                    int build = MiscFunc.parseInt(subKey.GetValue("CurrentBuildNumber", "0").ToString());
+                    if (build >= 10000) // 1507 RTM release
+                        return 10.0f;
+                }
+                return version_num;
             }
-            return version_num;
+            catch { }
+            return 0.0f;
         }
     }
 }

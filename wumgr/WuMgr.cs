@@ -518,8 +518,8 @@ namespace wumgr
                     Update.Title,
                     Update.Category,
                     Update.KB,
-                    FileOps.FormatSize(Update.Size),
                     Update.Date.ToString("dd.MM.yyyy"),
+                    FileOps.FormatSize(Update.Size),
                     State});
 
                 items[i].Tag = Update;

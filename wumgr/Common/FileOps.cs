@@ -15,12 +15,12 @@ class FileOps
         if (size == 0)
             return "";
         if (size > 1024 * 1024 * 1024)
-            return (size / (1024 * 1024 * 1024)).ToString("F") + " Gb";
+            return (size / (1024 * 1024 * 1024)).ToString("F") + " GB";
         if (size > 1024 * 1024)
-            return (size / (1024 * 1024)).ToString("F") + " Mb";
+            return (size / (1024 * 1024)).ToString("F") + " MB";
         if (size > 1024)
-            return (size / (1024)).ToString("F") + " Kb";
-        return ((Int64)size).ToString() + " b";
+            return (size / (1024)).ToString("F") + " KB";
+        return ((Int64)size).ToString() + " B";
     }
 
     static public bool MoveFile(string from, string to, bool Overwrite = false)

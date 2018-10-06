@@ -812,7 +812,7 @@ namespace wumgr
             }
             catch (Exception err)
             {
-                AppLog.Line("Search for updats failed");
+                AppLog.Line("Search for updates failed");
                 LogError(err);
                 OnFinished(RetCodes.InternalError);
                 return;
