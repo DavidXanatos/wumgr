@@ -33,17 +33,14 @@
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.chkAutoRun = new System.Windows.Forms.CheckBox();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.logBox = new System.Windows.Forms.RichTextBox();
+            this.panelList = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.lblSupport = new System.Windows.Forms.LinkLabel();
-            this.updateView = new wumgr.ListViewExtended();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.logBox = new System.Windows.Forms.RichTextBox();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnSearchOff = new System.Windows.Forms.Button();
+            this.txtFilter = new System.Windows.Forms.TextBox();
+            this.lblSearch = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -61,9 +58,9 @@
             this.btnInstalled = new System.Windows.Forms.CheckBox();
             this.btnWinUpd = new System.Windows.Forms.CheckBox();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabs = new System.Windows.Forms.TabControl();
             this.tabOptions = new System.Windows.Forms.TabPage();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.gbStartup = new System.Windows.Forms.GroupBox();
             this.chkNoUAC = new System.Windows.Forms.CheckBox();
             this.dlAutoCheck = new System.Windows.Forms.ComboBox();
             this.dlSource = new System.Windows.Forms.ComboBox();
@@ -72,7 +69,7 @@
             this.chkOld = new System.Windows.Forms.CheckBox();
             this.chkManual = new System.Windows.Forms.CheckBox();
             this.chkDownload = new System.Windows.Forms.CheckBox();
-            this.tabGPO = new System.Windows.Forms.TabPage();
+            this.tabAU = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.chkDrivers = new System.Windows.Forms.CheckBox();
             this.chkStore = new System.Windows.Forms.CheckBox();
@@ -87,16 +84,24 @@
             this.dlShDay = new System.Windows.Forms.ComboBox();
             this.dlShTime = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel3.SuspendLayout();
+            this.updateView = new wumgr.ListViewExtended();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.panelList.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.tabControl1.SuspendLayout();
+            this.tabs.SuspendLayout();
             this.tabOptions.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.tabGPO.SuspendLayout();
+            this.gbStartup.SuspendLayout();
+            this.tabAU.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -120,37 +125,27 @@
             this.notifyIcon.BalloonTipClicked += new System.EventHandler(this.notifyIcon_BalloonTipClicked);
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // tableLayoutPanel3
+            // panelList
             // 
-            this.tableLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.panelList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel3.ColumnCount = 1;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Controls.Add(this.logBox, 0, 2);
-            this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel7, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.updateView, 0, 1);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(188, 0);
-            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 3;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(495, 443);
-            this.tableLayoutPanel3.TabIndex = 1;
-            // 
-            // logBox
-            // 
-            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(3, 346);
-            this.logBox.Name = "logBox";
-            this.logBox.ReadOnly = true;
-            this.logBox.Size = new System.Drawing.Size(489, 94);
-            this.logBox.TabIndex = 4;
-            this.logBox.Text = "";
+            this.panelList.ColumnCount = 1;
+            this.panelList.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.panelList.Controls.Add(this.tableLayoutPanel7, 0, 0);
+            this.panelList.Controls.Add(this.updateView, 0, 1);
+            this.panelList.Controls.Add(this.logBox, 0, 3);
+            this.panelList.Controls.Add(this.tableLayoutPanel3, 0, 2);
+            this.panelList.Location = new System.Drawing.Point(188, 0);
+            this.panelList.Margin = new System.Windows.Forms.Padding(0);
+            this.panelList.Name = "panelList";
+            this.panelList.RowCount = 4;
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.panelList.Size = new System.Drawing.Size(495, 443);
+            this.panelList.TabIndex = 1;
             // 
             // tableLayoutPanel7
             // 
@@ -182,56 +177,68 @@
             this.lblSupport.Visible = false;
             this.lblSupport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblSupport_LinkClicked);
             // 
-            // updateView
+            // logBox
             // 
-            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.updateView.CheckBoxes = true;
-            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6});
-            this.updateView.Location = new System.Drawing.Point(3, 23);
-            this.updateView.Name = "updateView";
-            this.updateView.Size = new System.Drawing.Size(489, 317);
-            this.updateView.TabIndex = 2;
-            this.updateView.UseCompatibleStateImageBehavior = false;
-            this.updateView.View = System.Windows.Forms.View.Details;
-            this.updateView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.updateView_ColumnClick);
-            this.updateView.SelectedIndexChanged += new System.EventHandler(this.updateView_SelectedIndexChanged);
+            this.logBox.Location = new System.Drawing.Point(3, 346);
+            this.logBox.Name = "logBox";
+            this.logBox.ReadOnly = true;
+            this.logBox.Size = new System.Drawing.Size(489, 94);
+            this.logBox.TabIndex = 4;
+            this.logBox.Text = "";
             // 
-            // columnHeader1
+            // tableLayoutPanel3
             // 
-            this.columnHeader1.Text = "Title";
-            this.columnHeader1.Width = 260;
+            this.tableLayoutPanel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel3.ColumnCount = 3;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel3.Controls.Add(this.btnSearchOff, 2, 0);
+            this.tableLayoutPanel3.Controls.Add(this.txtFilter, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.lblSearch, 0, 0);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 318);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 1;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(495, 25);
+            this.tableLayoutPanel3.TabIndex = 6;
             // 
-            // columnHeader2
+            // btnSearchOff
             // 
-            this.columnHeader2.Text = "Category";
-            this.columnHeader2.Width = 100;
+            this.btnSearchOff.Location = new System.Drawing.Point(473, 3);
+            this.btnSearchOff.Name = "btnSearchOff";
+            this.btnSearchOff.Size = new System.Drawing.Size(19, 19);
+            this.btnSearchOff.TabIndex = 0;
+            this.btnSearchOff.Text = "X";
+            this.btnSearchOff.UseVisualStyleBackColor = true;
+            this.btnSearchOff.Click += new System.EventHandler(this.btnSearchOff_Click);
             // 
-            // columnHeader3
+            // txtFilter
             // 
-            this.columnHeader3.Text = "KB Article";
-            this.columnHeader3.Width = 80;
+            this.txtFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilter.Location = new System.Drawing.Point(103, 3);
+            this.txtFilter.Name = "txtFilter";
+            this.txtFilter.Size = new System.Drawing.Size(364, 20);
+            this.txtFilter.TabIndex = 1;
+            this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
             // 
-            // columnHeader4
+            // lblSearch
             // 
-            this.columnHeader4.Text = "Date";
-            this.columnHeader4.Width = 70;
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "Size";
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "State";
-            this.columnHeader6.Width = 80;
+            this.lblSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblSearch.AutoSize = true;
+            this.lblSearch.Location = new System.Drawing.Point(3, 6);
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(94, 13);
+            this.lblSearch.TabIndex = 2;
+            this.lblSearch.Text = "Search Filter:";
             // 
             // tableLayoutPanel2
             // 
@@ -241,7 +248,7 @@
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.tabControl1, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.tabs, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -452,21 +459,21 @@
             this.lblStatus.Size = new System.Drawing.Size(180, 13);
             this.lblStatus.TabIndex = 9;
             // 
-            // tabControl1
+            // tabs
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabOptions);
-            this.tabControl1.Controls.Add(this.tabGPO);
-            this.tabControl1.Location = new System.Drawing.Point(3, 213);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(182, 227);
-            this.tabControl1.TabIndex = 1;
+            this.tabs.Controls.Add(this.tabOptions);
+            this.tabs.Controls.Add(this.tabAU);
+            this.tabs.Location = new System.Drawing.Point(3, 213);
+            this.tabs.Name = "tabs";
+            this.tabs.SelectedIndex = 0;
+            this.tabs.Size = new System.Drawing.Size(182, 227);
+            this.tabs.TabIndex = 1;
             // 
             // tabOptions
             // 
-            this.tabOptions.Controls.Add(this.groupBox1);
+            this.tabOptions.Controls.Add(this.gbStartup);
             this.tabOptions.Controls.Add(this.dlSource);
             this.tabOptions.Controls.Add(this.chkOffline);
             this.tabOptions.Controls.Add(this.chkMsUpd);
@@ -481,17 +488,17 @@
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // gbStartup
             // 
-            this.groupBox1.Controls.Add(this.chkAutoRun);
-            this.groupBox1.Controls.Add(this.chkNoUAC);
-            this.groupBox1.Controls.Add(this.dlAutoCheck);
-            this.groupBox1.Location = new System.Drawing.Point(1, 125);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(170, 75);
-            this.groupBox1.TabIndex = 8;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Startup";
+            this.gbStartup.Controls.Add(this.chkAutoRun);
+            this.gbStartup.Controls.Add(this.chkNoUAC);
+            this.gbStartup.Controls.Add(this.dlAutoCheck);
+            this.gbStartup.Location = new System.Drawing.Point(1, 125);
+            this.gbStartup.Name = "gbStartup";
+            this.gbStartup.Size = new System.Drawing.Size(170, 75);
+            this.gbStartup.TabIndex = 8;
+            this.gbStartup.TabStop = false;
+            this.gbStartup.Text = "Startup";
             // 
             // chkNoUAC
             // 
@@ -590,28 +597,28 @@
             this.chkDownload.UseVisualStyleBackColor = true;
             this.chkDownload.CheckedChanged += new System.EventHandler(this.chkDownload_CheckedChanged);
             // 
-            // tabGPO
+            // tabAU
             // 
-            this.tabGPO.Controls.Add(this.label1);
-            this.tabGPO.Controls.Add(this.chkDrivers);
-            this.tabGPO.Controls.Add(this.chkStore);
-            this.tabGPO.Controls.Add(this.chkHideWU);
-            this.tabGPO.Controls.Add(this.chkDisableAU);
-            this.tabGPO.Controls.Add(this.radDefault);
-            this.tabGPO.Controls.Add(this.radSchedule);
-            this.tabGPO.Controls.Add(this.radDownload);
-            this.tabGPO.Controls.Add(this.chkBlockMS);
-            this.tabGPO.Controls.Add(this.radNotify);
-            this.tabGPO.Controls.Add(this.radDisable);
-            this.tabGPO.Controls.Add(this.dlShDay);
-            this.tabGPO.Controls.Add(this.dlShTime);
-            this.tabGPO.Location = new System.Drawing.Point(4, 22);
-            this.tabGPO.Name = "tabGPO";
-            this.tabGPO.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGPO.Size = new System.Drawing.Size(174, 201);
-            this.tabGPO.TabIndex = 1;
-            this.tabGPO.Text = "Auto Update";
-            this.tabGPO.UseVisualStyleBackColor = true;
+            this.tabAU.Controls.Add(this.label1);
+            this.tabAU.Controls.Add(this.chkDrivers);
+            this.tabAU.Controls.Add(this.chkStore);
+            this.tabAU.Controls.Add(this.chkHideWU);
+            this.tabAU.Controls.Add(this.chkDisableAU);
+            this.tabAU.Controls.Add(this.radDefault);
+            this.tabAU.Controls.Add(this.radSchedule);
+            this.tabAU.Controls.Add(this.radDownload);
+            this.tabAU.Controls.Add(this.chkBlockMS);
+            this.tabAU.Controls.Add(this.radNotify);
+            this.tabAU.Controls.Add(this.radDisable);
+            this.tabAU.Controls.Add(this.dlShDay);
+            this.tabAU.Controls.Add(this.dlShTime);
+            this.tabAU.Location = new System.Drawing.Point(4, 22);
+            this.tabAU.Name = "tabAU";
+            this.tabAU.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAU.Size = new System.Drawing.Size(174, 201);
+            this.tabAU.TabIndex = 1;
+            this.tabAU.Text = "Auto Update";
+            this.tabAU.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -682,10 +689,10 @@
             this.radSchedule.AutoSize = true;
             this.radSchedule.Location = new System.Drawing.Point(4, 91);
             this.radSchedule.Name = "radSchedule";
-            this.radSchedule.Size = new System.Drawing.Size(121, 17);
+            this.radSchedule.Size = new System.Drawing.Size(132, 17);
             this.radSchedule.TabIndex = 18;
             this.radSchedule.TabStop = true;
-            this.radSchedule.Text = "Sheduled Instalation";
+            this.radSchedule.Text = "Scheduled & Installation";
             this.radSchedule.UseVisualStyleBackColor = true;
             this.radSchedule.CheckedChanged += new System.EventHandler(this.radGPO_CheckedChanged);
             // 
@@ -801,7 +808,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.panelList, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(1, 2);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -809,6 +816,59 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(683, 443);
             this.tableLayoutPanel1.TabIndex = 1;
+            // 
+            // updateView
+            // 
+            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.updateView.CheckBoxes = true;
+            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3,
+            this.columnHeader4,
+            this.columnHeader5,
+            this.columnHeader6});
+            this.updateView.Location = new System.Drawing.Point(3, 23);
+            this.updateView.Name = "updateView";
+            this.updateView.ShowItemToolTips = true;
+            this.updateView.Size = new System.Drawing.Size(489, 292);
+            this.updateView.TabIndex = 2;
+            this.updateView.UseCompatibleStateImageBehavior = false;
+            this.updateView.View = System.Windows.Forms.View.Details;
+            this.updateView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.updateView_ColumnClick);
+            this.updateView.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.updateView_ItemCheck);
+            this.updateView.SelectedIndexChanged += new System.EventHandler(this.updateView_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Title";
+            this.columnHeader1.Width = 260;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Category";
+            this.columnHeader2.Width = 100;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "KB Article";
+            this.columnHeader3.Width = 80;
+            // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "Date";
+            this.columnHeader4.Width = 70;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "Size";
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "State";
+            this.columnHeader6.Width = 80;
             // 
             // WuMgr
             // 
@@ -822,21 +882,23 @@
             this.Text = "Update Manager for Windows";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WuMgr_FormClosing);
             this.Load += new System.EventHandler(this.WuMgr_Load);
-            this.tableLayoutPanel3.ResumeLayout(false);
+            this.panelList.ResumeLayout(false);
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
-            this.tabControl1.ResumeLayout(false);
+            this.tabs.ResumeLayout(false);
             this.tabOptions.ResumeLayout(false);
             this.tabOptions.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.tabGPO.ResumeLayout(false);
-            this.tabGPO.PerformLayout();
+            this.gbStartup.ResumeLayout(false);
+            this.gbStartup.PerformLayout();
+            this.tabAU.ResumeLayout(false);
+            this.tabAU.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -845,7 +907,7 @@
         #endregion
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.NotifyIcon notifyIcon;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.TableLayoutPanel panelList;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
@@ -886,11 +948,11 @@
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabs;
         private System.Windows.Forms.TabPage tabOptions;
         private System.Windows.Forms.ComboBox dlAutoCheck;
         private System.Windows.Forms.CheckBox chkAutoRun;
-        private System.Windows.Forms.TabPage tabGPO;
+        private System.Windows.Forms.TabPage tabAU;
         private System.Windows.Forms.CheckBox chkStore;
         private System.Windows.Forms.CheckBox chkDisableAU;
         private System.Windows.Forms.RadioButton radDefault;
@@ -898,8 +960,12 @@
         private System.Windows.Forms.RadioButton radDownload;
         private System.Windows.Forms.RadioButton radNotify;
         private System.Windows.Forms.RadioButton radDisable;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbStartup;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.Button btnSearchOff;
+        private System.Windows.Forms.TextBox txtFilter;
+        private System.Windows.Forms.Label lblSearch;
     }
 }
 

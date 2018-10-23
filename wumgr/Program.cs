@@ -56,11 +56,14 @@ namespace wumgr
 
             Console.WriteLine("Starting...");
 
+            appPath = Path.GetDirectoryName(Application.ExecutablePath);
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             mVersion = fvi.FileMajorPart + "." + fvi.FileMinorPart;
             if (fvi.FileBuildPart != 0)
                 mVersion += (char)('a' + (fvi.FileBuildPart - 1));
+
+            Translate.Load();
 
             AppLog Log = new AppLog();
             AppLog.Line("{0}, Version v{1} by David Xanatos", mName, mVersion);
@@ -75,13 +78,13 @@ namespace wumgr
                 client.Send("show");
                 string ret = client.Read(1000);
                 if(!ret.Equals("ok", StringComparison.CurrentCultureIgnoreCase))
-                    MessageBox.Show(MiscFunc.fmt("Application is already running."));
+                    MessageBox.Show(Translate.fmt("msg_running"));
                 return;
             }
 
             if (!MiscFunc.IsAdministrator() && !MiscFunc.IsDebugging())
             {
-                Console.WriteLine("Trying to get admin privilegs...");
+                Console.WriteLine("Trying to get admin privileges...");
 
                 if (SkipUacRun())
                 {
@@ -106,13 +109,13 @@ namespace wumgr
                     }
                     catch
                     {
-                        //MessageBox.Show(MiscFunc.fmt("The {0} requirers Administrator privilegs in order to install updates", mName), mName);
-                        AppLog.Line("Administrator privilegs are required in order to install updates.");
+                        //MessageBox.Show(Translate.fmt("msg_admin_req", mName), mName);
+                        AppLog.Line("Administrator privileges are required in order to install updates.");
                     }
                 }
             }
 
-            wrkPath = appPath = Path.GetDirectoryName(Application.ExecutablePath);
+            wrkPath = appPath;
 
             if (!FileOps.TestWrite(GetINIPath()))
             {
@@ -130,7 +133,7 @@ namespace wumgr
                 }
                 catch
                 {
-                    MessageBox.Show(MiscFunc.fmt("Can't write to working directory: {0}", wrkPath), mName);
+                    MessageBox.Show(Translate.fmt("msg_ro_wrk_dir", wrkPath), mName);
                 }
             }
 

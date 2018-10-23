@@ -87,7 +87,6 @@ namespace wumgr
         GPO.Respect mGPORespect = GPO.Respect.Unknown;
         float mWinVersion = 0.0f;
 
-
         enum AutoUpdateOptions
         {
             No = 0,
@@ -99,6 +98,10 @@ namespace wumgr
         AutoUpdateOptions AutoUpdate = AutoUpdateOptions.No;
         int IdleDelay = 0;
         DateTime LastCheck = DateTime.MaxValue;
+
+        float mSearchBoxHeight = 0.0f;
+        string mSearchFilter = null;
+        bool bUpdateList = false;
 
         public WuMgr()
         {
@@ -114,15 +117,9 @@ namespace wumgr
             }
 
             if(!MiscFunc.IsRunningAsUwp())
-                this.Text = MiscFunc.fmt("{0} v{1} by David Xanatos", Program.mName, Program.mVersion);
+                this.Text = string.Format("{0} v{1} by David Xanatos", Program.mName, Program.mVersion);
 
-            toolTip.SetToolTip(btnSearch, "Search");
-            toolTip.SetToolTip(btnInstall, "Install");
-            toolTip.SetToolTip(btnDownload, "Download");
-            toolTip.SetToolTip(btnHide, "Hide");
-            toolTip.SetToolTip(btnGetLink, "Get Links");
-            toolTip.SetToolTip(btnUnInstall, "Uninstall");
-            toolTip.SetToolTip(btnCancel, "Cancel");
+            Localize();
 
             btnSearch.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_available_updates_32, new Size(25, 25)));
             btnInstall.Image = (Image)(new Bitmap(global::wumgr.Properties.Resources.icons8_software_installer_32, new Size(25, 25)));
@@ -146,7 +143,7 @@ namespace wumgr
 
             if (!agent.IsActive())
             {
-                if (MessageBox.Show("Windows Update Service is not available, try to start it?", Program.mName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show(Translate.fmt("msg_wuau"), Program.mName, MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     agent.EnableWuAuServ();
                     agent.Init();
@@ -220,7 +217,7 @@ namespace wumgr
             // Note: when running in the UWP sandbox we cant write the real registry even as admins
             if (!MiscFunc.IsAdministrator() || MiscFunc.IsRunningAsUwp())
             {
-                foreach (Control ctl in tabGPO.Controls)
+                foreach (Control ctl in tabAU.Controls)
                     ctl.Enabled = false;
             }
 
@@ -255,21 +252,29 @@ namespace wumgr
 
             LoadProviders(source);
 
+            mSearchBoxHeight = this.panelList.RowStyles[2].Height;
+            this.panelList.RowStyles[2].Height = 0;
+
             mSuspendUpdate = false;
 
+
+            if (Program.TestArg("-provisioned"))
+                tabs.Enabled = false;
+
+
             mToolsMenu = new MenuItem();
-            mToolsMenu.Text = "&Tools";
+            mToolsMenu.Text = Translate.fmt("menu_tools");
 
             BuildToolsMenu();
 
             notifyIcon.ContextMenu = new ContextMenu();
 
             MenuItem menuAbout = new MenuItem();
-            menuAbout.Text = "&About";
+            menuAbout.Text = Translate.fmt("menu_about"); 
             menuAbout.Click += new System.EventHandler(menuAbout_Click);
 
             MenuItem menuExit = new MenuItem();
-            menuExit.Text = "E&xit";
+            menuExit.Text = Translate.fmt("menu_exit"); 
             menuExit.Click += new System.EventHandler(menuExit_Click);
 
             notifyIcon.ContextMenu.MenuItems.AddRange(new MenuItem[] { mToolsMenu, menuAbout, new MenuItem("-"), menuExit });
@@ -277,8 +282,8 @@ namespace wumgr
 
             IntPtr MenuHandle = GetSystemMenu(this.Handle, false); // Note: to restore default set true
             InsertMenu(MenuHandle, 5, MF_BYPOSITION | MF_SEPARATOR, 0, string.Empty); // <-- Add a menu seperator
-            InsertMenu(MenuHandle, 6, MF_BYPOSITION | MF_POPUP, (int)mToolsMenu.Handle, "Tools");
-            InsertMenu(MenuHandle, 7, MF_BYPOSITION, MYMENU_ABOUT, "&About");
+            InsertMenu(MenuHandle, 6, MF_BYPOSITION | MF_POPUP, (int)mToolsMenu.Handle, mToolsMenu.Text);
+            InsertMenu(MenuHandle, 7, MF_BYPOSITION, MYMENU_ABOUT, menuAbout.Text);
 
 
             UpdateCounts();
@@ -287,7 +292,7 @@ namespace wumgr
             doUpdte = Program.TestArg("-update");
 
             mTimer = new Timer();
-            mTimer.Interval = 1000; // once epr second
+            mTimer.Interval = 250; // 4 times per second
             mTimer.Tick += OnTimedEvent;
             mTimer.Enabled = true;
 
@@ -332,8 +337,7 @@ namespace wumgr
                         if (LastBaloon < DateTime.Now.AddHours(-4))
                         {
                             LastBaloon = DateTime.Now;
-                            notifyIcon.ShowBalloonTip(int.MaxValue, MiscFunc.fmt("Please Check For Updates"), 
-                                MiscFunc.fmt("WuMgr couldn't check for updates for {0} days, please check for updates manually and resolve possible issues", daysDue), ToolTipIcon.Warning);
+                            notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_chk_upd"), Translate.fmt("msg_chk_upd", Program.mName, daysDue), ToolTipIcon.Warning);
                         }
                     }
                 }
@@ -343,8 +347,7 @@ namespace wumgr
                     if (LastBaloon < DateTime.Now.AddHours(-4))
                     {
                         LastBaloon = DateTime.Now;
-                        notifyIcon.ShowBalloonTip(int.MaxValue, MiscFunc.fmt("New Updates found"),
-                            MiscFunc.fmt("WuMgr has found {0} new updates, please review the upates and install them", agent.mPendingUpdates), ToolTipIcon.Info);
+                        notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_new_upd"), Translate.fmt("msg_new_upd", Program.mName, agent.mPendingUpdates), ToolTipIcon.Info);
                     }
                 }
             }
@@ -357,6 +360,15 @@ namespace wumgr
                 else
                     agent.SearchForUpdates(dlSource.Text, chkOld.Checked);
             }
+
+            if (bUpdateList)
+            {
+                bUpdateList = false;
+                LoadList();
+            }
+
+            if (checkChecks)
+                UpdateState();
         }
 
         private void WuMgr_Load(object sender, EventArgs e)
@@ -431,14 +443,10 @@ namespace wumgr
 
         void UpdateCounts()
         {
-            if (agent.mPendingUpdates != null)
-                btnWinUpd.Text = MiscFunc.fmt("Windows Update ({0})", agent.mPendingUpdates.Count);
-            if (agent.mInstalledUpdates != null)
-                btnInstalled.Text = MiscFunc.fmt("Installed Updates ({0})", agent.mInstalledUpdates.Count);
-            if (agent.mHiddenUpdates != null)
-                btnHidden.Text = MiscFunc.fmt("Hidden Updates ({0})", agent.mHiddenUpdates.Count);
-            if (agent.mUpdateHistory != null)
-                btnHistory.Text = MiscFunc.fmt("Update History ({0})", agent.mUpdateHistory.Count);
+            btnWinUpd.Text = Translate.fmt("lbl_fnd_upd", agent.mPendingUpdates.Count);
+            btnInstalled.Text = Translate.fmt("lbl_inst_upd", agent.mInstalledUpdates.Count);
+            btnHidden.Text = Translate.fmt("lbl_block_upd", agent.mHiddenUpdates.Count);
+            btnHistory.Text = Translate.fmt("lbl_old_upd", agent.mUpdateHistory.Count);
         }
 
         void LoadList()
@@ -457,8 +465,10 @@ namespace wumgr
 
         void LoadList(List<MsUpdate> List)
         {
+            string INIPath = Program.wrkPath + @"\Updates.ini";
+
             updateView.Items.Clear();
-            ListViewItem[] items = new ListViewItem[List.Count];
+            List<ListViewItem> items = new List<ListViewItem>();
             for (int i = 0; i < List.Count; i++)
             {
                 MsUpdate Update = List[i];
@@ -468,61 +478,100 @@ namespace wumgr
                     case MsUpdate.UpdateState.History:
                         switch ((OperationResultCode)Update.ResultCode)
                         {
-                            case OperationResultCode.orcNotStarted: State = "Not Started"; break;
-                            case OperationResultCode.orcInProgress: State = "In Progress"; break;
-                            case OperationResultCode.orcSucceeded: State = "Succeeded"; break;
-                            case OperationResultCode.orcSucceededWithErrors: State = "Succeeded with Errors"; break;
-                            case OperationResultCode.orcFailed: State = "Failed"; break;
-                            case OperationResultCode.orcAborted: State = "Aborted"; break;
+                            case OperationResultCode.orcNotStarted: State = Translate.fmt("stat_not_start"); break;
+                            case OperationResultCode.orcInProgress: State = Translate.fmt("stat_in_prog"); break;
+                            case OperationResultCode.orcSucceeded: State = Translate.fmt("stat_success"); break;
+                            case OperationResultCode.orcSucceededWithErrors: State = Translate.fmt("stat_success_2"); break;
+                            case OperationResultCode.orcFailed: State = Translate.fmt("stat_failed"); break;
+                            case OperationResultCode.orcAborted: State = Translate.fmt("stat_abbort"); break;
                         }
                         State += " (0x" + String.Format("{0:X8}", Update.HResult) + ")";
                         break;
 
                     default:
                         if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Beta) != 0)
-                            State = "Beta ";
+                            State = Translate.fmt("stat_beta" + " ");
 
                         if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Installed) != 0)
                         {
-                            State += "Installed";
+                            State += Translate.fmt("stat_install");
                             if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Uninstallable) != 0)
-                                State += " Removable";
+                                State += " " + Translate.fmt("stat_rem");
                         }
                         else if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Hidden) != 0)
                         {
-                            State += "Hidden";
+                            State += Translate.fmt("stat_block"); 
                             if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
-                                State += " Downloaded";
+                                State += " " + Translate.fmt("stat_dl");
                         }
                         else
                         {
                             if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Downloaded) != 0)
-                                State += "Downloaded";
+                                State += Translate.fmt("stat_dl");
                             else
-                                State += "Pending";
+                                State += Translate.fmt("stat_pending");
                             if ((Update.Attributes & (int)MsUpdate.UpdateAttr.AutoSelect) != 0)
-                                State += " (!)";
+                                State += " " + Translate.fmt("stat_sel");
                             if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Mandatory) != 0)
-                                State += " Manatory";
+                                State += " " + Translate.fmt("stat_mand");
                         }
 
                         if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Exclusive) != 0)
-                            State += ", Exclusive";
+                            State += ", " + Translate.fmt("stat_excl");
 
                         if ((Update.Attributes & (int)MsUpdate.UpdateAttr.Reboot) != 0)
-                            State += ", Needs Reboot";
+                            State += ", " + Translate.fmt("stat_reboot"); 
                         break;
                 }
 
-                items[i] = new ListViewItem(new string[] {
+
+                string[] strings = new string[] {
                     Update.Title,
                     Update.Category,
                     Update.KB,
                     Update.Date.ToString("dd.MM.yyyy"),
                     FileOps.FormatSize(Update.Size),
-                    State});
+                    State};
 
-                items[i].Tag = Update;
+                if (mSearchFilter != null)
+                {
+                    bool match = false;
+                    foreach (string str in strings)
+                    {
+                        if (str.IndexOf(mSearchFilter, StringComparison.CurrentCultureIgnoreCase) != -1)
+                        {
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (!match)
+                        continue;
+                }
+
+                ListViewItem item = new ListViewItem(strings);
+
+                item.Tag = Update;
+
+                if (CurrentList == UpdateLists.PendingUpdates)
+                {
+                    if (MiscFunc.parseInt(Program.IniReadValue(Update.KB, "BlackList", "0", INIPath)) != 0)
+                        item.Font = new Font(item.Font.FontFamily, item.Font.Size, FontStyle.Strikeout);
+                    else if (MiscFunc.parseInt(Program.IniReadValue(Update.KB, "Select", "0", INIPath)) != 0)
+                        item.Checked = true;
+                }
+                else if (CurrentList == UpdateLists.InstaledUpdates)
+                {
+                    if (MiscFunc.parseInt(Program.IniReadValue(Update.KB, "Remove", "0", INIPath)) != 0)
+                        item.Checked = true;
+                }
+
+                string colorStr = Program.IniReadValue(Update.KB, "Color", "", INIPath);
+                if (colorStr.Length > 0)
+                {
+                    Color? color = MiscFunc.parseColor(colorStr);
+                    if (color != null)
+                        item.BackColor = (Color)color;
+                }
 
                 ListViewGroup lvg = updateView.Groups[Update.Category];
                 if (lvg == null)
@@ -530,9 +579,10 @@ namespace wumgr
                     lvg = updateView.Groups.Add(Update.Category, Update.Category);
                     ListViewExtended.setGrpState(lvg, ListViewGroupState.Collapsible);
                 }
-                items[i].Group = lvg;
+                item.Group = lvg;
+                items.Add(item);
             }
-            updateView.Items.AddRange(items);
+            updateView.Items.AddRange(items.ToArray());
 
             // Note: this has caused issues in the past
             //updateView.SetGroupState(ListViewGroupState.Collapsible);
@@ -579,6 +629,10 @@ namespace wumgr
 
         private void UpdateState()
         {
+            checkChecks = false;
+
+            bool isChecked = updateView.CheckedItems.Count > 0;
+
             bool busy = agent.IsBusy();
             btnCancel.Visible = busy;
             progTotal.Visible = busy;
@@ -591,11 +645,11 @@ namespace wumgr
 
             bool enable = agent.IsActive() && !busy;
             btnSearch.Enabled = enable;
-            btnDownload.Enabled = enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
-            btnInstall.Enabled = admin && enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
-            btnUnInstall.Enabled = admin && enable && isValid2 && (CurrentList == UpdateLists.InstaledUpdates);
-            btnHide.Enabled = enable && isValid && (CurrentList == UpdateLists.PendingUpdates || CurrentList == UpdateLists.HiddenUpdates);
-            btnGetLink.Enabled = CurrentList != UpdateLists.UpdateHistory;
+            btnDownload.Enabled = isChecked && enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
+            btnInstall.Enabled = isChecked && admin && enable && isValid2 && (CurrentList == UpdateLists.PendingUpdates);
+            btnUnInstall.Enabled = isChecked && admin && enable && (CurrentList == UpdateLists.InstaledUpdates);
+            btnHide.Enabled = isChecked && enable && isValid && (CurrentList == UpdateLists.PendingUpdates || CurrentList == UpdateLists.HiddenUpdates);
+            btnGetLink.Enabled = isChecked && CurrentList != UpdateLists.UpdateHistory;
         }
 
         private MenuItem mToolsMenu = null;
@@ -604,7 +658,7 @@ namespace wumgr
         private void BuildToolsMenu()
         {
             wuauMenu = new MenuItem();
-            wuauMenu.Text = "Windows Update Service";
+            wuauMenu.Text = Translate.fmt("menu_wuau");
             wuauMenu.Checked = agent.TestWuAuServ();
             wuauMenu.Click += new System.EventHandler(menuWuAu_Click);
             mToolsMenu.MenuItems.Add(wuauMenu);
@@ -655,7 +709,7 @@ namespace wumgr
             }
 
             MenuItem refreshMenu = new MenuItem();
-            refreshMenu.Text = "&Refresh";
+            refreshMenu.Text = Translate.fmt("menu_refresh");
             refreshMenu.Click += new System.EventHandler(menuRefresh_Click);
             mToolsMenu.MenuItems.Add(refreshMenu);
         }
@@ -665,7 +719,7 @@ namespace wumgr
             ProcessStartInfo startInfo = Program.PrepExec(exec, silent);
             startInfo.WorkingDirectory = dir;
             if(!Program.DoExec(startInfo))
-                MessageBox.Show(MiscFunc.fmt("Filed to start tool"), Program.mName);
+                MessageBox.Show(Translate.fmt("msg_tool_err"), Program.mName);
         }
 
         private void menuExit_Click(object Sender, EventArgs e)
@@ -676,9 +730,9 @@ namespace wumgr
         private void menuAbout_Click(object Sender, EventArgs e)
         {
             string About = "";
-            About += MiscFunc.fmt("Author: \tDavid Xanatos\r\n");
-            About += MiscFunc.fmt("Licence: \tGNU General Public License v3\r\n");
-            About += MiscFunc.fmt("Version: \t{0}\r\n", Program.mVersion);
+            About += "Author: \tDavid Xanatos\r\n";
+            About += "Licence: \tGNU General Public License v3\r\n";
+            About += string.Format("Version: \t{0}\r\n", Program.mVersion);
             About += "\r\n";
             About += "Icons from: https://icons8.com/";
             MessageBox.Show(About, Program.mName);
@@ -706,7 +760,7 @@ namespace wumgr
             RemoveMenu(MenuHandle, 6, MF_BYPOSITION);
             mToolsMenu.MenuItems.Clear();
             BuildToolsMenu();
-            InsertMenu(MenuHandle, 6, MF_BYPOSITION | MF_POPUP, (int)mToolsMenu.Handle, "Tools");
+            InsertMenu(MenuHandle, 6, MF_BYPOSITION | MF_POPUP, (int)mToolsMenu.Handle, Translate.fmt("menu_tools"));
         }
 
         private void btnWinUpd_CheckedChanged(object sender, EventArgs e)
@@ -747,7 +801,7 @@ namespace wumgr
         {
             if (!chkManual.Checked && !MiscFunc.IsAdministrator())
             {
-                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to download updates using windows update services. Use 'Manual' download instead."), Program.mName);
+                MessageBox.Show(Translate.fmt("msg_admin_dl"), Program.mName);
                 return;
             }
 
@@ -765,7 +819,7 @@ namespace wumgr
         {
             if (!MiscFunc.IsAdministrator())
             {
-                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to install updates."), Program.mName);
+                MessageBox.Show(Translate.fmt("msg_admin_inst"), Program.mName);
                 return;
             }
 
@@ -783,17 +837,14 @@ namespace wumgr
         {
             if (!MiscFunc.IsAdministrator())
             {
-                MessageBox.Show(MiscFunc.fmt("Administrator privilegs are required in order to remove updates."), Program.mName);
+                MessageBox.Show(Translate.fmt("msg_admin_rem"), Program.mName);
                 return;
             }
 
             if (!agent.IsActive() || agent.IsBusy())
                 return;
             WuAgent.RetCodes ret = WuAgent.RetCodes.Undefined;
-            if (chkManual.Checked)
-                ret = agent.UnInstallUpdatesOffline(GetUpdates());
-            else
-                ret = agent.UnInstallUpdates(GetUpdates());
+            ret = agent.UnInstallUpdatesManually(GetUpdates());
             ShowResult(WuAgent.AgentOperation.RemoveingUpdates, ret);
         }
 
@@ -825,7 +876,7 @@ namespace wumgr
                 AppLog.Line("Update Download Links copyed to clipboard");
             }
             else
-                AppLog.Line("No updates sellected");
+                AppLog.Line("No updates selected");
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -837,15 +888,15 @@ namespace wumgr
         {
             switch (op)
             {
-                case WuAgent.AgentOperation.CheckingUpdates: return "Checking for Updates";
-                case WuAgent.AgentOperation.PreparingCheck: return "Preparing Check"; 
+                case WuAgent.AgentOperation.CheckingUpdates: return Translate.fmt("op_check");
+                case WuAgent.AgentOperation.PreparingCheck: return Translate.fmt("op_prep"); 
                 case WuAgent.AgentOperation.PreparingUpdates:
-                case WuAgent.AgentOperation.DownloadingUpdates: return "Downloading Updates"; 
-                case WuAgent.AgentOperation.InstallingUpdates: return "Installing Updates"; 
-                case WuAgent.AgentOperation.RemoveingUpdates: return "Removing Updates"; 
-                case WuAgent.AgentOperation.CancelingOperation: return "Canceling Operation"; 
+                case WuAgent.AgentOperation.DownloadingUpdates: return Translate.fmt("op_dl"); 
+                case WuAgent.AgentOperation.InstallingUpdates: return Translate.fmt("op_inst"); 
+                case WuAgent.AgentOperation.RemoveingUpdates: return Translate.fmt("op_rem"); 
+                case WuAgent.AgentOperation.CancelingOperation: return Translate.fmt("op_cancel"); 
             }
-            return "Unknown Operation";
+            return Translate.fmt("op_unk");
         }
 
         void OnProgress(object sender, WuAgent.ProgressArgs args)
@@ -910,12 +961,12 @@ namespace wumgr
             {
                 if (ret == WuAgent.RetCodes.Success)
                 {
-                    MessageBox.Show(MiscFunc.fmt("Updates downloaded to {0}, \r\nready to be installed by the user.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(Translate.fmt("msg_dl_done", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 else if (ret == WuAgent.RetCodes.DownloadFailed)
                 {
-                    MessageBox.Show(MiscFunc.fmt("Updates downloaded to {0}, \r\nsome updates failed to download.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_dl_err", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
             }
@@ -924,12 +975,12 @@ namespace wumgr
             {
                 if (ret == WuAgent.RetCodes.Success)
                 {
-                    MessageBox.Show(MiscFunc.fmt("Updates successfully installed, howeever a reboot is required.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(Translate.fmt("msg_inst_done", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 else if (ret == WuAgent.RetCodes.DownloadFailed)
                 {
-                    MessageBox.Show(MiscFunc.fmt("Instalation of some Updates has failed, also a reboot is required.", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(Translate.fmt("msg_inst_err", agent.dlPath), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
             }
@@ -940,18 +991,18 @@ namespace wumgr
                 case WuAgent.RetCodes.Success:
                 case WuAgent.RetCodes.Abborted:
                 case WuAgent.RetCodes.InProgress: return;
-                case WuAgent.RetCodes.AccessError: status = MiscFunc.fmt("Required privilegs are not available"); break;
-                case WuAgent.RetCodes.Busy: status = MiscFunc.fmt("Anotehr operation is already in progress"); break;
-                case WuAgent.RetCodes.DownloadFailed: status = MiscFunc.fmt("Download failed"); break;
-                case WuAgent.RetCodes.InstallFailed: status = MiscFunc.fmt("Instalation failed"); break;
-                case WuAgent.RetCodes.NoUpdated: status = MiscFunc.fmt("No selected updates or no updates eligible for the operation"); break;
-                case WuAgent.RetCodes.InternalError: status = MiscFunc.fmt("Inernal error"); break;
-                case WuAgent.RetCodes.FileNotFound: status = MiscFunc.fmt("Required file(s) could not be found"); break;
+                case WuAgent.RetCodes.AccessError: status = Translate.fmt("err_admin"); break;
+                case WuAgent.RetCodes.Busy: status = Translate.fmt("err_busy"); break;
+                case WuAgent.RetCodes.DownloadFailed: status = Translate.fmt("err_dl"); break;
+                case WuAgent.RetCodes.InstallFailed: status = Translate.fmt("err_inst"); break;
+                case WuAgent.RetCodes.NoUpdated: status = Translate.fmt("err_no_sel"); break;
+                case WuAgent.RetCodes.InternalError: status = Translate.fmt("err_int"); break;
+                case WuAgent.RetCodes.FileNotFound: status = Translate.fmt("err_file"); break;
             }
 
             string action = GetOpStr(op);
 
-            MessageBox.Show(MiscFunc.fmt("{0} failed: {1}.", action, status), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(Translate.fmt("msg_err", action, status), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void dlSource_SelectedIndexChanged(object sender, EventArgs e)
@@ -1030,8 +1081,13 @@ namespace wumgr
 
             if (radDisable.Checked)
             {
-                if(chkDisableAU.Checked)
+                if (chkDisableAU.Checked)
+                {
+                    bool test = GPO.GetDisableAU();
                     GPO.DisableAU(true);
+                    if(!test)
+                        MessageBox.Show(Translate.fmt("msg_disable_au"));
+                }
 
                 GPO.ConfigAU(GPO.AUOptions.Disabled);
             }
@@ -1065,7 +1121,7 @@ namespace wumgr
                 {
                     if (!chkDisableAU.Checked)
                     {
-                        switch (MessageBox.Show("Your version of Windows does not respect the standard GPO's, to keep autoamtic windows update disabled update facilitation services must be disabled.", Program.mName, MessageBoxButtons.YesNoCancel))
+                        switch (MessageBox.Show(Translate.fmt("msg_gpo"), Program.mName, MessageBoxButtons.YesNoCancel))
                         {
                             case DialogResult.Yes:
                                 chkDisableAU.Checked = true; // Note: this triggers chkDisableAU_CheckedChanged
@@ -1099,7 +1155,10 @@ namespace wumgr
 
             if (mSuspendUpdate)
                 return;
+            bool test = GPO.GetDisableAU();
             GPO.DisableAU(chkDisableAU.Checked);
+            if(test != chkDisableAU.Checked)
+                MessageBox.Show(Translate.fmt("msg_disable_au"));
         }
 
         private void chkAutoRun_CheckedChanged(object sender, EventArgs e)
@@ -1169,16 +1228,18 @@ namespace wumgr
 
         private void updateView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(updateView.SelectedItems.Count == 1)
+            lblSupport.Visible = false;
+            if (updateView.SelectedItems.Count == 1)
             {
                 MsUpdate Update = (MsUpdate)updateView.SelectedItems[0].Tag;
-                lblSupport.Links[0].LinkData = Update.SupportUrl;
-                lblSupport.Links[0].Visited = false;
-                lblSupport.Visible = true;
-                toolTip.SetToolTip(lblSupport, Update.SupportUrl);
+                if (Update.KB != null && Update.KB.Length > 2)
+                {
+                    lblSupport.Links[0].LinkData = "https://support.microsoft.com/help/" + Update.KB.Substring(2);
+                    lblSupport.Links[0].Visited = false;
+                    lblSupport.Visible = true;
+                    toolTip.SetToolTip(lblSupport, lblSupport.Links[0].LinkData.ToString());
+                }
             }
-            else
-                lblSupport.Visible = false;
         }
 
         private void lblSupport_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1241,6 +1302,114 @@ namespace wumgr
             {
                 return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
             }
+        }
+
+
+        private void Localize()
+        {
+
+            btnWinUpd.Text = Translate.fmt("lbl_fnd_upd", 0);
+            btnInstalled.Text = Translate.fmt("lbl_inst_upd", 0);
+            btnHidden.Text = Translate.fmt("lbl_block_upd", 0);
+            btnHistory.Text = Translate.fmt("lbl_old_upd", 0);
+
+            toolTip.SetToolTip(btnSearch, Translate.fmt("tip_search"));
+            toolTip.SetToolTip(btnInstall, Translate.fmt("tip_inst"));
+            toolTip.SetToolTip(btnDownload, Translate.fmt("tip_dl"));
+            toolTip.SetToolTip(btnHide, Translate.fmt("tip_hide"));
+            toolTip.SetToolTip(btnGetLink, Translate.fmt("tip_lnk"));
+            toolTip.SetToolTip(btnUnInstall, Translate.fmt("tip_rem"));
+            toolTip.SetToolTip(btnCancel, Translate.fmt("tip_cancel"));
+
+            updateView.Columns[0].Text = Translate.fmt("col_title");
+            updateView.Columns[1].Text = Translate.fmt("col_cat");
+            updateView.Columns[2].Text = Translate.fmt("col_kb");
+            updateView.Columns[3].Text = Translate.fmt("col_date");
+            updateView.Columns[4].Text = Translate.fmt("col_site");
+            updateView.Columns[5].Text = Translate.fmt("col_stat");
+
+            lblSupport.Text = Translate.fmt("lbl_support");
+
+            lblSearch.Text = Translate.fmt("lbl_search");
+
+            tabOptions.Text = Translate.fmt("lbl_opt");
+
+            chkOffline.Text = Translate.fmt("lbl_off");
+            chkDownload.Text = Translate.fmt("lbl_dl");
+            chkManual.Text = Translate.fmt("lbl_man");
+            chkOld.Text = Translate.fmt("lbl_old");
+            chkMsUpd.Text = Translate.fmt("lbl_ms");
+
+            gbStartup.Text = Translate.fmt("lbl_start");
+            chkAutoRun.Text = Translate.fmt("lbl_auto");
+            dlAutoCheck.Items.Clear();
+            dlAutoCheck.Items.Add(Translate.fmt("lbl_ac_no"));
+            dlAutoCheck.Items.Add(Translate.fmt("lbl_ac_day"));
+            dlAutoCheck.Items.Add(Translate.fmt("lbl_ac_week"));
+            dlAutoCheck.Items.Add(Translate.fmt("lbl_ac_month"));
+            chkNoUAC.Text = Translate.fmt("lbl_uac");
+
+
+            tabAU.Text = Translate.fmt("lbl_au");
+
+            chkBlockMS.Text = Translate.fmt("lbl_block_ms");
+            radDisable.Text = Translate.fmt("lbl_au_off");
+            chkDisableAU.Text = Translate.fmt("lbl_au_dissable");
+            radNotify.Text = Translate.fmt("lbl_au_notify");
+            radDownload.Text = Translate.fmt("lbl_au_dl");
+            radSchedule.Text = Translate.fmt("lbl_au_time");
+            radDefault.Text = Translate.fmt("lbl_au_def");
+            chkHideWU.Text = Translate.fmt("lbl_hide");
+            chkStore.Text = Translate.fmt("lbl_store");
+            chkDrivers.Text = Translate.fmt("lbl_drv");
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.F))
+            {
+                this.panelList.RowStyles[2].Height = mSearchBoxHeight;
+                return true;
+            }
+
+            if (keyData == (Keys.Control | Keys.C))
+            {
+                string Info = "";
+                foreach (ListViewItem item in updateView.SelectedItems)
+                {
+                    if(Info.Length != 0)
+                        Info += "\r\n";
+                    Info += item.Text;
+                    for(int i=1; i < item.SubItems.Count; i++)
+                        Info += "; " + item.SubItems[i].Text;
+                }
+
+                if (Info.Length != 0)
+                    Clipboard.SetText(Info);
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void btnSearchOff_Click(object sender, EventArgs e)
+        {
+            this.panelList.RowStyles[2].Height = 0;
+            mSearchFilter = null;
+            LoadList();
+        }
+
+        private void txtFilter_TextChanged(object sender, EventArgs e)
+        {
+            mSearchFilter = txtFilter.Text;
+            bUpdateList = true;
+        }
+
+        bool checkChecks = false;
+
+        private void updateView_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            checkChecks = true;
         }
     }
 }

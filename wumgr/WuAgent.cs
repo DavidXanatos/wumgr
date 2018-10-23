@@ -356,10 +356,7 @@ namespace wumgr
                 download.FileName = "wsusscn2.cab";
                 downloads.Add(download); 
                 if(!mUpdateDownloader.Download(downloads))
-                {
                     OnFinished(RetCodes.DownloadFailed);
-                    return RetCodes.DownloadFailed;
-                }
                 return RetCodes.InProgress;
             }
 
@@ -475,10 +472,7 @@ namespace wumgr
             }
 
             if (!mUpdateDownloader.Download(downloads, Updates))
-            {
                 OnFinished(RetCodes.DownloadFailed);
-                return RetCodes.DownloadFailed;
-            }
             
             return RetCodes.InProgress;
         }
@@ -501,7 +495,7 @@ namespace wumgr
         }
 
 
-        public RetCodes UnInstallUpdatesOffline(List<MsUpdate> Updates)
+        public RetCodes UnInstallUpdatesManually(List<MsUpdate> Updates)
         {
             if (mUpdateInstaller.IsBusy())
                 return RetCodes.Busy;
@@ -509,11 +503,24 @@ namespace wumgr
             mCurOperation = AgentOperation.RemoveingUpdates;
             OnProgress(-1, 0, 0, 0);
 
-            if (!mUpdateInstaller.UnInstall(Updates))
+            List<MsUpdate> FilteredUpdates = new List<MsUpdate>();
+            foreach (MsUpdate Update in Updates)
             {
-                OnFinished(RetCodes.InstallFailed);
-                return RetCodes.InstallFailed;
+                if (((int)Update.Attributes & (int)MsUpdate.UpdateAttr.Uninstallable) == 0)
+                {
+                    AppLog.Line("Update can not be uninstalled: {0}", Update.Title);
+                    continue;
+                }
+                FilteredUpdates.Add(Update);
             }
+            if (FilteredUpdates.Count == 0)
+            {
+                AppLog.Line("No updates selected or eligible for uninstallation");
+                return RetCodes.NoUpdated;
+            }
+
+            if (!mUpdateInstaller.UnInstall(FilteredUpdates))
+                OnFinished(RetCodes.InstallFailed);
 
             return RetCodes.InProgress;
         }
@@ -609,7 +616,7 @@ namespace wumgr
                 AppLog.Line("Updates failed to (Un)Install");
 
             if (args.Reboot)
-                AppLog.Line("Reboot is required for one of more updates");
+                AppLog.Line("Reboot is required for one or more updates");
 
             OnUpdatesChanged();
 
@@ -689,7 +696,7 @@ namespace wumgr
 
             if (mInstaller.Updates.Count == 0)
             {
-                AppLog.Line("No updates selected for instalation");
+                AppLog.Line("No updates selected for installation");
                 return RetCodes.NoUpdated;
             }
 
@@ -710,7 +717,8 @@ namespace wumgr
             return RetCodes.InProgress;
         }
 
-        public RetCodes UnInstallUpdates(List<MsUpdate> Updates)
+        // Note: this works _only_ for updates installed from WSUS
+        /*public RetCodes UnInstallUpdates(List<MsUpdate> Updates)
         {
             if (mCallback != null)
                 return RetCodes.Busy;
@@ -732,7 +740,7 @@ namespace wumgr
                 }
                 mInstaller.Updates.Add(update);
             }
-            if (mDownloader.Updates.Count == 0)
+            if (mInstaller.Updates.Count == 0)
             {
                 AppLog.Line("No updates selected or eligible for uninstallation");
                 return RetCodes.NoUpdated;
@@ -753,7 +761,7 @@ namespace wumgr
                 return OnWuError(err);
             }
             return RetCodes.InProgress;
-        }
+        }*/
 
         public bool RemoveFrom(List<MsUpdate> Updates, MsUpdate Update)
         {
@@ -940,7 +948,7 @@ namespace wumgr
                 }
 
                 if (InstallationResults.RebootRequired == true)
-                    AppLog.Line("Reboot is required for one of more updates");
+                    AppLog.Line("Reboot is required for one or more updates");
             }
             else
                 AppLog.Line("Updates failed to (Un)Install");
@@ -1054,7 +1062,7 @@ namespace wumgr
 
         protected void OnUpdatesChanged(bool found = false)
         {
-            string INIPath = Program.wrkPath + @"\updates.ini";
+            string INIPath = dlPath + @"\updates.ini";
             FileOps.DeleteFile(INIPath);
 
             StoreUpdates(mUpdateHistory);
@@ -1067,7 +1075,7 @@ namespace wumgr
 
         private void StoreUpdates(List<MsUpdate> Updates)
         {
-            string INIPath = Program.wrkPath + @"\updates.ini";
+            string INIPath = dlPath + @"\updates.ini";
             foreach (MsUpdate Update in Updates)
             {
                 if (Update.KB.Length == 0) // sanity check
@@ -1095,7 +1103,7 @@ namespace wumgr
 
         private void LoadUpdates()
         {
-            string INIPath = Program.wrkPath + @"\updates.ini";
+            string INIPath = dlPath + @"\updates.ini";
             foreach (string KB in Program.IniEnumSections(INIPath))
             {
                 if (KB.Length == 0)

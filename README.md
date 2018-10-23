@@ -6,5 +6,4 @@ It allows the user fine control of updates on modern (Windows 10) operating syst
 
 This tool is inspired by the Windows Update Mini Tool, however in contrast to WUMT it is written in .NET instead of C/C++ and it is open source; thus its continued maintenance is ensured.
 
-
 Icons provided by: http://icons8.com/

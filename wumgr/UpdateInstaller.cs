@@ -54,7 +54,7 @@ namespace wumgr
             DoInstall = false;
 
             NextUpdate();
-            return false;
+            return true;
         }
 
         public bool IsBusy()
@@ -302,20 +302,19 @@ namespace wumgr
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo();
                 startInfo.FileName = @"%SystemRoot%\System32\wusa.exe";
-                startInfo.Arguments = "/uninstall /kb:" + KB.Substring(2) + " /quiet /norestart";
+                startInfo.Arguments = "/uninstall /kb:" + KB.Substring(2) + " /norestart"; // /quiet 
 
                 int exitCode = ExecTask(startInfo);
 
-                if (exitCode == 3010 || exitCode == 3010)
-                    reboot = true; // reboot requires
-                else if (exitCode == 1641)
+                if (exitCode == 3010 || exitCode == 3010 || exitCode == 1641)
                 {
-                    AppLog.Line("Error, reboot got initiated: {0}", KB);
-                    reboot = true; // reboot in initiated, WTF !!!!
-                    ok = false;
+                    reboot = true;
                 }
                 else if (exitCode != 1 && exitCode != 0)
+                {
+                    AppLog.Line("Error, exit coded: {0}", exitCode);
                     ok = false; // some error
+                }
             }
             catch (Exception e)
             {

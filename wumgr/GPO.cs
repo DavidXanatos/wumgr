@@ -26,197 +26,243 @@ namespace wumgr
 
         static public void ConfigAU(AUOptions option, int day = -1, int time = -1)
         {
-            var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-            switch (option)
+            try
             {
-                case AUOptions.Default: //Automatic(default)
-                    subKey.DeleteValue("NoAutoUpdate", false);
-                    subKey.DeleteValue("AUOptions", false);
-                    break;
-                case AUOptions.Disabled: //Disabled
-                    subKey.SetValue("NoAutoUpdate", 1);
-                    subKey.DeleteValue("AUOptions", false);
-                    break;
-                case AUOptions.Notification: //Notification only
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 2);
-                    break;
-                case AUOptions.Download: //Download only
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 3);
-                    break;
-                case AUOptions.Scheduled: //Scheduled Installation
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 4);
-                    break;
-                case AUOptions.ManagedByAdmin: //Managed by Admin
-                    subKey.SetValue("NoAutoUpdate", 0);
-                    subKey.SetValue("AUOptions", 5);
-                    break;
-            }
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                switch (option)
+                {
+                    case AUOptions.Default: //Automatic(default)
+                        subKey.DeleteValue("NoAutoUpdate", false);
+                        subKey.DeleteValue("AUOptions", false);
+                        break;
+                    case AUOptions.Disabled: //Disabled
+                        subKey.SetValue("NoAutoUpdate", 1);
+                        subKey.DeleteValue("AUOptions", false);
+                        break;
+                    case AUOptions.Notification: //Notification only
+                        subKey.SetValue("NoAutoUpdate", 0);
+                        subKey.SetValue("AUOptions", 2);
+                        break;
+                    case AUOptions.Download: //Download only
+                        subKey.SetValue("NoAutoUpdate", 0);
+                        subKey.SetValue("AUOptions", 3);
+                        break;
+                    case AUOptions.Scheduled: //Scheduled Installation
+                        subKey.SetValue("NoAutoUpdate", 0);
+                        subKey.SetValue("AUOptions", 4);
+                        break;
+                    case AUOptions.ManagedByAdmin: //Managed by Admin
+                        subKey.SetValue("NoAutoUpdate", 0);
+                        subKey.SetValue("AUOptions", 5);
+                        break;
+                }
 
-            if (option == AUOptions.Scheduled)
-            {
-                if(day != -1) subKey.SetValue("ScheduledInstallDay", day);
-                if (time != -1) subKey.SetValue("ScheduledInstallTime", time);
+                if (option == AUOptions.Scheduled)
+                {
+                    if (day != -1) subKey.SetValue("ScheduledInstallDay", day);
+                    if (time != -1) subKey.SetValue("ScheduledInstallTime", time);
+                }
+                else
+                {
+                    subKey.DeleteValue("ScheduledInstallDay", false);
+                    subKey.DeleteValue("ScheduledInstallTime", false);
+                }
             }
-            else
-            {
-                subKey.DeleteValue("ScheduledInstallDay", false);
-                subKey.DeleteValue("ScheduledInstallTime", false);
-            }
+            catch { }
         }
 
         static public AUOptions GetAU(out int day, out int time)
         {
             AUOptions option = AUOptions.Default;
-
-            var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", false);
-            object value_no = subKey.GetValue("NoAutoUpdate");
-            if (value_no == null || (int)value_no == 0)
+            try
             {
-                object value_au = subKey.GetValue("AUOptions");
-                switch (value_au == null ? 0 : (int)value_au)
+                var subKey = Registry.LocalMachine.OpenSubKey(mWuGPO + @"\AU", false);
+                object value_no = subKey == null ? null : subKey.GetValue("NoAutoUpdate");
+                if (value_no == null || (int)value_no == 0)
                 {
-                    case 0: option = AUOptions.Default; break;
-                    case 2: option = AUOptions.Notification; break;
-                    case 3: option = AUOptions.Download; break;
-                    case 4: option = AUOptions.Scheduled; break;
-                    case 5: option = AUOptions.ManagedByAdmin; break;
+                    object value_au = subKey == null ? null : subKey.GetValue("AUOptions");
+                    switch (value_au == null ? 0 : (int)value_au)
+                    {
+                        case 0: option = AUOptions.Default; break;
+                        case 2: option = AUOptions.Notification; break;
+                        case 3: option = AUOptions.Download; break;
+                        case 4: option = AUOptions.Scheduled; break;
+                        case 5: option = AUOptions.ManagedByAdmin; break;
+                    }
                 }
-            }
-            else
-            {
-                option = AUOptions.Disabled;
-            }
+                else
+                {
+                    option = AUOptions.Disabled;
+                }
 
-            object value_day = subKey.GetValue("ScheduledInstallDay");
-            day = value_day != null ? (int)value_day : 0;
-            object value_time = subKey.GetValue("ScheduledInstallTime");
-            time = value_time != null ? (int)value_time : 0;
-
+                object value_day = subKey.GetValue("ScheduledInstallDay");
+                day = value_day != null ? (int)value_day : 0;
+                object value_time = subKey.GetValue("ScheduledInstallTime");
+                time = value_time != null ? (int)value_time : 0;
+            }
+            catch { day = 0; time = 0; }
             return option;
         }
 
         static public void ConfigDriverAU(int option)
         {
-            var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
-            switch (option)
+            try
             {
-                case 0: // CheckState.Unchecked:
-                    subKey.SetValue("ExcludeWUDriversInQualityUpdate", 1);
-                    break;
-                case 2: // CheckState.Indeterminate:
-                    subKey.DeleteValue("ExcludeWUDriversInQualityUpdate", false);
-                    break;
-                case 1: // CheckState.Checked:
-                    subKey.SetValue("ExcludeWUDriversInQualityUpdate", 0);
-                    break;
+                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
+                switch (option)
+                {
+                    case 0: // CheckState.Unchecked:
+                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 1);
+                        break;
+                    case 2: // CheckState.Indeterminate:
+                        subKey.DeleteValue("ExcludeWUDriversInQualityUpdate", false);
+                        break;
+                    case 1: // CheckState.Checked:
+                        subKey.SetValue("ExcludeWUDriversInQualityUpdate", 0);
+                        break;
+                }
             }
+            catch { }
         }
 
         static public int GetDriverAU()
         {
-            var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, false);
-            object value_drv = subKey.GetValue("ExcludeWUDriversInQualityUpdate");
+            try
+            {
+                var subKey = Registry.LocalMachine.OpenSubKey(mWuGPO, false);
+                object value_drv = subKey == null ? null : subKey.GetValue("ExcludeWUDriversInQualityUpdate");
 
-            if (value_drv == null)
-                return 2; // CheckState.Indeterminate;
-            else if ((int)value_drv == 1)
-                return 0; // CheckState.Unchecked;
-            else //if ((int)value_drv == 0)
-                return 1; // CheckState.Checked;
+                if (value_drv == null)
+                    return 2; // CheckState.Indeterminate;
+                else if ((int)value_drv == 1)
+                    return 0; // CheckState.Unchecked;
+                else //if ((int)value_drv == 0)
+                    return 1; // CheckState.Checked
+            }
+            catch { }
+            return 2;
         }
 
         static public void HideUpdatePage(bool hide = true)
         {
-            var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", true);
-            if (hide)
-                subKey.SetValue("SettingsPageVisibility", "hide:windowsupdate");
-            else
-                subKey.DeleteValue("SettingsPageVisibility", false);
+            try
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer", true);
+                if (hide)
+                    subKey.SetValue("SettingsPageVisibility", "hide:windowsupdate");
+                else
+                    subKey.DeleteValue("SettingsPageVisibility", false);
+            }
+            catch { }
         }
 
         static public bool IsUpdatePageHidden()
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer");
-            string value = subKey == null ? null : subKey.GetValue("SettingsPageVisibility", "").ToString();
-            return value.Contains("hide:windowsupdate");
+            try
+            {
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer");
+                string value = subKey == null ? null : subKey.GetValue("SettingsPageVisibility", "").ToString();
+                return value.Contains("hide:windowsupdate");
+            }
+            catch { }
+            return false;
         }
 
         static public void BlockMS(bool block = true)
         {
-            if (block)
+            try
             {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
-                subKey.SetValue("DoNotConnectToWindowsUpdateInternetLocations", 1);
-                subKey.SetValue("WUServer", "\" \"");
-                subKey.SetValue("WUStatusServer", "\" \"");
-                subKey.SetValue("UpdateServiceUrlAlternate", "\" \"");
+                if (block)
+                {
+                    var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
+                    subKey.SetValue("DoNotConnectToWindowsUpdateInternetLocations", 1);
+                    subKey.SetValue("WUServer", "\" \"");
+                    subKey.SetValue("WUStatusServer", "\" \"");
+                    subKey.SetValue("UpdateServiceUrlAlternate", "\" \"");
 
-                var subKey2 = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-                subKey2.SetValue("UseWUServer", 1);
-            }
-            else
-            {
-                var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
-                subKey.DeleteValue("DoNotConnectToWindowsUpdateInternetLocations", false);
-                subKey.DeleteValue("WUServer", false);
-                subKey.DeleteValue("WUStatusServer", false);
-                subKey.DeleteValue("UpdateServiceUrlAlternate", false);
+                    var subKey2 = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                    subKey2.SetValue("UseWUServer", 1);
+                }
+                else
+                {
+                    var subKey = Registry.LocalMachine.CreateSubKey(mWuGPO, true);
+                    subKey.DeleteValue("DoNotConnectToWindowsUpdateInternetLocations", false);
+                    subKey.DeleteValue("WUServer", false);
+                    subKey.DeleteValue("WUStatusServer", false);
+                    subKey.DeleteValue("UpdateServiceUrlAlternate", false);
 
-                var subKey2 = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
-                subKey2.DeleteValue("UseWUServer", false);
+                    var subKey2 = Registry.LocalMachine.CreateSubKey(mWuGPO + @"\AU", true);
+                    subKey2.DeleteValue("UseWUServer", false);
+                }
             }
+            catch { }
         }
 
         static public int GetBlockMS()
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(mWuGPO);
+            try
+            {
+                var subKey = Registry.LocalMachine.OpenSubKey(mWuGPO, false);
 
-            object value_block = subKey == null ? null : subKey.GetValue("DoNotConnectToWindowsUpdateInternetLocations");
+                object value_block = subKey == null ? null : subKey.GetValue("DoNotConnectToWindowsUpdateInternetLocations");
 
-            var subKey2 = Registry.LocalMachine.OpenSubKey(mWuGPO + @"\AU");
-            object value_wsus = subKey2 == null ? null : subKey2.GetValue("UseWUServer");
+                var subKey2 = Registry.LocalMachine.OpenSubKey(mWuGPO + @"\AU", false);
+                object value_wsus = subKey2 == null ? null : subKey2.GetValue("UseWUServer");
 
-            if ((value_block != null && (int)value_block == 1) && (value_wsus != null && (int)value_wsus == 1))
-                return 1; // CheckState.Checked;
-            else if ((value_block == null || (int)value_block == 0) && (value_wsus == null || (int)value_wsus == 0))
-                return 0; // CheckState.Unchecked;
-            else
-                return 2; // CheckState.Indeterminate;
+                if ((value_block != null && (int)value_block == 1) && (value_wsus != null && (int)value_wsus == 1))
+                    return 1; // CheckState.Checked;
+                else if ((value_block == null || (int)value_block == 0) && (value_wsus == null || (int)value_wsus == 0))
+                    return 0; // CheckState.Unchecked;
+                else
+                    return 2; // CheckState.Indeterminate;
+            }
+            catch { }
+            return 2;
         }
 
         static public void SetStoreAU(bool disable)
         {
-            var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore", true);
-            //var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", true);
-            if (disable)
-                subKey.SetValue("AutoDownload", 2);
-            else
-                subKey.DeleteValue("AutoDownload", false); // subKey.SetValue("AutoDownload", 4);
+            try
+            {
+                var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore", true);
+                //var subKey = Registry.LocalMachine.CreateSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", true);
+                if (disable)
+                    subKey.SetValue("AutoDownload", 2);
+                else
+                    subKey.DeleteValue("AutoDownload", false); // subKey.SetValue("AutoDownload", 4);
+            }
+            catch { }
         }
 
         static public bool GetStoreAU()
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore");
-            //var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate");
-            object value_block = subKey == null ? null : subKey.GetValue("AutoDownload");
-            return (value_block != null && (int)value_block == 2);
+            try
+            {
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\Microsoft\WindowsStore", false);
+                //var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate");
+                object value_block = subKey == null ? null : subKey.GetValue("AutoDownload");
+                return (value_block != null && (int)value_block == 2);
+            }
+            catch { }
+            return false;
         }
 
         static public void DisableAU(bool disable)
         {
-            if (disable)
+            try
             {
-                ConfigSvc("UsoSvc", ServiceStartMode.Disabled); // Update Orchestrator Service
-                ConfigSvc("WaaSMedicSvc", ServiceStartMode.Disabled); // Windows Update Medic Service
+                if (disable)
+                {
+                    ConfigSvc("UsoSvc", ServiceStartMode.Disabled); // Update Orchestrator Service
+                    ConfigSvc("WaaSMedicSvc", ServiceStartMode.Disabled); // Windows Update Medic Service
+                }
+                else
+                {
+                    ConfigSvc("UsoSvc", ServiceStartMode.Automatic); // Update Orchestrator Service
+                    ConfigSvc("WaaSMedicSvc", ServiceStartMode.Manual); // Windows Update Medic Service
+                }
             }
-            else
-            {
-                ConfigSvc("UsoSvc", ServiceStartMode.Automatic); // Update Orchestrator Service
-                ConfigSvc("WaaSMedicSvc", ServiceStartMode.Manual); // Windows Update Medic Service
-            }
+            catch { }
         }
 
         static public void ConfigSvc(string name, ServiceStartMode mode)
@@ -234,7 +280,7 @@ namespace wumgr
                 // Note: for UsoSvc and for WaaSMedicSvc this call fails with an access error so we have to set the registry
                 //ServiceHelper.ChangeStartMode(svc, mode);
             }
-            catch (Exception err)
+            catch
             {
                 if(showErr)
                     AppLog.Line("Error Stoping Service: {0}", name);
@@ -271,8 +317,13 @@ namespace wumgr
 
         static public bool IsSvcDisabled(string name)
         {
-            var subKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\" + name);
-            return subKey == null || (MiscFunc.parseInt(subKey.GetValue("Start", "-1").ToString()) == (int)ServiceStartMode.Disabled);
+            try
+            {
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\" + name, false);
+                return subKey == null || (MiscFunc.parseInt(subKey.GetValue("Start", "-1").ToString()) == (int)ServiceStartMode.Disabled);
+            }
+            catch { }
+            return false;
         }
 
         public enum Respect
@@ -287,7 +338,9 @@ namespace wumgr
         {
             try
             {
-                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", false);
+                if(subKey == null)
+                    return Respect.Unknown;
                 //string edition = subKey.GetValue("EditionID", "").ToString();
                 string name = subKey.GetValue("ProductName", "").ToString();
                 string type = subKey.GetValue("InstallationType", "").ToString();
@@ -311,7 +364,9 @@ namespace wumgr
         {
             try
             {
-                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+                var subKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", false);
+                if (subKey == null)
+                    return 0.0f;
                 //string Majorversion = subKey.GetValue("CurrentMajorVersionNumber", "0").ToString(); // this is 10 on 10 but not present on earlier editions
                 string version = subKey.GetValue("CurrentVersion", "0").ToString();
                 float version_num = float.Parse(version, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);

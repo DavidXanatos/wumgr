@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 
@@ -46,10 +48,24 @@ class MiscFunc
         }
     }
 
-    public static String fmt(string str, params object[] args)
+    static public Color? parseColor(string input)
+    {
+        ColorConverter c = new ColorConverter();
+        if (Regex.IsMatch(input, "^(#[0-9A-Fa-f]{3})$|^(#[0-9A-Fa-f]{6})$"))
+            return (Color)c.ConvertFromString(input);
+        
+        ColorConverter.StandardValuesCollection svc = (ColorConverter.StandardValuesCollection)c.GetStandardValues();
+        foreach (Color o in svc){
+            if (o.Name.Equals(input, StringComparison.OrdinalIgnoreCase))
+                return (Color)c.ConvertFromString(input);
+        }
+        return null;
+    }
+
+    /*public static String fmt(string str, params object[] args)
     {
         return string.Format(str, args);
-    }
+    }*/
 
     public static bool IsAdministrator()
     {
