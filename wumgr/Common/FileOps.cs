@@ -216,7 +216,7 @@ class FileOps
         }
         catch (PrivilegeNotHeldException err)
         {
-            AppLog.Line("Enable SkipUAC Error {0}", err.ToString());
+            AppLog.Line("Couldn't take Ownership {0}", err.ToString());
             ret = false;
         }
         finally

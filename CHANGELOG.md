@@ -2,6 +2,55 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.8] - 2018-10-32
+### Fixed
+- issue when uninstalling updates
+
+## [0.8c beta] - 2018-10-21
+### Added
+- messge box promping for a reboot when changing update facilitator settings
+- tooltips to list view for long texts
+
+### Changed
+- some buttons are now disabled when no updates are checked
+
+### Fixed
+- issue with supprot url's nor manualy generated mased on the kb number
+
+
+## [0.8b beta] - 2018-10-20
+### Added
+- command line parameter for scripted operation, disabling configuration options -provisioned
+- added search filter ctrl+f
+- addec ctrl+c to copy infos about selected updates
+- added option to blacklist updates by KB using the updates ini, also collor them or pre select them
+
+Example:
+[KB4023307]
+BlackList=1
+Remove=0
+Color=#ffcccc
+
+[KB4343909]
+Select=1
+Color=#ccffcc
+
+### Changed
+- updates are now cached in updates.ini inside teh downloads directory, updates.ini in the working directorty is used for persistent update informations
+
+### Fixed
+- fixed typos in transaltion thx to Carlos Detweiller and PointZero
+
+
+## [0.8a beta] - 2018-10-19
+### Added
+- translation support
+
+### Fixed
+- crash bug in uninstall routile
+- size and date columns ware out of order
+- fixed some GPO related crash issues
+
 
 ## [0.7] - 2018-10-05
 ### Added
@@ -21,8 +70,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - crash bug when firewall blocks downloads
 - issue client not properl abborting operations on cancesss
 
-## [0.6b] - 2018-09-30
 
+## [0.6b] - 2018-09-30
 ### Fixed
 - issues only one instance restriction
 - issues with list view separation

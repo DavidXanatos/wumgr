@@ -142,7 +142,7 @@ class HttpTask
         }
         else if (Success == 2)
         {
-            AppLog.Line("File already dowllaoded {0}", mDlPath + @"\" + mDlName);
+            AppLog.Line("File already downloaded {0}", mDlPath + @"\" + mDlName);
         }
         else
         {

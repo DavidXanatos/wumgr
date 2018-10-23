@@ -103,6 +103,7 @@
     <Compile Include="Common\MiscFunc.cs" />
     <Compile Include="Common\ServiceHelper.cs" />
     <Compile Include="MsUpdate.cs" />
+    <Compile Include="Translate.cs" />
     <Compile Include="UpdateDownloader.cs" />
     <Compile Include="Common\WinConsole.cs" />
     <Compile Include="UpdateErrors.cs" />
