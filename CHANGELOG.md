@@ -2,7 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.8] - 2018-10-32
+
+## [0.8g beta] - 2018-11-1
+### Added
+- Added french translation thanks to Leo
+
+### Changed
+- now the WU setting is always available, and it not ato set when chagrin AU blocking options.
+
+
+## [0.8] - 2018-10-23
 ### Fixed
 - issue when uninstalling updates
 

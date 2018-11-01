@@ -36,6 +36,13 @@
             this.panelList = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.lblSupport = new System.Windows.Forms.LinkLabel();
+            this.updateView = new wumgr.ListViewExtended();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.logBox = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSearchOff = new System.Windows.Forms.Button();
@@ -84,13 +91,6 @@
             this.dlShDay = new System.Windows.Forms.ComboBox();
             this.dlShTime = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.updateView = new wumgr.ListViewExtended();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panelList.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -176,6 +176,59 @@
             this.lblSupport.Text = "Support URL";
             this.lblSupport.Visible = false;
             this.lblSupport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblSupport_LinkClicked);
+            // 
+            // updateView
+            // 
+            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.updateView.CheckBoxes = true;
+            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3,
+            this.columnHeader4,
+            this.columnHeader5,
+            this.columnHeader6});
+            this.updateView.Location = new System.Drawing.Point(3, 23);
+            this.updateView.Name = "updateView";
+            this.updateView.ShowItemToolTips = true;
+            this.updateView.Size = new System.Drawing.Size(489, 292);
+            this.updateView.TabIndex = 2;
+            this.updateView.UseCompatibleStateImageBehavior = false;
+            this.updateView.View = System.Windows.Forms.View.Details;
+            this.updateView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.updateView_ColumnClick);
+            this.updateView.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.updateView_ItemCheck);
+            this.updateView.SelectedIndexChanged += new System.EventHandler(this.updateView_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Title";
+            this.columnHeader1.Width = 260;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Category";
+            this.columnHeader2.Width = 100;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "KB Article";
+            this.columnHeader3.Width = 80;
+            // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "Date";
+            this.columnHeader4.Width = 70;
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "Size";
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "State";
+            this.columnHeader6.Width = 80;
             // 
             // logBox
             // 
@@ -816,59 +869,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(683, 443);
             this.tableLayoutPanel1.TabIndex = 1;
-            // 
-            // updateView
-            // 
-            this.updateView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.updateView.CheckBoxes = true;
-            this.updateView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6});
-            this.updateView.Location = new System.Drawing.Point(3, 23);
-            this.updateView.Name = "updateView";
-            this.updateView.ShowItemToolTips = true;
-            this.updateView.Size = new System.Drawing.Size(489, 292);
-            this.updateView.TabIndex = 2;
-            this.updateView.UseCompatibleStateImageBehavior = false;
-            this.updateView.View = System.Windows.Forms.View.Details;
-            this.updateView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.updateView_ColumnClick);
-            this.updateView.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.updateView_ItemCheck);
-            this.updateView.SelectedIndexChanged += new System.EventHandler(this.updateView_SelectedIndexChanged);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "Title";
-            this.columnHeader1.Width = 260;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Category";
-            this.columnHeader2.Width = 100;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "KB Article";
-            this.columnHeader3.Width = 80;
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "Date";
-            this.columnHeader4.Width = 70;
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "Size";
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "State";
-            this.columnHeader6.Width = 80;
             // 
             // WuMgr
             // 

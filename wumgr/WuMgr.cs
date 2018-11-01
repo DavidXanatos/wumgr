@@ -1145,13 +1145,16 @@ namespace wumgr
 
         private void chkDisableAU_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkDisableAU.Checked)
+            /*if (chkDisableAU.Checked)
             {
                 chkHideWU.Checked = true;
                 chkHideWU.Enabled = false;
             }
             else
+            {
+                chkHideWU.Checked = false;
                 chkHideWU.Enabled = true;
+            }*/
 
             if (mSuspendUpdate)
                 return;
