@@ -1,19 +1,14 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WUApiLib;//this is required to use the Interfaces given by microsoft. 
-using System.Collections;
-using Microsoft.Win32;
-using System.Security.AccessControl;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Diagnostics;
 
 namespace wumgr
 {
@@ -347,7 +342,7 @@ namespace wumgr
                     if (LastBaloon < DateTime.Now.AddHours(-4))
                     {
                         LastBaloon = DateTime.Now;
-                        notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_new_upd"), Translate.fmt("msg_new_upd", Program.mName, agent.mPendingUpdates), ToolTipIcon.Info);
+                        notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_new_upd"), Translate.fmt("msg_new_upd", Program.mName, string.Join(Environment.NewLine, agent.mPendingUpdates.Select(x => $"- {x.Title}"))), ToolTipIcon.Info);
                     }
                 }
             }
