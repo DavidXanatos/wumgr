@@ -9,9 +9,7 @@ This tool is inspired by the Windows Update Mini Tool, however in contrast to WU
 On popular request, here is hot you can donate:
 
 ETH: 0xBf08c3c47C5175015cEF4E32fB2315c9111F5305
-
 LTC: LTqXK1UEri1FCv7fNn9bcFhsrh78SaNdSM
-
 BTC: 18tQgfoog4VyespgskpNiaNFMTdcm6j5Gd
 
 And if you preffer more legit payment methods, here is my pateron page: https://www.patreon.com/DavidXanatos
