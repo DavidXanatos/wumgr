@@ -14,6 +14,6 @@ LTC: LTqXK1UEri1FCv7fNn9bcFhsrh78SaNdSM
 
 BTC: 18tQgfoog4VyespgskpNiaNFMTdcm6j5Gd
 
-
+And if you preffer more legit payment methods, here is my pateron page: https://www.patreon.com/DavidXanatos
 
 Icons provided by: http://icons8.com/
