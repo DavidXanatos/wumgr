@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9a] - 2018-12-06
+### Added
+- Added Japanese translation thx @Rukoto 
+- Added Polish translation thx @Filemon
+- added select all checkbox
+
+### Fixed
+- Fixed auto update crash issue
+- date formating in last searche for rupdate log
+- fixed date and size sorting issue in columns
+
+### Changed
+- now ctrl+f sets cursot to the searhc box
+- improved sorting, now sort order can be reversed by clicking agina on the column
+
 
 ## [0.8g beta] - 2018-11-1
 ### Added

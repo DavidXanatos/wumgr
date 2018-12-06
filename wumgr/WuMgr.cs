@@ -178,7 +178,9 @@ namespace wumgr
                 case GPO.AUOptions.Download: radDownload.Checked = true; break;
                 case GPO.AUOptions.Scheduled: radSchedule.Checked = true; break;
             }
-            dlShDay.SelectedIndex = day; dlShTime.SelectedIndex = time;
+            try{
+                dlShDay.SelectedIndex = day; dlShTime.SelectedIndex = time;
+            }catch{ }
 
             if (mWinVersion >= 10) // 10 or abive
                 chkDisableAU.Checked = GPO.GetDisableAU();
@@ -187,7 +189,9 @@ namespace wumgr
                 chkStore.Enabled = false;
             chkStore.Checked = GPO.GetStoreAU();
 
-            dlAutoCheck.SelectedIndex = MiscFunc.parseInt(GetConfig("AutoUpdate", "0"));
+            try{
+                dlAutoCheck.SelectedIndex = MiscFunc.parseInt(GetConfig("AutoUpdate", "0"));
+            }catch{ }
             chkAutoRun.Checked = Program.IsAutoStart();
             if (MiscFunc.IsRunningAsUwp() && chkAutoRun.CheckState == CheckState.Checked)
                 chkAutoRun.Enabled = false;
@@ -247,13 +251,18 @@ namespace wumgr
 
             try {
                 LastCheck = DateTime.Parse(GetConfig("LastCheck", ""));
-                AppLog.Line("Last Checked for updates: {0}", LastCheck.ToString());
-            } catch { }
+                AppLog.Line("Last Checked for updates: {0}", LastCheck.ToString("dd.MM.yyyy"));
+            } catch {
+                LastCheck = DateTime.Now;
+            }
 
             LoadProviders(source);
 
             mSearchBoxHeight = this.panelList.RowStyles[2].Height;
             this.panelList.RowStyles[2].Height = 0;
+
+            chkGrupe.Checked = MiscFunc.parseInt(GetConfig("GroupUpdates", "1")) != 0;
+            updateView.ShowGroups = chkGrupe.Checked;
 
             mSuspendUpdate = false;
 
@@ -347,7 +356,7 @@ namespace wumgr
                     if (LastBaloon < DateTime.Now.AddHours(-4))
                     {
                         LastBaloon = DateTime.Now;
-                        notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_new_upd"), Translate.fmt("msg_new_upd", Program.mName, agent.mPendingUpdates), ToolTipIcon.Info);
+                        notifyIcon.ShowBalloonTip(int.MaxValue, Translate.fmt("cap_new_upd"), Translate.fmt("msg_new_upd", Program.mName, agent.mPendingUpdates.Count), ToolTipIcon.Info);
                     }
                 }
             }
@@ -378,16 +387,24 @@ namespace wumgr
 
         private int GetAutoUpdateDue()
         {
-            DateTime NextUpdate = DateTime.MaxValue;
-            switch (AutoUpdate)
+            try
             {
-                case AutoUpdateOptions.EveryDay: NextUpdate = LastCheck.AddDays(1); break;
-                case AutoUpdateOptions.EveryWeek: NextUpdate = LastCheck.AddDays(7); break;
-                case AutoUpdateOptions.EveryMonth: NextUpdate = LastCheck.AddMonths(1); break;
+                DateTime NextUpdate = DateTime.MaxValue;
+                switch (AutoUpdate)
+                {
+                    case AutoUpdateOptions.EveryDay: NextUpdate = LastCheck.AddDays(1); break;
+                    case AutoUpdateOptions.EveryWeek: NextUpdate = LastCheck.AddDays(7); break;
+                    case AutoUpdateOptions.EveryMonth: NextUpdate = LastCheck.AddMonths(1); break;
+                }
+                if (NextUpdate >= DateTime.Now)
+                    return 0;
+                return (int)Math.Ceiling((DateTime.Now - NextUpdate).TotalDays);
             }
-            if (NextUpdate >= DateTime.Now)
+            catch
+            {
+                LastCheck = DateTime.Now;
                 return 0;
-            return (int)Math.Ceiling((DateTime.Now - NextUpdate).TotalDays);
+            }
         }
 
         private int GetGraceDays()
@@ -451,7 +468,9 @@ namespace wumgr
 
         void LoadList()
         {
+            ignoreChecks = true;
             updateView.CheckBoxes = CurrentList != UpdateLists.UpdateHistory;
+            ignoreChecks = false;
             updateView.ForeColor = updateView.CheckBoxes && !agent.IsValid() ? Color.Gray : Color.Black;
 
             switch (CurrentList)
@@ -549,6 +568,9 @@ namespace wumgr
                 }
 
                 ListViewItem item = new ListViewItem(strings);
+                item.SubItems[3].Tag = Update.Date;
+                item.SubItems[4].Tag = Update.Size;
+
 
                 item.Tag = Update;
 
@@ -733,6 +755,8 @@ namespace wumgr
             About += "Author: \tDavid Xanatos\r\n";
             About += "Licence: \tGNU General Public License v3\r\n";
             About += string.Format("Version: \t{0}\r\n", Program.mVersion);
+            About += "\r\n";
+            About += "Source: \thttps://github.com/DavidXanatos/wumgr\r\n";
             About += "\r\n";
             About += "Icons from: https://icons8.com/";
             MessageBox.Show(About, Program.mName);
@@ -1145,16 +1169,16 @@ namespace wumgr
 
         private void chkDisableAU_CheckedChanged(object sender, EventArgs e)
         {
-            /*if (chkDisableAU.Checked)
+            if (chkDisableAU.Checked)
             {
                 chkHideWU.Checked = true;
                 chkHideWU.Enabled = false;
             }
             else
             {
-                chkHideWU.Checked = false;
+                //chkHideWU.Checked = false;
                 chkHideWU.Enabled = true;
-            }*/
+            }
 
             if (mSuspendUpdate)
                 return;
@@ -1285,7 +1309,9 @@ namespace wumgr
 
         private void updateView_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            updateView.ListViewItemSorter = new ListViewItemComparer(e.Column);
+            if(updateView.ListViewItemSorter == null)
+                updateView.ListViewItemSorter = new ListViewItemComparer();
+            ((ListViewItemComparer)updateView.ListViewItemSorter).Update(e.Column);
             updateView.Sort();
         }
 
@@ -1293,17 +1319,28 @@ namespace wumgr
         class ListViewItemComparer : IComparer
         {
             private int col;
+            private int inv;
             public ListViewItemComparer()
             {
                 col = 0;
+                inv = 1;
             }
-            public ListViewItemComparer(int column)
+            public void Update(int column)
             {
+                if (col == column)
+                    inv = -inv;
+                else
+                    inv = 1;
                 col = column;
             }
+
             public int Compare(object x, object y)
             {
-                return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+                if (col == 3) // date
+                    return ((DateTime)((ListViewItem)y).SubItems[col].Tag).CompareTo(((DateTime)((ListViewItem)x).SubItems[col].Tag)) * inv;
+                if (col == 4) // size
+                    return ((decimal)((ListViewItem)y).SubItems[col].Tag).CompareTo(((decimal)((ListViewItem)x).SubItems[col].Tag)) * inv;
+                return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text) * inv;
             }
         }
 
@@ -1331,7 +1368,13 @@ namespace wumgr
             updateView.Columns[4].Text = Translate.fmt("col_site");
             updateView.Columns[5].Text = Translate.fmt("col_stat");
 
+            chkGrupe.Text = Translate.fmt("lbl_group");
+            chkAll.Text = Translate.fmt("lbl_all");
+
             lblSupport.Text = Translate.fmt("lbl_support");
+            lblPatreon.Text = Translate.fmt("lbl_patreon");
+            //string cc = "";
+            //toolTip.SetToolTip(lblPatreon, cc);
 
             lblSearch.Text = Translate.fmt("lbl_search");
 
@@ -1365,6 +1408,7 @@ namespace wumgr
             chkHideWU.Text = Translate.fmt("lbl_hide");
             chkStore.Text = Translate.fmt("lbl_store");
             chkDrivers.Text = Translate.fmt("lbl_drv");
+
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -1372,6 +1416,8 @@ namespace wumgr
             if (keyData == (Keys.Control | Keys.F))
             {
                 this.panelList.RowStyles[2].Height = mSearchBoxHeight;
+                this.txtFilter.SelectAll();
+                this.txtFilter.Focus();
                 return true;
             }
 
@@ -1408,11 +1454,51 @@ namespace wumgr
             bUpdateList = true;
         }
 
-        bool checkChecks = false;
-
-        private void updateView_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void chkGrupe_CheckedChanged(object sender, EventArgs e)
         {
+            if (mSuspendUpdate)
+                return;
+
+            updateView.ShowGroups = chkGrupe.Checked;
+            SetConfig("GroupUpdates", chkGrupe.Checked ? "1" : "0");
+        }
+
+        bool checkChecks = false;
+        bool ignoreChecks = false;
+
+        private void chkAll_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ignoreChecks)
+                return;
+
+            ignoreChecks = true;
+            foreach (ListViewItem item in updateView.Items)
+                item.Checked = chkAll.Checked;
+            ignoreChecks = false;
+        }
+
+        private void updateView_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (ignoreChecks)
+                return;
+
             checkChecks = true;
+
+            ignoreChecks = true;
+
+            if (updateView.CheckedItems.Count == 0)
+                chkAll.CheckState = CheckState.Unchecked;
+            else if (updateView.CheckedItems.Count == updateView.Items.Count)
+                chkAll.CheckState = CheckState.Checked;
+            else
+                chkAll.CheckState = CheckState.Indeterminate;
+
+            ignoreChecks = false;
+        }
+
+        private void lblPatreon_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.patreon.com/DavidXanatos");
         }
     }
 }

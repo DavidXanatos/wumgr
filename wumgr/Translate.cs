@@ -127,6 +127,10 @@ namespace wumgr
             mStrings.Add("lbl_store", "Disable Store Auto Update");
             mStrings.Add("lbl_drv", "Include Drivers");
             mStrings.Add("msg_disable_au", "For the new configuration to fully take effect a reboot is required.");
+            mStrings.Add("lbl_all", "Select All");
+            mStrings.Add("lbl_group", "Group Updates");
+            mStrings.Add("lbl_patreon", "Support WuMgr on Patreon");
+            mStrings.Add("lbl_github", "Visit WuMgr on GitHub");
 
             string langINI = Program.appPath + @"\Translation.ini";
 
