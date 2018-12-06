@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.9a] - 2018-12-06
 ### Added
 - Added Japanese translation thx @Rukoto 
-- Added Polish translation thx @Filemon
+- Added Polish translation thx @vitos
 - added select all checkbox
 
 ### Fixed
