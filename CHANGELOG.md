@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.9a+] - 2018-12-07
+### Added
+- Added Russian translation thx @zetcamp
+
 ## [0.9a] - 2018-12-06
 ### Added
 - Added Japanese translation thx @Rukoto 
