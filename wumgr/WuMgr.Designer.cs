@@ -36,6 +36,9 @@
             this.panelList = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.lblSupport = new System.Windows.Forms.LinkLabel();
+            this.chkGrupe = new System.Windows.Forms.CheckBox();
+            this.chkAll = new System.Windows.Forms.CheckBox();
+            this.lblPatreon = new System.Windows.Forms.LinkLabel();
             this.logBox = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSearchOff = new System.Windows.Forms.Button();
@@ -91,9 +94,6 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chkGrupe = new System.Windows.Forms.CheckBox();
-            this.chkAll = new System.Windows.Forms.CheckBox();
-            this.lblPatreon = new System.Windows.Forms.LinkLabel();
             this.panelList.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -111,9 +111,9 @@
             // chkAutoRun
             // 
             this.chkAutoRun.AutoSize = true;
-            this.chkAutoRun.Location = new System.Drawing.Point(3, 16);
+            this.chkAutoRun.Location = new System.Drawing.Point(3, 18);
             this.chkAutoRun.Name = "chkAutoRun";
-            this.chkAutoRun.Size = new System.Drawing.Size(117, 17);
+            this.chkAutoRun.Size = new System.Drawing.Size(127, 19);
             this.chkAutoRun.TabIndex = 0;
             this.chkAutoRun.Text = "Run in background";
             this.chkAutoRun.ThreeState = true;
@@ -139,15 +139,15 @@
             this.panelList.Controls.Add(this.updateView, 0, 1);
             this.panelList.Controls.Add(this.logBox, 0, 3);
             this.panelList.Controls.Add(this.tableLayoutPanel3, 0, 2);
-            this.panelList.Location = new System.Drawing.Point(188, 0);
+            this.panelList.Location = new System.Drawing.Point(219, 0);
             this.panelList.Margin = new System.Windows.Forms.Padding(0);
             this.panelList.Name = "panelList";
             this.panelList.RowCount = 4;
-            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.panelList.Size = new System.Drawing.Size(495, 443);
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.panelList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 115F));
+            this.panelList.Size = new System.Drawing.Size(578, 511);
             this.panelList.TabIndex = 1;
             // 
             // tableLayoutPanel7
@@ -169,31 +169,71 @@
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 1;
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(495, 20);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(578, 23);
             this.tableLayoutPanel7.TabIndex = 5;
             // 
             // lblSupport
             // 
             this.lblSupport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lblSupport.AutoSize = true;
-            this.lblSupport.Location = new System.Drawing.Point(423, 5);
+            this.lblSupport.Location = new System.Drawing.Point(502, 5);
             this.lblSupport.Name = "lblSupport";
-            this.lblSupport.Size = new System.Drawing.Size(69, 13);
+            this.lblSupport.Size = new System.Drawing.Size(73, 15);
             this.lblSupport.TabIndex = 0;
             this.lblSupport.TabStop = true;
             this.lblSupport.Text = "Support URL";
             this.lblSupport.Visible = false;
             this.lblSupport.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblSupport_LinkClicked);
             // 
+            // chkGrupe
+            // 
+            this.chkGrupe.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkGrupe.AutoSize = true;
+            this.chkGrupe.Location = new System.Drawing.Point(83, 3);
+            this.chkGrupe.Name = "chkGrupe";
+            this.chkGrupe.Size = new System.Drawing.Size(105, 19);
+            this.chkGrupe.TabIndex = 1;
+            this.chkGrupe.Text = "Group Updates";
+            this.chkGrupe.UseVisualStyleBackColor = true;
+            this.chkGrupe.CheckedChanged += new System.EventHandler(this.chkGrupe_CheckedChanged);
+            // 
+            // chkAll
+            // 
+            this.chkAll.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkAll.AutoSize = true;
+            this.chkAll.Location = new System.Drawing.Point(3, 3);
+            this.chkAll.Name = "chkAll";
+            this.chkAll.Size = new System.Drawing.Size(74, 19);
+            this.chkAll.TabIndex = 2;
+            this.chkAll.Text = "Select All";
+            this.chkAll.UseVisualStyleBackColor = true;
+            this.chkAll.CheckedChanged += new System.EventHandler(this.chkAll_CheckedChanged);
+            // 
+            // lblPatreon
+            // 
+            this.lblPatreon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPatreon.AutoSize = true;
+            this.lblPatreon.Location = new System.Drawing.Point(194, 5);
+            this.lblPatreon.Name = "lblPatreon";
+            this.lblPatreon.Size = new System.Drawing.Size(302, 15);
+            this.lblPatreon.TabIndex = 0;
+            this.lblPatreon.TabStop = true;
+            this.lblPatreon.Text = "Support WuMgr on Patreon";
+            this.lblPatreon.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblPatreon_LinkClicked);
+            // 
             // logBox
             // 
             this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(3, 346);
+            this.logBox.Location = new System.Drawing.Point(3, 399);
             this.logBox.Name = "logBox";
             this.logBox.ReadOnly = true;
-            this.logBox.Size = new System.Drawing.Size(489, 94);
+            this.logBox.Size = new System.Drawing.Size(572, 109);
             this.logBox.TabIndex = 4;
             this.logBox.Text = "";
             // 
@@ -203,25 +243,25 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel3.ColumnCount = 3;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 117F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 29F));
             this.tableLayoutPanel3.Controls.Add(this.btnSearchOff, 2, 0);
             this.tableLayoutPanel3.Controls.Add(this.txtFilter, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.lblSearch, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 318);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 367);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(495, 25);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(578, 29);
             this.tableLayoutPanel3.TabIndex = 6;
             // 
             // btnSearchOff
             // 
-            this.btnSearchOff.Location = new System.Drawing.Point(473, 3);
+            this.btnSearchOff.Location = new System.Drawing.Point(552, 3);
             this.btnSearchOff.Name = "btnSearchOff";
-            this.btnSearchOff.Size = new System.Drawing.Size(19, 19);
+            this.btnSearchOff.Size = new System.Drawing.Size(22, 22);
             this.btnSearchOff.TabIndex = 0;
             this.btnSearchOff.Text = "X";
             this.btnSearchOff.UseVisualStyleBackColor = true;
@@ -232,9 +272,9 @@
             this.txtFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFilter.Location = new System.Drawing.Point(103, 3);
+            this.txtFilter.Location = new System.Drawing.Point(120, 3);
             this.txtFilter.Name = "txtFilter";
-            this.txtFilter.Size = new System.Drawing.Size(364, 20);
+            this.txtFilter.Size = new System.Drawing.Size(426, 23);
             this.txtFilter.TabIndex = 1;
             this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
             // 
@@ -242,9 +282,9 @@
             // 
             this.lblSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(3, 6);
+            this.lblSearch.Location = new System.Drawing.Point(3, 7);
             this.lblSearch.Name = "lblSearch";
-            this.lblSearch.Size = new System.Drawing.Size(94, 13);
+            this.lblSearch.Size = new System.Drawing.Size(111, 15);
             this.lblSearch.TabIndex = 2;
             this.lblSearch.Text = "Search Filter:";
             // 
@@ -263,7 +303,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(188, 443);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(219, 511);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel4
@@ -281,14 +321,14 @@
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 7;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 15F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(186, 210);
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 35F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 43F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 17F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(217, 242);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // flowLayoutPanel1
@@ -299,9 +339,9 @@
             this.flowLayoutPanel1.Controls.Add(this.btnUnInstall);
             this.flowLayoutPanel1.Controls.Add(this.btnHide);
             this.flowLayoutPanel1.Controls.Add(this.btnGetLink);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 123);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 143);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 29);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(210, 33);
             this.flowLayoutPanel1.TabIndex = 4;
             // 
             // btnSearch
@@ -309,57 +349,57 @@
             this.btnSearch.Location = new System.Drawing.Point(0, 0);
             this.btnSearch.Margin = new System.Windows.Forms.Padding(0);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(30, 30);
+            this.btnSearch.Size = new System.Drawing.Size(35, 32);
             this.btnSearch.TabIndex = 0;
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // btnDownload
             // 
-            this.btnDownload.Location = new System.Drawing.Point(30, 0);
+            this.btnDownload.Location = new System.Drawing.Point(35, 0);
             this.btnDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btnDownload.Name = "btnDownload";
-            this.btnDownload.Size = new System.Drawing.Size(30, 30);
+            this.btnDownload.Size = new System.Drawing.Size(35, 32);
             this.btnDownload.TabIndex = 1;
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
             // btnInstall
             // 
-            this.btnInstall.Location = new System.Drawing.Point(60, 0);
+            this.btnInstall.Location = new System.Drawing.Point(70, 0);
             this.btnInstall.Margin = new System.Windows.Forms.Padding(0);
             this.btnInstall.Name = "btnInstall";
-            this.btnInstall.Size = new System.Drawing.Size(30, 30);
+            this.btnInstall.Size = new System.Drawing.Size(35, 32);
             this.btnInstall.TabIndex = 2;
             this.btnInstall.UseVisualStyleBackColor = true;
             this.btnInstall.Click += new System.EventHandler(this.btnInstall_Click);
             // 
             // btnUnInstall
             // 
-            this.btnUnInstall.Location = new System.Drawing.Point(90, 0);
+            this.btnUnInstall.Location = new System.Drawing.Point(105, 0);
             this.btnUnInstall.Margin = new System.Windows.Forms.Padding(0);
             this.btnUnInstall.Name = "btnUnInstall";
-            this.btnUnInstall.Size = new System.Drawing.Size(30, 30);
+            this.btnUnInstall.Size = new System.Drawing.Size(35, 32);
             this.btnUnInstall.TabIndex = 3;
             this.btnUnInstall.UseVisualStyleBackColor = true;
             this.btnUnInstall.Click += new System.EventHandler(this.btnUnInstall_Click);
             // 
             // btnHide
             // 
-            this.btnHide.Location = new System.Drawing.Point(120, 0);
+            this.btnHide.Location = new System.Drawing.Point(140, 0);
             this.btnHide.Margin = new System.Windows.Forms.Padding(0);
             this.btnHide.Name = "btnHide";
-            this.btnHide.Size = new System.Drawing.Size(30, 30);
+            this.btnHide.Size = new System.Drawing.Size(35, 32);
             this.btnHide.TabIndex = 4;
             this.btnHide.UseVisualStyleBackColor = true;
             this.btnHide.Click += new System.EventHandler(this.btnHide_Click);
             // 
             // btnGetLink
             // 
-            this.btnGetLink.Location = new System.Drawing.Point(150, 0);
+            this.btnGetLink.Location = new System.Drawing.Point(175, 0);
             this.btnGetLink.Margin = new System.Windows.Forms.Padding(0);
             this.btnGetLink.Name = "btnGetLink";
-            this.btnGetLink.Size = new System.Drawing.Size(30, 30);
+            this.btnGetLink.Size = new System.Drawing.Size(35, 32);
             this.btnGetLink.TabIndex = 5;
             this.btnGetLink.UseVisualStyleBackColor = true;
             this.btnGetLink.Click += new System.EventHandler(this.btnGetLink_Click);
@@ -370,25 +410,24 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel5.ColumnCount = 2;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 34F));
             this.tableLayoutPanel5.Controls.Add(this.btnCancel, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.progTotal, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 160);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 186);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(180, 28);
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 33F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(211, 32);
             this.tableLayoutPanel5.TabIndex = 5;
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(151, 0);
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancel.Location = new System.Drawing.Point(177, 0);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(0);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(29, 29);
+            this.btnCancel.Size = new System.Drawing.Size(34, 33);
             this.btnCancel.TabIndex = 0;
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -399,7 +438,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progTotal.Location = new System.Drawing.Point(3, 3);
             this.progTotal.Name = "progTotal";
-            this.progTotal.Size = new System.Drawing.Size(145, 23);
+            this.progTotal.Size = new System.Drawing.Size(171, 27);
             this.progTotal.TabIndex = 1;
             // 
             // btnHistory
@@ -408,9 +447,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnHistory.Appearance = System.Windows.Forms.Appearance.Button;
             this.btnHistory.AutoSize = true;
-            this.btnHistory.Location = new System.Drawing.Point(3, 93);
+            this.btnHistory.Location = new System.Drawing.Point(3, 108);
             this.btnHistory.Name = "btnHistory";
-            this.btnHistory.Size = new System.Drawing.Size(180, 23);
+            this.btnHistory.Size = new System.Drawing.Size(211, 25);
             this.btnHistory.TabIndex = 6;
             this.btnHistory.Text = "Update History";
             this.btnHistory.UseVisualStyleBackColor = true;
@@ -422,9 +461,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnHidden.Appearance = System.Windows.Forms.Appearance.Button;
             this.btnHidden.AutoSize = true;
-            this.btnHidden.Location = new System.Drawing.Point(3, 63);
+            this.btnHidden.Location = new System.Drawing.Point(3, 73);
             this.btnHidden.Name = "btnHidden";
-            this.btnHidden.Size = new System.Drawing.Size(180, 23);
+            this.btnHidden.Size = new System.Drawing.Size(211, 25);
             this.btnHidden.TabIndex = 7;
             this.btnHidden.Text = "Hidden Updates";
             this.btnHidden.UseVisualStyleBackColor = true;
@@ -436,9 +475,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnInstalled.Appearance = System.Windows.Forms.Appearance.Button;
             this.btnInstalled.AutoSize = true;
-            this.btnInstalled.Location = new System.Drawing.Point(3, 33);
+            this.btnInstalled.Location = new System.Drawing.Point(3, 38);
             this.btnInstalled.Name = "btnInstalled";
-            this.btnInstalled.Size = new System.Drawing.Size(180, 23);
+            this.btnInstalled.Size = new System.Drawing.Size(211, 25);
             this.btnInstalled.TabIndex = 8;
             this.btnInstalled.Text = "Installed Updates";
             this.btnInstalled.UseVisualStyleBackColor = true;
@@ -452,7 +491,7 @@
             this.btnWinUpd.AutoSize = true;
             this.btnWinUpd.Location = new System.Drawing.Point(3, 3);
             this.btnWinUpd.Name = "btnWinUpd";
-            this.btnWinUpd.Size = new System.Drawing.Size(180, 23);
+            this.btnWinUpd.Size = new System.Drawing.Size(211, 25);
             this.btnWinUpd.TabIndex = 0;
             this.btnWinUpd.Text = "Windows Updates";
             this.btnWinUpd.UseVisualStyleBackColor = true;
@@ -462,9 +501,9 @@
             // 
             this.lblStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(3, 194);
+            this.lblStatus.Location = new System.Drawing.Point(3, 225);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(180, 13);
+            this.lblStatus.Size = new System.Drawing.Size(211, 15);
             this.lblStatus.TabIndex = 9;
             // 
             // tabs
@@ -473,10 +512,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabs.Controls.Add(this.tabOptions);
             this.tabs.Controls.Add(this.tabAU);
-            this.tabs.Location = new System.Drawing.Point(3, 213);
+            this.tabs.Location = new System.Drawing.Point(3, 246);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(182, 227);
+            this.tabs.Size = new System.Drawing.Size(213, 262);
             this.tabs.TabIndex = 1;
             // 
             // tabOptions
@@ -488,10 +527,10 @@
             this.tabOptions.Controls.Add(this.chkOld);
             this.tabOptions.Controls.Add(this.chkManual);
             this.tabOptions.Controls.Add(this.chkDownload);
-            this.tabOptions.Location = new System.Drawing.Point(4, 22);
+            this.tabOptions.Location = new System.Drawing.Point(4, 24);
             this.tabOptions.Name = "tabOptions";
             this.tabOptions.Padding = new System.Windows.Forms.Padding(3);
-            this.tabOptions.Size = new System.Drawing.Size(174, 201);
+            this.tabOptions.Size = new System.Drawing.Size(205, 234);
             this.tabOptions.TabIndex = 0;
             this.tabOptions.Text = "Options";
             this.tabOptions.UseVisualStyleBackColor = true;
@@ -501,9 +540,9 @@
             this.gbStartup.Controls.Add(this.chkAutoRun);
             this.gbStartup.Controls.Add(this.chkNoUAC);
             this.gbStartup.Controls.Add(this.dlAutoCheck);
-            this.gbStartup.Location = new System.Drawing.Point(1, 125);
+            this.gbStartup.Location = new System.Drawing.Point(1, 144);
             this.gbStartup.Name = "gbStartup";
-            this.gbStartup.Size = new System.Drawing.Size(170, 75);
+            this.gbStartup.Size = new System.Drawing.Size(198, 87);
             this.gbStartup.TabIndex = 8;
             this.gbStartup.TabStop = false;
             this.gbStartup.Text = "Startup";
@@ -511,9 +550,9 @@
             // chkNoUAC
             // 
             this.chkNoUAC.AutoSize = true;
-            this.chkNoUAC.Location = new System.Drawing.Point(3, 56);
+            this.chkNoUAC.Location = new System.Drawing.Point(3, 65);
             this.chkNoUAC.Name = "chkNoUAC";
-            this.chkNoUAC.Size = new System.Drawing.Size(154, 17);
+            this.chkNoUAC.Size = new System.Drawing.Size(174, 19);
             this.chkNoUAC.TabIndex = 1;
             this.chkNoUAC.Text = "Always run as Administrator";
             this.chkNoUAC.UseVisualStyleBackColor = true;
@@ -529,9 +568,9 @@
             "Search updates every day",
             "Search updates once a week",
             "Search updates every month"});
-            this.dlAutoCheck.Location = new System.Drawing.Point(3, 33);
+            this.dlAutoCheck.Location = new System.Drawing.Point(3, 38);
             this.dlAutoCheck.Name = "dlAutoCheck";
-            this.dlAutoCheck.Size = new System.Drawing.Size(163, 21);
+            this.dlAutoCheck.Size = new System.Drawing.Size(189, 23);
             this.dlAutoCheck.TabIndex = 2;
             this.dlAutoCheck.SelectedIndexChanged += new System.EventHandler(this.dlAutoCheck_SelectedIndexChanged);
             // 
@@ -540,9 +579,9 @@
             this.dlSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.dlSource.Enabled = false;
             this.dlSource.FormattingEnabled = true;
-            this.dlSource.Location = new System.Drawing.Point(4, 5);
+            this.dlSource.Location = new System.Drawing.Point(5, 6);
             this.dlSource.Name = "dlSource";
-            this.dlSource.Size = new System.Drawing.Size(164, 21);
+            this.dlSource.Size = new System.Drawing.Size(191, 23);
             this.dlSource.TabIndex = 0;
             this.dlSource.SelectedIndexChanged += new System.EventHandler(this.dlSource_SelectedIndexChanged);
             // 
@@ -551,9 +590,9 @@
             this.chkOffline.AutoSize = true;
             this.chkOffline.Checked = true;
             this.chkOffline.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOffline.Location = new System.Drawing.Point(4, 29);
+            this.chkOffline.Location = new System.Drawing.Point(5, 33);
             this.chkOffline.Name = "chkOffline";
-            this.chkOffline.Size = new System.Drawing.Size(86, 17);
+            this.chkOffline.Size = new System.Drawing.Size(96, 19);
             this.chkOffline.TabIndex = 1;
             this.chkOffline.Text = "Offline Mode";
             this.chkOffline.UseVisualStyleBackColor = true;
@@ -562,9 +601,9 @@
             // chkMsUpd
             // 
             this.chkMsUpd.AutoSize = true;
-            this.chkMsUpd.Location = new System.Drawing.Point(4, 93);
+            this.chkMsUpd.Location = new System.Drawing.Point(5, 107);
             this.chkMsUpd.Name = "chkMsUpd";
-            this.chkMsUpd.Size = new System.Drawing.Size(149, 17);
+            this.chkMsUpd.Size = new System.Drawing.Size(163, 19);
             this.chkMsUpd.TabIndex = 0;
             this.chkMsUpd.Text = "Register Microsoft Update";
             this.chkMsUpd.UseVisualStyleBackColor = true;
@@ -573,9 +612,9 @@
             // chkOld
             // 
             this.chkOld.AutoSize = true;
-            this.chkOld.Location = new System.Drawing.Point(4, 77);
+            this.chkOld.Location = new System.Drawing.Point(5, 89);
             this.chkOld.Name = "chkOld";
-            this.chkOld.Size = new System.Drawing.Size(119, 17);
+            this.chkOld.Size = new System.Drawing.Size(128, 19);
             this.chkOld.TabIndex = 2;
             this.chkOld.Text = "Include superseded";
             this.chkOld.UseVisualStyleBackColor = true;
@@ -584,9 +623,9 @@
             // chkManual
             // 
             this.chkManual.AutoSize = true;
-            this.chkManual.Location = new System.Drawing.Point(4, 61);
+            this.chkManual.Location = new System.Drawing.Point(5, 70);
             this.chkManual.Name = "chkManual";
-            this.chkManual.Size = new System.Drawing.Size(148, 17);
+            this.chkManual.Size = new System.Drawing.Size(165, 19);
             this.chkManual.TabIndex = 0;
             this.chkManual.Text = "\'Manual\' Download/Install";
             this.chkManual.UseVisualStyleBackColor = true;
@@ -597,9 +636,9 @@
             this.chkDownload.AutoSize = true;
             this.chkDownload.Checked = true;
             this.chkDownload.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDownload.Location = new System.Drawing.Point(4, 45);
+            this.chkDownload.Location = new System.Drawing.Point(5, 52);
             this.chkDownload.Name = "chkDownload";
-            this.chkDownload.Size = new System.Drawing.Size(145, 17);
+            this.chkDownload.Size = new System.Drawing.Size(155, 19);
             this.chkDownload.TabIndex = 3;
             this.chkDownload.Text = "Download wsusscn2.cab";
             this.chkDownload.UseVisualStyleBackColor = true;
@@ -620,10 +659,10 @@
             this.tabAU.Controls.Add(this.radDisable);
             this.tabAU.Controls.Add(this.dlShDay);
             this.tabAU.Controls.Add(this.dlShTime);
-            this.tabAU.Location = new System.Drawing.Point(4, 22);
+            this.tabAU.Location = new System.Drawing.Point(4, 24);
             this.tabAU.Name = "tabAU";
             this.tabAU.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAU.Size = new System.Drawing.Size(174, 201);
+            this.tabAU.Size = new System.Drawing.Size(205, 234);
             this.tabAU.TabIndex = 1;
             this.tabAU.Text = "Auto Update";
             this.tabAU.UseVisualStyleBackColor = true;
@@ -631,17 +670,17 @@
             // label1
             // 
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label1.Location = new System.Drawing.Point(0, 149);
+            this.label1.Location = new System.Drawing.Point(0, 172);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(174, 2);
+            this.label1.Size = new System.Drawing.Size(203, 2);
             this.label1.TabIndex = 22;
             // 
             // chkDrivers
             // 
             this.chkDrivers.AutoSize = true;
-            this.chkDrivers.Location = new System.Drawing.Point(4, 186);
+            this.chkDrivers.Location = new System.Drawing.Point(5, 215);
             this.chkDrivers.Name = "chkDrivers";
-            this.chkDrivers.Size = new System.Drawing.Size(97, 17);
+            this.chkDrivers.Size = new System.Drawing.Size(104, 19);
             this.chkDrivers.TabIndex = 7;
             this.chkDrivers.Text = "Include Drivers";
             this.chkDrivers.ThreeState = true;
@@ -651,9 +690,9 @@
             // chkStore
             // 
             this.chkStore.AutoSize = true;
-            this.chkStore.Location = new System.Drawing.Point(4, 170);
+            this.chkStore.Location = new System.Drawing.Point(5, 196);
             this.chkStore.Name = "chkStore";
-            this.chkStore.Size = new System.Drawing.Size(152, 17);
+            this.chkStore.Size = new System.Drawing.Size(164, 19);
             this.chkStore.TabIndex = 21;
             this.chkStore.Text = "Disable Store Auto Update";
             this.chkStore.UseVisualStyleBackColor = true;
@@ -662,9 +701,9 @@
             // chkHideWU
             // 
             this.chkHideWU.AutoSize = true;
-            this.chkHideWU.Location = new System.Drawing.Point(4, 154);
+            this.chkHideWU.Location = new System.Drawing.Point(5, 178);
             this.chkHideWU.Name = "chkHideWU";
-            this.chkHideWU.Size = new System.Drawing.Size(139, 17);
+            this.chkHideWU.Size = new System.Drawing.Size(147, 19);
             this.chkHideWU.TabIndex = 1;
             this.chkHideWU.Text = "Hide WU Settings Page";
             this.chkHideWU.UseVisualStyleBackColor = true;
@@ -672,9 +711,9 @@
             // 
             // chkDisableAU
             // 
-            this.chkDisableAU.Location = new System.Drawing.Point(16, 37);
+            this.chkDisableAU.Location = new System.Drawing.Point(19, 43);
             this.chkDisableAU.Name = "chkDisableAU";
-            this.chkDisableAU.Size = new System.Drawing.Size(155, 21);
+            this.chkDisableAU.Size = new System.Drawing.Size(181, 24);
             this.chkDisableAU.TabIndex = 20;
             this.chkDisableAU.Text = "Disable Update Facilitators";
             this.chkDisableAU.UseVisualStyleBackColor = true;
@@ -683,9 +722,9 @@
             // radDefault
             // 
             this.radDefault.AutoSize = true;
-            this.radDefault.Location = new System.Drawing.Point(4, 130);
+            this.radDefault.Location = new System.Drawing.Point(5, 150);
             this.radDefault.Name = "radDefault";
-            this.radDefault.Size = new System.Drawing.Size(151, 17);
+            this.radDefault.Size = new System.Drawing.Size(170, 19);
             this.radDefault.TabIndex = 19;
             this.radDefault.TabStop = true;
             this.radDefault.Text = "Automatic Update (default)";
@@ -695,9 +734,9 @@
             // radSchedule
             // 
             this.radSchedule.AutoSize = true;
-            this.radSchedule.Location = new System.Drawing.Point(4, 91);
+            this.radSchedule.Location = new System.Drawing.Point(5, 105);
             this.radSchedule.Name = "radSchedule";
-            this.radSchedule.Size = new System.Drawing.Size(132, 17);
+            this.radSchedule.Size = new System.Drawing.Size(144, 19);
             this.radSchedule.TabIndex = 18;
             this.radSchedule.TabStop = true;
             this.radSchedule.Text = "Scheduled & Installation";
@@ -707,9 +746,9 @@
             // radDownload
             // 
             this.radDownload.AutoSize = true;
-            this.radDownload.Location = new System.Drawing.Point(4, 73);
+            this.radDownload.Location = new System.Drawing.Point(5, 84);
             this.radDownload.Name = "radDownload";
-            this.radDownload.Size = new System.Drawing.Size(97, 17);
+            this.radDownload.Size = new System.Drawing.Size(107, 19);
             this.radDownload.TabIndex = 17;
             this.radDownload.TabStop = true;
             this.radDownload.Text = "Download Only";
@@ -719,9 +758,9 @@
             // chkBlockMS
             // 
             this.chkBlockMS.AutoSize = true;
-            this.chkBlockMS.Location = new System.Drawing.Point(4, 4);
+            this.chkBlockMS.Location = new System.Drawing.Point(5, 5);
             this.chkBlockMS.Name = "chkBlockMS";
-            this.chkBlockMS.Size = new System.Drawing.Size(164, 17);
+            this.chkBlockMS.Size = new System.Drawing.Size(170, 19);
             this.chkBlockMS.TabIndex = 4;
             this.chkBlockMS.Text = "Block Access to WU Servers";
             this.chkBlockMS.UseVisualStyleBackColor = true;
@@ -730,9 +769,9 @@
             // radNotify
             // 
             this.radNotify.AutoSize = true;
-            this.radNotify.Location = new System.Drawing.Point(4, 55);
+            this.radNotify.Location = new System.Drawing.Point(5, 63);
             this.radNotify.Name = "radNotify";
-            this.radNotify.Size = new System.Drawing.Size(102, 17);
+            this.radNotify.Size = new System.Drawing.Size(116, 19);
             this.radNotify.TabIndex = 16;
             this.radNotify.TabStop = true;
             this.radNotify.Text = "Notification Only";
@@ -742,9 +781,9 @@
             // radDisable
             // 
             this.radDisable.AutoSize = true;
-            this.radDisable.Location = new System.Drawing.Point(4, 22);
+            this.radDisable.Location = new System.Drawing.Point(5, 25);
             this.radDisable.Name = "radDisable";
-            this.radDisable.Size = new System.Drawing.Size(148, 17);
+            this.radDisable.Size = new System.Drawing.Size(163, 19);
             this.radDisable.TabIndex = 15;
             this.radDisable.TabStop = true;
             this.radDisable.Text = "Disable Automatic Update";
@@ -765,9 +804,9 @@
             "Thursday",
             "Friday",
             "Saturday"});
-            this.dlShDay.Location = new System.Drawing.Point(18, 108);
+            this.dlShDay.Location = new System.Drawing.Point(21, 125);
             this.dlShDay.Name = "dlShDay";
-            this.dlShDay.Size = new System.Drawing.Size(90, 21);
+            this.dlShDay.Size = new System.Drawing.Size(104, 23);
             this.dlShDay.TabIndex = 5;
             this.dlShDay.SelectedIndexChanged += new System.EventHandler(this.dlShDay_SelectedIndexChanged);
             // 
@@ -801,9 +840,9 @@
             "21:00",
             "22:00",
             "23:00"});
-            this.dlShTime.Location = new System.Drawing.Point(114, 108);
+            this.dlShTime.Location = new System.Drawing.Point(133, 125);
             this.dlShTime.Name = "dlShTime";
-            this.dlShTime.Size = new System.Drawing.Size(55, 21);
+            this.dlShTime.Size = new System.Drawing.Size(63, 23);
             this.dlShTime.TabIndex = 6;
             this.dlShTime.SelectedIndexChanged += new System.EventHandler(this.dlShTime_SelectedIndexChanged);
             // 
@@ -822,7 +861,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(683, 443);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(797, 511);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // updateView
@@ -838,10 +877,10 @@
             this.columnHeader4,
             this.columnHeader5,
             this.columnHeader6});
-            this.updateView.Location = new System.Drawing.Point(3, 23);
+            this.updateView.Location = new System.Drawing.Point(3, 26);
             this.updateView.Name = "updateView";
             this.updateView.ShowItemToolTips = true;
-            this.updateView.Size = new System.Drawing.Size(489, 292);
+            this.updateView.Size = new System.Drawing.Size(572, 338);
             this.updateView.TabIndex = 2;
             this.updateView.UseCompatibleStateImageBehavior = false;
             this.updateView.View = System.Windows.Forms.View.Details;
@@ -878,54 +917,15 @@
             this.columnHeader6.Text = "State";
             this.columnHeader6.Width = 80;
             // 
-            // chkGrupe
-            // 
-            this.chkGrupe.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkGrupe.AutoSize = true;
-            this.chkGrupe.Location = new System.Drawing.Point(79, 3);
-            this.chkGrupe.Name = "chkGrupe";
-            this.chkGrupe.Size = new System.Drawing.Size(98, 17);
-            this.chkGrupe.TabIndex = 1;
-            this.chkGrupe.Text = "Group Updates";
-            this.chkGrupe.UseVisualStyleBackColor = true;
-            this.chkGrupe.CheckedChanged += new System.EventHandler(this.chkGrupe_CheckedChanged);
-            // 
-            // chkAll
-            // 
-            this.chkAll.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkAll.AutoSize = true;
-            this.chkAll.Location = new System.Drawing.Point(3, 3);
-            this.chkAll.Name = "chkAll";
-            this.chkAll.Size = new System.Drawing.Size(70, 17);
-            this.chkAll.TabIndex = 2;
-            this.chkAll.Text = "Select All";
-            this.chkAll.UseVisualStyleBackColor = true;
-            this.chkAll.CheckedChanged += new System.EventHandler(this.chkAll_CheckedChanged);
-            // 
-            // lblPatreon
-            // 
-            this.lblPatreon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblPatreon.AutoSize = true;
-            this.lblPatreon.Location = new System.Drawing.Point(183, 5);
-            this.lblPatreon.Name = "lblPatreon";
-            this.lblPatreon.Size = new System.Drawing.Size(234, 13);
-            this.lblPatreon.TabIndex = 0;
-            this.lblPatreon.TabStop = true;
-            this.lblPatreon.Text = "Support WuMgr on Patreon";
-            this.lblPatreon.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblPatreon_LinkClicked);
-            // 
             // WuMgr
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(685, 447);
+            this.ClientSize = new System.Drawing.Size(799, 516);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(700, 485);
+            this.MinimumSize = new System.Drawing.Size(814, 554);
             this.Name = "WuMgr";
             this.Text = "Update Manager for Windows";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WuMgr_FormClosing);
