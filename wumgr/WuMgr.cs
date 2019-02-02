@@ -40,6 +40,7 @@ namespace wumgr
         //public const Int32 MF_REMOVE = 0x1000;
 
         public const Int32 MYMENU_ABOUT = 1000;
+        public const Int32 MYMENU_WHY_DISABLED = 1001;
 
         [DllImport("user32.dll")]
         private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
@@ -61,6 +62,7 @@ namespace wumgr
                         switch (msg.WParam.ToInt32())
                         {
                             case MYMENU_ABOUT: menuAbout_Click(null, null); return;
+                            case MYMENU_WHY_DISABLED: menuWhyDisabled_Click(null, null); return;
                         }
                     }
                     break;
@@ -286,13 +288,18 @@ namespace wumgr
             menuExit.Text = Translate.fmt("menu_exit"); 
             menuExit.Click += new System.EventHandler(menuExit_Click);
 
+            MenuItem menuWhyDisabled = new MenuItem();
+            menuWhyDisabled.Text = Translate.fmt("menu_why_disabled");
+            menuWhyDisabled.Click += new System.EventHandler(menuWhyDisabled_Click);
+
             notifyIcon.ContextMenu.MenuItems.AddRange(new MenuItem[] { mToolsMenu, menuAbout, new MenuItem("-"), menuExit });
 
 
             IntPtr MenuHandle = GetSystemMenu(this.Handle, false); // Note: to restore default set true
             InsertMenu(MenuHandle, 5, MF_BYPOSITION | MF_SEPARATOR, 0, string.Empty); // <-- Add a menu seperator
             InsertMenu(MenuHandle, 6, MF_BYPOSITION | MF_POPUP, (int)mToolsMenu.Handle, mToolsMenu.Text);
-            InsertMenu(MenuHandle, 7, MF_BYPOSITION, MYMENU_ABOUT, menuAbout.Text);
+            InsertMenu(MenuHandle, 7, MF_BYPOSITION, MYMENU_WHY_DISABLED, menuWhyDisabled.Text);
+            InsertMenu(MenuHandle, 8, MF_BYPOSITION, MYMENU_ABOUT, menuAbout.Text);
 
 
             UpdateCounts();
@@ -747,6 +754,29 @@ namespace wumgr
         private void menuExit_Click(object Sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void menuWhyDisabled_Click(object Sender, EventArgs e)
+        {
+            string text = "";
+
+            if (MiscFunc.IsRunningAsUwp())
+            {
+                text = "This app is running in Store mode. It cannot make changes to the " +
+                    "system Registry, even if running as an Administrator. Therefore, the " +
+                    "Auto Update settings have been disabled.";
+            }
+            else if (!MiscFunc.IsAdministrator())
+            {
+                text = "This app has not been launched as an Administrator. You must do so " +
+                    "to make changes to the Auto Update settings.";
+            }
+            else
+            {
+                text = "All settings are enabled.";
+            }
+
+            MessageBox.Show(this, text, Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void menuAbout_Click(object Sender, EventArgs e)

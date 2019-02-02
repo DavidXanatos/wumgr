@@ -79,6 +79,7 @@ namespace wumgr
             mStrings.Add("stat_reboot", "Needs Reboot");
             mStrings.Add("menu_wuau", "Windows Update Service");
             mStrings.Add("menu_refresh", "&Refresh");
+            mStrings.Add("menu_why_disabled", "&Why are some controls disabled?");
             mStrings.Add("op_check", "Checking for Updates");
             mStrings.Add("op_prep", "Preparing Check");
             mStrings.Add("op_dl", "Downloading Updates");
