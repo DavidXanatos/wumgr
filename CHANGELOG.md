@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0] - 2019-10-19
+### Added
+- Added italian translation thx @irondave
+- Added Brazilian Portuguese translation thx @Possessed777
+- Added ini option to select language
+
+### Fixed
+- fixed minor issues with progress display
+
+### Changed
+- date format should now be proeprly localized
+- improved auto check for update feature
+
+
 ## [0.9a+] - 2018-12-07
 ### Added
 - Added Russian translation thx @zetcamp

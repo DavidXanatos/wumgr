@@ -14,11 +14,11 @@ class FileOps
     {
         if (size == 0)
             return "";
-        if (size > 1024 * 1024 * 1024)
+        if (size >= 1024 * 1024 * 1024)
             return (size / (1024 * 1024 * 1024)).ToString("F") + " GB";
-        if (size > 1024 * 1024)
+        if (size >= 1024 * 1024)
             return (size / (1024 * 1024)).ToString("F") + " MB";
-        if (size > 1024)
+        if (size >= 1024)
             return (size / (1024)).ToString("F") + " KB";
         return ((Int64)size).ToString() + " B";
     }

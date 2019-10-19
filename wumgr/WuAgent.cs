@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Collections.Specialized;
+using System.Globalization;
 
 namespace wumgr
 {
@@ -500,9 +501,6 @@ namespace wumgr
             if (mUpdateInstaller.IsBusy())
                 return RetCodes.Busy;
 
-            mCurOperation = AgentOperation.RemoveingUpdates;
-            OnProgress(-1, 0, 0, 0);
-
             List<MsUpdate> FilteredUpdates = new List<MsUpdate>();
             foreach (MsUpdate Update in Updates)
             {
@@ -519,6 +517,9 @@ namespace wumgr
                 return RetCodes.NoUpdated;
             }
 
+            mCurOperation = AgentOperation.RemoveingUpdates;
+            OnProgress(-1, 0, 0, 0);
+
             if (!mUpdateInstaller.UnInstall(FilteredUpdates))
                 OnFinished(RetCodes.InstallFailed);
 
@@ -527,6 +528,12 @@ namespace wumgr
 
         void DownloadsFinished(object sender, UpdateDownloader.FinishedEventArgs args) // "manuall" mode
         {
+            if (mCurOperation == AgentOperation.CancelingOperation)
+            {
+                OnFinished(RetCodes.Abborted);
+                return;
+            }
+
             if (mCurOperation == AgentOperation.PreparingCheck)
             {
                 AppLog.Line("wsusscn2.cab downloaded");
@@ -1087,7 +1094,7 @@ namespace wumgr
                 Program.IniWriteValue(Update.KB, "Info", Update.Description, INIPath);
                 Program.IniWriteValue(Update.KB, "Category", Update.Category, INIPath);
 
-                Program.IniWriteValue(Update.KB, "Date", Update.Date.ToString("dd.MM.yyyy"), INIPath);
+                Program.IniWriteValue(Update.KB, "Date", Update.Date.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern), INIPath);
                 Program.IniWriteValue(Update.KB, "Size", Update.Size.ToString(), INIPath);
 
                 Program.IniWriteValue(Update.KB, "SupportUrl", Update.SupportUrl, INIPath);

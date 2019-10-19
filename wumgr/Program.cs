@@ -63,7 +63,9 @@ namespace wumgr
             if (fvi.FileBuildPart != 0)
                 mVersion += (char)('a' + (fvi.FileBuildPart - 1));
 
-            Translate.Load();
+            wrkPath = appPath;
+
+            Translate.Load(IniReadValue("Options", "Lang", ""));
 
             AppLog Log = new AppLog();
             AppLog.Line("{0}, Version v{1} by David Xanatos", mName, mVersion);
@@ -114,8 +116,6 @@ namespace wumgr
                     }
                 }
             }
-
-            wrkPath = appPath;
 
             if (!FileOps.TestWrite(GetINIPath()))
             {

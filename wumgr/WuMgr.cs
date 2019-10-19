@@ -14,6 +14,7 @@ using System.Security.AccessControl;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace wumgr
 {
@@ -251,7 +252,7 @@ namespace wumgr
 
             try {
                 LastCheck = DateTime.Parse(GetConfig("LastCheck", ""));
-                AppLog.Line("Last Checked for updates: {0}", LastCheck.ToString("dd.MM.yyyy"));
+                AppLog.Line("Last Checked for updates: {0}", LastCheck.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern));
             } catch {
                 LastCheck = DateTime.Now;
             }
@@ -548,7 +549,7 @@ namespace wumgr
                     Update.Title,
                     Update.Category,
                     Update.KB,
-                    Update.Date.ToString("dd.MM.yyyy"),
+                    Update.Date.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern),
                     FileOps.FormatSize(Update.Size),
                     State};
 
@@ -1472,17 +1473,19 @@ namespace wumgr
                 return;
 
             ignoreChecks = true;
+
             foreach (ListViewItem item in updateView.Items)
                 item.Checked = chkAll.Checked;
+
             ignoreChecks = false;
+
+            checkChecks = true;
         }
 
         private void updateView_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
             if (ignoreChecks)
                 return;
-
-            checkChecks = true;
 
             ignoreChecks = true;
 
@@ -1494,6 +1497,8 @@ namespace wumgr
                 chkAll.CheckState = CheckState.Indeterminate;
 
             ignoreChecks = false;
+
+            checkChecks = true;
         }
 
         private void lblPatreon_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
