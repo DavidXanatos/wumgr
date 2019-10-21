@@ -1,1 +1,1 @@
-The tool only gathers information's about installed and missing updates, all data are processed local on the users own device, no personal information's of any kind are send to the cloud.
+The tool only gather information about installed and missing updates, all data are processed locally on the user's own device, no personal information of any kind is sent to the cloud.
