@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - fixed minor issues with progress display
 
 ### Changed
-- date format should now be proeprly localized
+- date format should now be properly localized
 - improved auto check for update feature
 
 
@@ -28,12 +28,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fixed auto update crash issue
-- date formating in last searche for rupdate log
+- date formatting in last search for update log
 - fixed date and size sorting issue in columns
 
 ### Changed
-- now ctrl+f sets cursot to the searhc box
-- improved sorting, now sort order can be reversed by clicking agina on the column
+- now ctrl+f sets cursor to the search box
+- improved sorting, now sort order can be reversed by clicking again on the column
 
 
 ## [0.8g beta] - 2018-11-1
@@ -50,14 +50,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.8c beta] - 2018-10-21
 ### Added
-- messge box promping for a reboot when changing update facilitator settings
+- message box prompting for a reboot when changing update facilitator settings
 - tooltips to list view for long texts
 
 ### Changed
 - some buttons are now disabled when no updates are checked
 
 ### Fixed
-- issue with supprot url's nor manualy generated mased on the kb number
+- issue with support url's not manually generated based on the kb number
 
 
 ## [0.8b beta] - 2018-10-20
@@ -65,7 +65,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - command line parameter for scripted operation, disabling configuration options -provisioned
 - added search filter ctrl+f
 - addec ctrl+c to copy infos about selected updates
-- added option to blacklist updates by KB using the updates ini, also collor them or pre select them
+- added option to blacklist updates by KB using the updates ini, also color them or preselect them
 
 Example:
 [KB4023307]
@@ -78,7 +78,7 @@ Select=1
 Color=#ccffcc
 
 ### Changed
-- updates are now cached in updates.ini inside teh downloads directory, updates.ini in the working directorty is used for persistent update informations
+- updates are now cached in updates.ini inside the downloads directory, updates.ini in the working directorty is used for persistent update informations
 
 ### Fixed
 - fixed typos in transaltion thx to Carlos Detweiller and PointZero
@@ -89,8 +89,8 @@ Color=#ccffcc
 - translation support
 
 ### Fixed
-- crash bug in uninstall routile
-- size and date columns ware out of order
+- crash bug in uninstall routine
+- size and date columns were out of order
 - fixed some GPO related crash issues
 
 
@@ -102,15 +102,15 @@ Color=#ccffcc
 ### Changed
 - automatic update GPO handling, now much more user friendly
 - reworked error handling to allow limited non admin operation
-- reworked status codes for better ui expirience
-- when download fails but the file was already downloaded in the previuse session the old file is used
+- reworked status codes for better ui experience
+- when download fails but the file was already downloaded in the previous session the old file is used
 - reworked UAC bypass handling
 
 ### Fixed
 - windows 10 version detection
-- issue when started rom a read only directory, fallback to ...\{UserProfile}\Downloads\WuMgr\
+- issue when started from a read only directory, fallback to ...\{UserProfile}\Downloads\WuMgr\
 - crash bug when firewall blocks downloads
-- issue client not properl abborting operations on cancesss
+- issue client not properly aborting operations on cancel
 
 
 ## [0.6b] - 2018-09-30
@@ -126,7 +126,7 @@ Color=#ccffcc
 - added tool entry to setup/remove windows defender update task
 
 ### Changed
-- ObjectListView.dll is not longer required instead a simple self contained control is used
+- ObjectListView.dll is no longer required, instead a simple self-contained control is used
 - replaced the app icon with a nicer one
 
 ### Fixed
@@ -137,12 +137,12 @@ Color=#ccffcc
 
 ## [0.5] - 2018-09-16
 ### Added
-- wumgr.ini is restricted to be writeble only by administrators
-- added better download system, now server date is checked and files get downloaded only if there are newer ont he server
+- wumgr.ini is restricted to be writable only by administrators
+- added better download system, now server date is checked and files get downloaded only if there are newer on the server
 - automatic check for updates
 - added support url label
-- added customizable tools menu tin better integrate 3rd aprty tools, accessible from tray and the window system menu.
-- added update cache such to remembet the last state between application restarts
+- added customizable tools menu that better integrate 3rd aprty tools, accessible from tray and the window system menu.
+- added update cache such to remember the last state between application restarts
 
 ### Changed
 - UAC bypass implementation to prevent possible privilege escalation
@@ -153,7 +153,7 @@ Color=#ccffcc
 - fixed size display for kb sized patches
 - auto update issue introduced in 0.4
 - update list not updating when updates were installed/uninstalled/etc
-- two instances cant longer be started at once
+- two instances can no longer be started at once
 
 ## [0.4] - 2018-09-08
 ### Added
@@ -162,7 +162,7 @@ Color=#ccffcc
 - added commandline option -online [serviceID]
 - added GPO to block connections to M$ update servers on pro/home SKU's based on the "Windows Restricted Traffic Limited Functionality Baseline"
 - added check to switch between "manual" download/instalation (that is done by WuMgr without using windows update facilities) and the usage of wuauserv
-- added propepr icons
+- added proper icons
 - automatically hiding the windows update page when update is disabled or access to M$ servers restricted
 - added about dialog
 - added configuration ini file
@@ -171,7 +171,7 @@ Color=#ccffcc
 - improved applog
 - improved agent events
 - fixed category and state display for history
-- unifyed catalog cab and update download
+- unified catalog cab and update download
 - improved custom update downloader
 
 ## [0.3] - 2018-09-02
@@ -179,22 +179,22 @@ Color=#ccffcc
 - System tray Icon
 - Auto Start
 - UAC bypass for administrator users
-- added warning if running without window supdate service enabled
+- added warning if running without windows update service enabled
 - added -console command line option to show a debug console 
 - added /? command line option to show all available command line options
 - added direct update download, i.e. not using the update service
-- added propepr slitter for the log
+- added proper splitter for the log
 - added settings saving to registry
 
 ### Fixed
-- multiple errors with offlien update search
+- multiple errors with offline update search
 - issue with slow history loading
 
 ## [0.2] - 2018-08-26
 ### Added
 - Add command line options compatible with wumt (wumgr -update -onclose [command])
 - Add option to auto download the *.cab file for semi-offline update
-- Finish the GPO groupe
+- Finish the GPO group
 
 ## [0.1] - 2018-08-16
 ### Added
