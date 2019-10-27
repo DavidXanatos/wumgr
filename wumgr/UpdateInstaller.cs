@@ -71,7 +71,7 @@ namespace wumgr
         {
             if (!Canceled && mUpdates.Count > mCurrentTask)
             {
-                int Percent = 0; // Note: there does not seam to be an easy way to get this value
+                int Percent = 0; // Note: there does not seem to be an easy way to get this value
                 Progress?.Invoke(this, new WuAgent.ProgressArgs(mUpdates.Count, mUpdates.Count == 0 ? 0 : (100 * mCurrentTask + Percent) / mUpdates.Count, mCurrentTask + 1, Percent, mUpdates[mCurrentTask].Title));
 
                 if (DoInstall)
