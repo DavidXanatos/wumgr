@@ -331,7 +331,7 @@ namespace wumgr
         {
             bool updateNow = false;
             if (notifyIcon.Visible)
-            {
+            { 
                 int daysDue = GetAutoUpdateDue();
                 if (daysDue != 0 && !agent.IsBusy())
                 {
@@ -362,7 +362,7 @@ namespace wumgr
                 }
             }
 
-            if ((doUpdte || updateNow) && agent.IsActive())
+            if ((doUpdte || (updateNow && !ResultShown)) && agent.IsActive())
             {
                 doUpdte = false;
                 if (chkOffline.Checked)
@@ -962,7 +962,8 @@ namespace wumgr
             UpdateCounts();
             if (args.Found) // if (agent.CurOperation() == WuAgent.AgentOperation.CheckingUpdates)
             {
-                SetConfig("LastCheck", DateTime.Now.ToString());
+                LastCheck = DateTime.Now;
+                SetConfig("LastCheck", LastCheck.ToString());
                 SwitchList(UpdateLists.PendingUpdates);
             }
             else
@@ -982,6 +983,8 @@ namespace wumgr
 
             ShowResult(args.Op, args.Ret, args.RebootNeeded);
         }
+
+        bool ResultShown = false;
 
         private void ShowResult(WuAgent.AgentOperation op, WuAgent.RetCodes ret, bool reboot = false)
         {
@@ -1030,7 +1033,9 @@ namespace wumgr
 
             string action = GetOpStr(op);
 
+            ResultShown = true;
             MessageBox.Show(Translate.fmt("msg_err", action, status), Program.mName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ResultShown = false;
         }
 
         private void dlSource_SelectedIndexChanged(object sender, EventArgs e)
