@@ -238,6 +238,7 @@
             this.columnHeader4,
             this.columnHeader5,
             this.columnHeader6});
+            this.updateView.HideSelection = false;
             this.updateView.Location = new System.Drawing.Point(3, 23);
             this.updateView.Name = "updateView";
             this.updateView.ShowItemToolTips = true;

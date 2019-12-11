@@ -109,7 +109,7 @@ class MiscFunc
         }
     }
 
-    static private bool IsWindows7OrLower
+    static public bool IsWindows7OrLower
     {
         get
         {

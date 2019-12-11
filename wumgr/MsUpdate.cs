@@ -68,6 +68,7 @@ namespace wumgr
                 Description = update.Description;
                 Date = update.Date;
                 SupportUrl = update.SupportUrl;
+                ApplicationID = update.ClientApplicationID;
 
                 State = UpdateState.History;
 
@@ -144,6 +145,7 @@ namespace wumgr
         public DateTime Date = DateTime.MinValue;
         public decimal Size = 0;
         public String SupportUrl = "";
+        public String ApplicationID = "";
         public System.Collections.Specialized.StringCollection Downloads = new System.Collections.Specialized.StringCollection();
 
         public enum UpdateState

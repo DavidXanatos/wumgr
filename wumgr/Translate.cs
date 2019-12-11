@@ -90,6 +90,7 @@ namespace wumgr
             mStrings.Add("col_title", "Title");
             mStrings.Add("col_cat", "Category");
             mStrings.Add("col_kb", "KB Article");
+            mStrings.Add("col_app_id", "Application ID");
             mStrings.Add("col_date", "Date");
             mStrings.Add("col_site", "Size");
             mStrings.Add("col_stat", "State");

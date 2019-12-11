@@ -548,7 +548,7 @@ namespace wumgr
                 string[] strings = new string[] {
                     Update.Title,
                     Update.Category,
-                    Update.KB,
+                    CurrentList == UpdateLists.UpdateHistory ? Update.ApplicationID : Update.KB,
                     Update.Date.ToString(CultureInfo.CurrentUICulture.DateTimeFormat.ShortDatePattern),
                     FileOps.FormatSize(Update.Size),
                     State};
@@ -643,6 +643,9 @@ namespace wumgr
             suspendChange = false;
 
             CurrentList = List;
+
+            updateView.Columns[2].Text = (CurrentList == UpdateLists.UpdateHistory) ? Translate.fmt("col_app_id") : Translate.fmt("col_kb");
+
             LoadList();
 
             UpdateState();
