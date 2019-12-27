@@ -304,7 +304,7 @@ namespace wumgr
                 if (rule.IdentityReference.Value.Equals(FileOps.SID_System))
                     ac.RemoveAccessRule(rule);
             }
-            // Note: windows tryes to re enable this services so we need to remove system write access
+            // Note: windows trys to re-enable this service so we need to remove system write access
             if (mode == ServiceStartMode.Disabled) // add new rule
                 ac.AddAccessRule(new RegistryAccessRule(new SecurityIdentifier(FileOps.SID_System), RegistryRights.FullControl, AccessControlType.Deny));
             subKey.SetAccessControl(ac);

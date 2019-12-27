@@ -81,7 +81,7 @@ namespace wumgr
                 mCurTask.Finished += OnFinished;
                 if (mCurTask.Start())
                     return;
-                // Failedto start this task lets try an otehr one
+                // Failed to start this task lets try another one
                 mCurrentTask++;
             }
 

@@ -67,7 +67,7 @@ namespace wumgr
 
             mUpdateSession = new UpdateSession();
             mUpdateSession.ClientApplicationID = Program.mName;
-            //mUpdateSession.UserLocale = 1033; // alwys show strings in englisch
+            //mUpdateSession.UserLocale = 1033; // always show strings in english
 
             mUpdateServiceManager = new UpdateServiceManager();
 
@@ -266,7 +266,7 @@ namespace wumgr
         {
             if (mOfflineService != null)
             {
-                // note: if we keep references to updates reffering to an removed service we may got a crash
+                // note: if we keep references to updates reffering to a removed service we may get a crash
                 foreach (MsUpdate Update in mUpdateHistory)
                     Update.Invalidate();
                 foreach (MsUpdate Update in mPendingUpdates)
@@ -533,7 +533,7 @@ namespace wumgr
             return RetCodes.InProgress;
         }
 
-        void DownloadsFinished(object sender, UpdateDownloader.FinishedEventArgs args) // "manuall" mode
+        void DownloadsFinished(object sender, UpdateDownloader.FinishedEventArgs args) // "manual" mode
         {
             if (mCurOperation == AgentOperation.CancelingOperation)
             {
@@ -546,7 +546,7 @@ namespace wumgr
                 AppLog.Line("wsusscn2.cab downloaded");
 
                 RetCodes ret = ClearOffline();
-                if (ret == RetCodes.Success)
+                if (ret == RetCodes.Success)l
                     ret = SetupOffline();
                 if (ret == RetCodes.Success)
                     ret = SearchForUpdates();
@@ -600,7 +600,7 @@ namespace wumgr
             OnProgress(args.TotalCount, args.TotalPercent, args.CurrentIndex, args.CurrentPercent, args.Info);
         }
 
-        void InstallFinished(object sender, UpdateInstaller.FinishedEventArgs args) // "manuall" mode
+        void InstallFinished(object sender, UpdateInstaller.FinishedEventArgs args) // "manual" mode
         {
             if (args.Success)
             {
@@ -1164,7 +1164,7 @@ namespace wumgr
             // Implementation of ISearchCompletedCallback interface...
             public void Invoke(ISearchJob searchJob, ISearchCompletedCallbackArgs e)
             {
-                // !!! warning this function is invoced from a different thread !!!            
+                // !!! warning this function is invoked from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnUpdatesFound(searchJob);
                 }));
@@ -1173,7 +1173,7 @@ namespace wumgr
             // Implementation of IDownloadProgressChangedCallback interface...
             public void Invoke(IDownloadJob downloadJob, IDownloadProgressChangedCallbackArgs callbackArgs)
             {
-                // !!! warning this function is invoced from a different thread !!!            
+                // !!! warning this function is invoked from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnProgress(downloadJob.Updates.Count, callbackArgs.Progress.PercentComplete, callbackArgs.Progress.CurrentUpdateIndex + 1,
                         callbackArgs.Progress.CurrentUpdatePercentComplete, downloadJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title);
@@ -1183,7 +1183,7 @@ namespace wumgr
             // Implementation of IDownloadCompletedCallback interface...
             public void Invoke(IDownloadJob downloadJob, IDownloadCompletedCallbackArgs callbackArgs)
             {
-                // !!! warning this function is invoced from a different thread !!!            
+                // !!! warning this function is invoked from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnUpdatesDownloaded(downloadJob, downloadJob.AsyncState);
                 }));
@@ -1192,7 +1192,7 @@ namespace wumgr
             // Implementation of IInstallationProgressChangedCallback interface...
             public void Invoke(IInstallationJob installationJob, IInstallationProgressChangedCallbackArgs callbackArgs)
             {
-                // !!! warning this function is invoced from a different thread !!!            
+                // !!! warning this function is invoked from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnProgress(installationJob.Updates.Count, callbackArgs.Progress.PercentComplete, callbackArgs.Progress.CurrentUpdateIndex + 1,
                         callbackArgs.Progress.CurrentUpdatePercentComplete, installationJob.Updates[callbackArgs.Progress.CurrentUpdateIndex].Title);
@@ -1202,7 +1202,7 @@ namespace wumgr
             // Implementation of IInstallationCompletedCallback interface...
             public void Invoke(IInstallationJob installationJob, IInstallationCompletedCallbackArgs callbackArgs)
             {
-                // !!! warning this function is invoced from a different thread !!!            
+                // !!! warning this function is invoked from a different thread !!!            
                 agent.mDispatcher.Invoke(new Action(() => {
                     agent.OnInstalationCompleted(installationJob, installationJob.AsyncState);
                 }));
