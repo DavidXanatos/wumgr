@@ -263,7 +263,7 @@ namespace wumgr
             WritePrivateProfileString(Section, Key, Value, INIPath != null ? INIPath : GetINIPath());
         }
 
-        [DllImport("kernel32")]
+        [DllImport("kernel32", CharSet = CharSet.Unicode)]
         private static extern int GetPrivateProfileString(string section, string key, string def, [In, Out] char[] retVal, int size, string filePath);
         public static string IniReadValue(string Section, string Key, string Default = "", string INIPath = null)
         {
