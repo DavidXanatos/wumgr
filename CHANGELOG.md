@@ -23,7 +23,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - improved auto check for update feature
 
 
-## [0.9a+] - 2018-12-07
+## [0.9a+] - 2018-12-07 
 ### Added
 - Added Russian translation thx @zetcamp
 
