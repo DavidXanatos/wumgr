@@ -1,4 +1,4 @@
-# WuMgr
+# WuMgr 
 
 ## Overview
 WuMgr (Update Manager for Windows) is a tool to manage updates of Microsoft products on the Windows operating system.
